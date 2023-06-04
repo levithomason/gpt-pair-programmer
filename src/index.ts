@@ -104,7 +104,8 @@ app.get("/file/content", async (_, res) => {
 //
 
 app.get("/gpt/get-started", async (_, res) => {
-  fs.readFile("GPT_GET_STARTED.md", "utf8", (error, data) => {
+  const filePath = path.resolve(PLUGIN_ROOT, "gpt-ignore/GPT_FIX_GITHUB_ISSUE.md");
+  fs.readFile(filePath, "utf8", (error, data) => {
     res.setHeader("Content-Type", "application/json");
     res.status(error ? 500 : 200).send({ error, data });
   });

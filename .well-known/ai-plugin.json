@@ -1,9 +1,9 @@
 {
   "schema_version": "v1",
-  "name_for_human": "Terminal Plugin (No Auth)",
-  "name_for_model": "terminal",
-  "description_for_human": "Plugin for running terminal commands. You can run any command you want.",
-  "description_for_model": "Plugin for accomplishing goals by running terminal commands. You can run commands and get the output to step towards your goal. Use user's document folder as your working directory unless specified otherwise.",
+  "name_for_human": "Pair Programmer Plugin",
+  "name_for_model": "pairing",
+  "description_for_human": "Plugin for enabling ChatGPT to pair program with you on your computer.",
+  "description_for_model": "Plugin for accomplishing goals by pair programming with the user and executing terminal commands. Run commands to step towards your goal.",
   "auth": {
     "type": "none"
   },

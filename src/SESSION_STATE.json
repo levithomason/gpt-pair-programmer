@@ -1,6 +1,6 @@
 {
   "file": {
-    "path": "gpt-home/foo.txt",
-    "content": "This was a file"
+    "path": "./gpt-home/Semantic-UI-React/docs/src/examples/modules/Popup/Types/PopupExample.js",
+    "content": "import React from 'react'\nimport { Button, Popup } from 'semantic-ui-react'\n\n/**\n * A Popup can be controlled with the 'open' prop.\n */\nconst PopupExample = () => (\n  <Popup content='Add users to your feed' trigger={<Button icon='add' />} />\n)\n\nexport default PopupExample\n"
   }
 }

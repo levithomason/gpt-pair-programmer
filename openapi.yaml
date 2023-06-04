@@ -13,7 +13,7 @@ paths:
     post:
       summary: Load a file into the session state
       description: |
-        This endpoint loads a file into the session state. The file path is provided in the request body. The file content is read from the file system and stored in the session state, along with the file path. If the file is loaded successfully, a success message is returned. If an error occurs while loading the file, an error message is returned.
+        Loads a file into the session state. The file path is provided in the request body. The file content is read from the file system and stored in the session state. Returns a success message if the file is loaded successfully, otherwise returns an error message.
       operationId: loadFile
       tags:
         - File Operations
@@ -59,7 +59,7 @@ paths:
     post:
       summary: Save the current content of the session state back to the file
       description: |
-        This endpoint saves the current content of the session state back to the file. The file path and content are retrieved from the session state. The content is written to the file system at the specified path. If the file is saved successfully, a success message is returned. If an error occurs while saving the file, an error message is returned.
+        Saves the current content of the session state back to the file. The file path and content are retrieved from the session state. The content is written to the file system at the specified path. Returns a success message if the file is saved successfully, otherwise returns an error message.
       operationId: saveFile
       tags:
         - File Operations
@@ -93,7 +93,7 @@ paths:
     post:
       summary: Perform an edit operation on the file in the session state
       description: |
-        This endpoint performs an edit operation on the file in the session state. The start position, end position, and new text are provided in the request body. The file content is retrieved from the session state, and the specified range is replaced with the new text. The updated content is then stored back in the session state. If the edit operation is performed successfully, a success message is returned. If an error occurs while editing the file, an error message is returned.
+        Edits the file in the session state. The start position, end position, and new text are provided in the request body. The specified range in the file content is replaced with the new text. Returns a success message if the edit is successful, otherwise returns an error message.
       operationId: editFile
       tags:
         - File Operations
@@ -215,7 +215,7 @@ paths:
     get:
       summary: Get the system tree
       description: |
-        This endpoint retrieves a tree structure of the file system, up to a depth of 3 levels, excluding the "node_modules" directory. The tree is generated using the `tree` command. The command is executed in the current working directory, or in a directory specified in the request body. The output of the command, as well as any error message, are returned in the response body.
+        Retrieves a tree structure of the file system, excluding the "node_modules" directory. The tree is generated using the tree command. The command is executed in the current working directory or a specified directory. Returns the output of the command and any error message.
       operationId: getSystemTree
       tags:
         - System Operations
