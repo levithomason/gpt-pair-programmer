@@ -1,0 +1,1 @@
+This directory should be ignored by ChatGPT. It contains prompts for use later.

@@ -1,0 +1,297 @@
+openapi: 3.0.1
+info:
+  title: Pair Programmer Plugin
+  description: A plugin that enables ChatGPT to pair program with the user. It provides ChatGPT with the ability to edit files richly, execute terminal commands. It also enables ChatGPT to create hierarchical plans, execute them, iteratively update them, and track its progress toward completing a goal.
+  version: "v1"
+servers:
+  - url: http://localhost:5004
+paths:
+  #
+  # Paths - File
+  #
+  /file/load:
+    post:
+      summary: Load a file into the session state
+      description: |
+        This endpoint loads a file into the session state. The file path is provided in the request body. The file content is read from the file system and stored in the session state, along with the file path. If the file is loaded successfully, a success message is returned. If an error occurs while loading the file, an error message is returned.
+      operationId: loadFile
+      tags:
+        - File Operations
+      requestBody:
+        description: The file path to load
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filePath:
+                  type: string
+                  description: The path of the file to load
+                  example: "/path/to/file.txt"
+      responses:
+        "200":
+          description: The file was loaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A success message
+                    example: "File loaded successfully"
+        "500":
+          description: An error occurred while loading the file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error loading file"
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+  /file/save:
+    post:
+      summary: Save the current content of the session state back to the file
+      description: |
+        This endpoint saves the current content of the session state back to the file. The file path and content are retrieved from the session state. The content is written to the file system at the specified path. If the file is saved successfully, a success message is returned. If an error occurs while saving the file, an error message is returned.
+      operationId: saveFile
+      tags:
+        - File Operations
+      responses:
+        "200":
+          description: The file was saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A success message
+                    example: "File saved successfully"
+        "500":
+          description: An error occurred while saving the file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error saving file"
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+  /file/edit:
+    post:
+      summary: Perform an edit operation on the file in the session state
+      description: |
+        This endpoint performs an edit operation on the file in the session state. The start position, end position, and new text are provided in the request body. The file content is retrieved from the session state, and the specified range is replaced with the new text. The updated content is then stored back in the session state. If the edit operation is performed successfully, a success message is returned. If an error occurs while editing the file, an error message is returned.
+      operationId: editFile
+      tags:
+        - File Operations
+      requestBody:
+        description: The details of the edit operation
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                start:
+                  type: integer
+                  description: The start position of the range to replace
+                  example: 0
+                end:
+                  type: integer
+                  description: The end position of the range to replace
+                  example: 10
+                text:
+                  type: string
+                  description: The new text to insert
+                  example: "New text"
+      responses:
+        "200":
+          description: The file was edited successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A success message
+                    example: "File edited successfully"
+        "500":
+          description: An error occurred while editing the file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error editing file"
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+  /file/content:
+    get:
+      summary: Get the current content of the file in the session state
+      description: |
+        This endpoint retrieves the current content of the file in the session state. The content is returned in the response body. If an error occurs while retrieving the content, an error message is returned.
+      operationId: getFileContent
+      tags:
+        - File Operations
+      responses:
+        "200":
+          description: The file content was retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                    description: The current content of the file
+                    example: "File content"
+        "500":
+          description: An error occurred while retrieving the file content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error retrieving file content"
+  #
+  # Paths - GPT
+  #
+  /gpt/get-started:
+    get:
+      summary: Get the GPT get started guide
+      description: |
+        This endpoint retrieves the content of the "GPT_GET_STARTED.md" file, which provides a guide for getting started with GPT. The content of the file is returned in the response body. If an error occurs while reading the file, an error message is returned.
+      operationId: getGptStarted
+      tags:
+        - GPT Operations
+      responses:
+        "200":
+          description: The guide was retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: string
+                    description: The content of the guide
+                    example: "GPT Get Started Guide content"
+        "500":
+          description: An error occurred while retrieving the guide
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+                    example: "Error retrieving guide"
+  #
+  # Paths - System
+  #
+  /system/tree:
+    get:
+      summary: Get the system tree
+      description: |
+        This endpoint retrieves a tree structure of the file system, up to a depth of 3 levels, excluding the "node_modules" directory. The tree is generated using the `tree` command. The command is executed in the current working directory, or in a directory specified in the request body. The output of the command, as well as any error message, are returned in the response body.
+      operationId: getSystemTree
+      tags:
+        - System Operations
+      requestBody:
+        description: The directory to execute the command in
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cwd:
+                  type: string
+                  description: The path of the directory to execute the command in
+                  example: "/path/to/directory"
+      responses:
+        "200":
+          description: The tree was retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stdout:
+                    type: string
+                    description: The output of the tree command
+                    example: "Directory tree structure"
+                  stderr:
+                    type: string
+                    description: The error output of the tree command
+                    example: ""
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+                    example: "Error retrieving tree"
+  /system/exec:
+    post:
+      summary: Execute a system command
+      description: |
+        This endpoint executes a system command provided in the request body. The command is executed in the current working directory, or in a directory specified in the request body. The output of the command, as well as any error message, are returned in the response body.
+      operationId: execSystemCommand
+      tags:
+        - System Operations
+      requestBody:
+        description: The command to execute and the directory to execute it in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The system command to execute
+                  example: "ls -l"
+                cwd:
+                  type: string
+                  description: The path of the directory to execute the command in
+                  example: "/path/to/directory"
+      responses:
+        "200":
+          description: The command was executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stdout:
+                    type: string
+                    description: The output of the command
+                    example: "Command output"
+                  stderr:
+                    type: string
+                    description: The error output of the command
+                    example: ""
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+                    example: "Error executing command"

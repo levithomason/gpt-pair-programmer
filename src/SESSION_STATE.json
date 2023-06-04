@@ -1,0 +1,6 @@
+{
+  "file": {
+    "path": "gpt-home/foo.txt",
+    "content": "This was a file"
+  }
+}

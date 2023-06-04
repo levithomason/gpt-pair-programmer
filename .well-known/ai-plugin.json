@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Terminal Plugin (No Auth)",
+  "name_for_model": "terminal",
+  "description_for_human": "Plugin for running terminal commands. You can run any command you want.",
+  "description_for_model": "Plugin for accomplishing goals by running terminal commands. You can run commands and get the output to step towards your goal. Use user's document folder as your working directory unless specified otherwise.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "http://localhost:5004/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "http://localhost:5004/logo.png",
+  "contact_email": "legal@example.com",
+  "legal_info_url": "http://example.com/legal"
+}
