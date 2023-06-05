@@ -378,3 +378,42 @@ Curling the endpoint works as expected, the file scrolled 20 lines:
 
 #### Test: Removing Scroll in Favor of Page Down
 
+The scroll up/down methods were removed from the OpenAPI spec to force ChatGPT to use the page up/down methods.
+
+FINDING:
+ChatGPT is able to page a window down to find content in a file and make a suitable and syntactically correct edit.
+However, ChatGPT still included the GUI in the edit, as expected.
+
+#### Test: Removing GUI
+
+The GUI was removed from the window view to see if ChatGPT would be able to edit the prop description successfully.
+
+FINDING:
+ChatGPT was able to scroll and edit the prop description successfully with no GUI present.
+The closing brace of the prop interface was inside the window view which may have helped ChatGPT's context.
+
+It is also interesting that the explanation ChatGPT added does not make sense given the type of the prop this time.
+
+This was the view after edit:
+
+```
+  /** Element to be rendered in-place where the popup is defined. */
+  trigger?: React.ReactNode
+
+  /**
+   * Defines the width of the Popup.
+   * This can be set to any CSS valid value.
+   * By default, the width of the Popup is determined by the content it contains.
+   */
+  wide?: boolean | 'very'
+}
+
+interface PopupComponent extends React.ComponentClass<PopupProps> {
+  Content: typeof PopupContent
+  Header: typeof PopupHeader
+}
+
+declare const Popup: PopupComponent
+
+export default Popup
+```

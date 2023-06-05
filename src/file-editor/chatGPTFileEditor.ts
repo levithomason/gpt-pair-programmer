@@ -32,25 +32,30 @@ export class ChatGPTFileEditor {
   }
 
   getWindow(): string {
-    const isEOF = this.windowBottom >= this.lines.length;
+    // const isEOF = this.windowBottom >= this.lines.length;
+    //
+    // const windowWithGUI = [
+    //   "=".repeat(80),
+    //   `GPT FILE EDITOR: ${this.filePath}`,
+    //   ...this.lines
+    //     .slice(this.windowStart, this.windowStart + this.windowSize)
+    //     .map((line, i, arr) => {
+    //       const gutter = String(this.windowStart + arr.length).length;
+    //       return `${String(this.windowStart + i + 1).padEnd(gutter)}  ${line}`;
+    //     }),
+    //   isEOF
+    //     ? "EOF"
+    //     : "... " +
+    //       this.linesBelowWindow +
+    //       " more line" +
+    //       (this.linesBelowWindow > 1 ? "s" : ""),
+    //   "=".repeat(80),
+    // ];
 
-    const window = [
-      "=".repeat(80),
-      `GPT FILE EDITOR: ${this.filePath}`,
-      ...this.lines
-        .slice(this.windowStart, this.windowStart + this.windowSize)
-        .map((line, i, arr) => {
-          const gutter = String(this.windowStart + arr.length).length;
-          return `${String(this.windowStart + i + 1).padEnd(gutter)}  ${line}`;
-        }),
-      isEOF
-        ? "EOF"
-        : "... " +
-          this.linesBelowWindow +
-          " more line" +
-          (this.linesBelowWindow > 1 ? "s" : ""),
-      "=".repeat(80),
-    ];
+    const window = this.lines.slice(
+      this.windowStart,
+      this.windowStart + this.windowSize
+    );
 
     console.log(window.join("\n"));
 
