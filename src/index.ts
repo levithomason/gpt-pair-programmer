@@ -1,21 +1,19 @@
-import fs from "fs";
 import { exec } from "child_process";
+import path from "path";
+import fs from "fs";
 
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import { json } from "body-parser";
+
 import { trimStringToTokens } from "./utils";
-import { getSessionState, setSessionState } from "./sessionState";
-import path from "path";
+import { GPT_4_MAX_TOKENS, PROJECT_ROOT } from "./config";
+import { addFileEditorRoutes } from "./file-editor/routes";
 
-const app = express();
-
-const GPT_4_MAX_TOKENS = 8000;
-const GPT_3_MAX_TOKENS = 4000;
 const TERMINAL_STREAM_MAX_TOKENS = GPT_4_MAX_TOKENS / 3;
 
-const PLUGIN_ROOT = path.resolve(__dirname, "..");
+const app = express();
 
 // ============================================================================
 // Middleware
@@ -33,78 +31,20 @@ app.use(json());
 // File Operations
 //
 
-app.post("/file/load", async (req, res) => {
-  const filePath = req.body.filePath;
-  try {
-    const fileContent = fs.readFileSync(filePath, "utf-8");
-    setSessionState({
-      file: {
-        path: filePath,
-        content: fileContent,
-      },
-    });
-    res.status(200).send({ message: "File loaded successfully" });
-  } catch (error) {
-    if (error instanceof Error) {
-      res
-        .status(500)
-        .send({ message: "Error loading file", error: error.message });
-    } else {
-      res.status(500).send({ message: "Error loading file" });
-    }
-  }
-});
+// ChatGPT was not able to edit files based on start/end position or line/column
+// addFileEditPositionRoutes(app);
 
-app.post("/file/save", async (req, res) => {
-  const { path, content } = getSessionState().file;
-  try {
-    fs.writeFileSync(path, content, "utf-8");
-    res.status(200).send({ message: "File saved successfully" });
-  } catch (error) {
-    if (error instanceof Error) {
-      res
-        .status(500)
-        .send({ message: "Error saving file", error: error.message });
-    } else {
-      res.status(500).send({ message: "Error saving file" });
-    }
-  }
-});
-
-app.post("/file/edit", async (req, res) => {
-  const { start, end, text } = req.body;
-  const { path, content } = getSessionState().file;
-  try {
-    const newContent = content.slice(0, start) + text + content.slice(end);
-    setSessionState({
-      file: {
-        path: path,
-        content: newContent,
-      },
-    });
-    res.status(200).send({ message: "File edited successfully" });
-  } catch (error) {
-    if (error instanceof Error) {
-      res
-        .status(500)
-        .send({ message: "Error editing file", error: error.message });
-    } else {
-      res.status(500).send({ message: "Error editing file" });
-    }
-  }
-});
-
-app.get("/file/content", async (_, res) => {
-  const { content } = getSessionState().file;
-  res.status(200).send({ content: content });
-});
+addFileEditorRoutes(app);
 
 //
 // GPT
 //
 
 app.get("/gpt/get-started", async (_, res) => {
-  const filePath = path.resolve(PLUGIN_ROOT, "gpt-ignore/GPT_FIX_GITHUB_ISSUE.md");
+  const filePath = path.resolve(
+    PROJECT_ROOT,
+    "gpt-ignore/GPT_FIX_GITHUB_ISSUE.md"
+  );
   fs.readFile(filePath, "utf8", (error, data) => {
     res.setHeader("Content-Type", "application/json");
     res.status(error ? 500 : 200).send({ error, data });
@@ -117,7 +57,7 @@ app.get("/gpt/get-started", async (_, res) => {
 
 app.get("/system/tree", async (req, res) => {
   const command = `tree -a -L 3 -F --noreport --filelimit 500 --dirsfirst -I "node_modules"`;
-  const cwd = path.resolve(PLUGIN_ROOT, req.body.cwd || ".");
+  const cwd = path.resolve(PROJECT_ROOT, req.body.cwd || ".");
 
   console.log("/system/tree", { command, cwd });
 
@@ -133,7 +73,7 @@ app.get("/system/tree", async (req, res) => {
 
 app.post("/system/exec", async (req, res) => {
   const command = req.body.command;
-  const cwd = path.resolve(PLUGIN_ROOT, req.body.cwd || ".");
+  const cwd = path.resolve(PROJECT_ROOT, req.body.cwd || ".");
 
   console.log("/system/exec", { command, cwd });
 

@@ -12,7 +12,9 @@ const SESSION_STATE_PATH = path.resolve(__dirname, SESSION_STATE_FILENAME);
 const data = fs.readFileSync(SESSION_STATE_PATH, "utf-8");
 let sessionState: SessionState = JSON.parse(data);
 
-export const getSessionState = () => JSON.parse(JSON.stringify(sessionState));
+export const getSessionState = (): SessionState => {
+  return JSON.parse(JSON.stringify(sessionState));
+};
 
 export const setSessionState = (partialState: Partial<SessionState>) => {
   sessionState = { ...sessionState, ...partialState };

@@ -1,0 +1,6 @@
+{
+  "file": {
+    "path": "gpt-home/task.json",
+    "content": "{\n  \"title\": \"Fix a GitHub Issue\",\n  \"description\": \"Complete all necessary steps to identify, resolve, and close a specific GitHub issue, ensuring that all changes are properly implemented, tested, and completed in a new branch.\",\n  \"s\n    {\n      \"title\": \"Sub-step title\",\n      \"description\": \"Sub-step description\",\n      \"status\": \"not started\"\n    }tatus\": \"not started\",\n  \"steps\": []\n}\n"
+  }
+}

@@ -58,13 +58,15 @@ These are IMPORTANT. YOU MUST always:
 
 - Complete all work using the terminal ONLY. NEVER expect or ask the human to do any work for you.
 
-- Tell the user what terminal command(s) you'd like to run next BEFORE running it. Show the command(s) in a code block for easy reading by humans. If they give approval to proceed then execute the command(s), otherwise, DO NOT run the command(s). EXCEPTIONS, you may run any readonly commands without asking for approval. Examples of readonly commands:
+- Run any readonly commands without asking for approval. Examples of readonly commands:
 -- ls
 -- cat
 -- grep
 -- curl
 -- git diff
 -- ...any other command that does not change the state of the user's computer or data or settings.
+
+- IF the command(s) change the state of the user's computer or data or settings, show them to the user in a code block BEFORE running them. Ask if you can run the command(s) and ONLY run them if the user approves, otherwise, DO NOT run the command(s).
 
 - Continue running read-only commands directly or proposing non-read-only commands to run and verifying your work until you are ready for the user to review the work.
 

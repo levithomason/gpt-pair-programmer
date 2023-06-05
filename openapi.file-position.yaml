@@ -6,16 +6,19 @@ info:
 servers:
   - url: http://localhost:5004
 paths:
-  /file-editor/open:
+  #
+  # Paths - File
+  #
+  /file/open:
     post:
-      summary: Open a file in an in a stateful in-memory REST friendly editor only visible to ChatGPT.
+      summary: Load a file into the session state
+      description: |
+        Loads a file into the session state. The file path is provided in the request body. The file content is read from the file system and stored in the session state. Returns the file content and a success message if the file is opened successfully, otherwise returns an error message.
       operationId: openFile
+      tags:
+        - File Operations
       requestBody:
-        description: >
-          Opens a file in a stateful in-memory REST friendly editor only visible to ChatGPT.
-          A window is provided for viewing small portions of the file.
-          The window can be moved up and down, and the file can be edited.
-          The file can be saved to disk.
+        description: The file path to open
         required: true
         content:
           application/json:
@@ -23,16 +26,25 @@ paths:
               type: object
               properties:
                 filePath:
-                  required: true
                   type: string
                   description: The path of the file to open
+                  example: "/path/to/file.txt"
       responses:
         "200":
-          description: File opened successfully
+          description: The file was opened successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EditorView"
+                type: object
+                properties:
+                  content:
+                    type: string
+                    description: The current content of the file
+                    example: "File content"
+                  message:
+                    type: string
+                    description: A success message
+                    example: "File opened successfully"
         "500":
           description: An error occurred while opening the file
           content:
@@ -40,151 +52,139 @@ paths:
               schema:
                 type: object
                 properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error opening file"
                   error:
-                    type: object
-                    description: The error object thrown by the exception
-  /file-editor/window:
-    get:
-      summary: Get the current file contents displayed in the window of the editor
-      operationId: getWindow
-      responses:
-        "200":
-          description: Current file contents displayed in the window of the editor
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
+                    type: string
+                    description: The error message from the exception, if available
+  /file/save:
     post:
-      summary: Replace the current file contents displayed in the window of the editor
-      operationId: replaceWindow
-      requestBody:
-        description: The new content for the window
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                  description: New content to replace the content currently shown in the editor window. File content outside of the view of the current window will not be affected. Replacement content does not have to be the same length or have the same line count as the window content.
+      summary: Save the current content of the session state back to the file
+      description: |
+        Saves the current content of the session state back to the file. The file path and content are retrieved from the session state. The content is written to the file system at the specified path. Returns a success message if the file is saved successfully, otherwise returns an error message.
+      operationId: saveFile
+      tags:
+        - File Operations
       responses:
         "200":
-          description: Window replaced successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-        "500":
-          description: An error occurred while replacing the window
+          description: The file was saved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  message:
+                    type: string
+                    description: A success message
+                    example: "File saved successfully"
+        "500":
+          description: An error occurred while saving the file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error saving file"
                   error:
-                    type: object
-                    description: The error object thrown by the exception
-  /file-editor/window/scroll-up:
+                    type: string
+                    description: The error message from the exception, if available
+  /file/edit-range:
     post:
-      summary: Scroll the window up
-      operationId: scrollUp
+      summary: Perform an edit operation on the file in the session state
+      description: |
+        Edits the file in the session state. The start position, end position, and new text are provided in the request body. The specified range in the file content is replaced with the new text. Returns the file content and a success message if the edit is successful, otherwise returns an error message.
+      operationId: editFile
+      tags:
+        - File Operations
       requestBody:
-        description: >
-          Scrolls the window up the file contents by the specified number of lines.
-          Useful for making small adjustments to the window position and preparing for precise editing.
+        description: The details of the edit operation
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                lines:
-                  type: number
-                  required: true
-                  description: >
-                    The number of lines to scroll the window down the file contents.
-                    The window will stop when it reaches the top or the bottom of the file.
+                start:
+                  type: integer
+                  description: The start position of the range to replace
+                  example: 0
+                end:
+                  type: integer
+                  description: The end position of the range to replace
+                  example: 10
+                text:
+                  type: string
+                  description: The new text to insert
+                  example: "New text"
       responses:
         "200":
-          description: Window scrolled up successfully
+          description: The file was edited successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/scroll-down:
-    post:
-      summary: Scroll the window down
-      operationId: scrollDown
-      requestBody:
-        description: >
-          Scrolls the window down the file contents by the specified number of lines.
-          Useful for making small adjustments to the window position and preparing for precise editing.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                lines:
-                  type: number
-                  required: true
-                  description: >
-                    The number of lines to scroll the window down the file contents.
-                    The window will stop when it reaches the top or the bottom of the file.
-      responses:
-        "200":
-          description: Window scrolled down successfully
+                type: object
+                properties:
+                  content:
+                    type: string
+                    description: The current content of the file
+                    example: "File content"
+                  message:
+                    type: string
+                    description: A success message
+                    example: "File edited successfully"
+        "500":
+          description: An error occurred while editing the file
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/scroll-to-top:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error editing file"
+                  error:
+                    type: string
+                    description: The error message from the exception, if available
+  /file/content:
     get:
-      summary: Scroll the window to the top of the file.
-      operationId: scrollToTop
+      summary: Get the current content of the file in the session state
+      description: |
+        This endpoint retrieves the current content of the file in the session state. The content is returned in the response body. If an error occurs while retrieving the content, an error message is returned.
+      operationId: getFileContent
+      tags:
+        - File Operations
       responses:
         "200":
-          description: Window scrolled to the top successfully
+          description: The file content was retrieved successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/scroll-to-bottom:
-    get:
-      summary: Scroll the window to the bottom of the file.
-      operationId: scrollToBottom
-      responses:
-        "200":
-          description: Window scrolled to the bottom successfully
+                type: object
+                properties:
+                  content:
+                    type: string
+                    description: The current content of the file
+                    example: "File content"
+        "500":
+          description: An error occurred while retrieving the file content
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/page-up:
-    get:
-      summary: Scroll the window up by one page
-      operationId: pageUp
-      description: Scroll the window up by one full window of lines. Useful for scanning the file contents.
-      responses:
-        "200":
-          description: Window scrolled up by one page successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/page-down:
-    get:
-      summary: Page the window down the file contents.
-      operationId: pageDown
-      description: Scroll the window down by one full window of lines. Useful for scanning the file contents.
-      responses:
-        "200":
-          description: Window scrolled down by one page successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: An error message
+                    example: "Error retrieving file content"
+  #
+  # Paths - GPT
+  #
   /gpt/get-started:
     get:
       summary: Get the GPT get started guide
@@ -303,29 +303,3 @@ paths:
                     type: string
                     description: The error message from the exception, if available
                     example: "Error executing command"
-components:
-  schemas:
-    EditorView:
-      type: object
-      description: >
-        Be careful when editing the file as the file contents often continue beyond the view of the window.
-      properties:
-        fileLineCount:
-          type: number
-          description: The number of lines in the file. Useful for planning window navigation.
-        linesAboveWindow:
-          type: number
-          description: The number of lines above the window. Useful for planning upward window navigation.
-        linesBelowWindow:
-          type: number
-          description: The number of lines below the window. Useful for planning downward window navigation.
-        window:
-          type: string
-          description: >
-            The file contents are displayed using a terminal GUI.
-            The GUI includes a frame around the file contents, line numbers, and the path of the file.
-            An indicator is shown regarding how many lines exist outside the file window.
-            An EOF indicator is shown when the end of the file is reached.
-            Files with content exceeding the lines of the window will be truncated.
-            Additional content can be seen by using the window movement endpoints.
-            Consider this when replacing window contents as the actual contents of the file may be longer than the window.

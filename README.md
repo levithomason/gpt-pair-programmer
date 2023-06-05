@@ -1,6 +1,6 @@
 # ChatGPT Pair Programmer Plugin
 
-This plugin allows you to pair program with ChatGPT.
+This plugin allows ChatGPT to pair program with you.
 
 It gives ChatGPT access to your terminal and allows it to execute commands on your computer.
 
