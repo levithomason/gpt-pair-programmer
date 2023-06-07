@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import express from "express";
 import morgan from "morgan";
 
@@ -30,49 +32,56 @@ app.post("/nano/open", (req, res) => {
     nanoProcess.kill();
   }
 
-  nanoProcess = spawn("nano", [fileName], { stdio: ["pipe", "pipe", "pipe"] });
-  let output = "";
+  const out = fs.createWriteStream("./gpt-home/out.log", { flags: "a" });
+  const err = fs.createWriteStream("./gpt-home/err.log", { flags: "a" });
 
-  nanoProcess.stdout
-    .on("data", (data: string) => {
-      console.log("nano/open data:", typeof data);
-      output += data.toString();
-    })
-    .on("end", () => {
-      console.log("nano/open end:", output);
-      res.json({ stdout: output, stderr: "" });
+  out.on("open", function (fd) {
+    err.on("open", function (fd) {
+      nanoProcess = spawn("nano", [fileName], {
+        stdio: ["ignore", out, err],
+      });
+
+      // let output = "";
+
+      // nanoProcess.stdout.on("data", (data: string) => {
+      //   console.log("nano/open data:", typeof data);
+      //   output += data.toString();
+      // });
+
+      // nanoProcess.stderr.on("data", (data: string) => {
+      //   console.error(`nano/open stderr: ${data}`);
+      // });
+
+      // nanoProcess.on("close", (code: string) => {
+      //   console.log(`nanoProcess exited with code ${code}`);
+      // });
+
+      // We don't have an end event as nano is a long running process.
+      // We need to determine when to respond to the user after nano opens.
+      // We will check the output of nano every 100ms
+      // If it has been stable for 3 checks, we will respond to the user.
+
+      let lastOutput = "";
+      let lastOutputStableCount = 0;
+      const interval = setInterval(() => {
+        const output = fs.readFileSync("./gpt-home/out.log", "utf-8");
+
+        if (lastOutput === output) {
+          lastOutputStableCount++;
+        } else {
+          lastOutputStableCount = 0;
+        }
+        lastOutput = output;
+
+        if (lastOutputStableCount >= 10) {
+          console.log("nano/open stable:");
+          console.log(output);
+          clearInterval(interval);
+          res.json({ stdout: output, stderr: "" });
+        }
+      }, 100);
     });
-
-  nanoProcess.stderr.on("data", (data: string) => {
-    console.error(`nano/open stderr: ${data}`);
   });
-
-  nanoProcess.on("close", (code: string) => {
-    console.log(`nanoProcess exited with code ${code}`);
-  });
-
-  // We don't have an end event as nano is a long running process.
-  // We need to determine when to respond to the user after nano opens.
-  // We will check the output of nano every 100ms
-  // If it has been stable for 3 checks, we will respond to the user.
-
-  let lastOutput = "";
-  let lastOutputStableCount = 0;
-  const interval = setInterval(() => {
-    if (lastOutput === output) {
-      lastOutputStableCount++;
-    } else {
-      lastOutputStableCount = 0;
-    }
-    lastOutput = output;
-
-    if (lastOutputStableCount >= 3) {
-      console.log("nano/open stable:");
-      console.log(output);
-      clearInterval(interval);
-      res.json({ stdout: output, stderr: "" });
-    }
-  }, 100);
 });
 
 app.post("/nano/keys", async (req, res) => {
