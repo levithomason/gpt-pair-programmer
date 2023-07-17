@@ -6,6 +6,70 @@ info:
 servers:
   - url: http://localhost:5004
 paths:
+  /github/comments/{owner}/{repo}/{issue}:
+    get:
+      operationId: getSimplifiedIssueComments
+      summary: Get simplified comments from a GitHub issue
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema:
+            type: string
+          description: The owner of the repository
+        - in: path
+          name: repo
+          required: true
+          schema:
+            type: string
+          description: The repository name
+        - in: path
+          name: issue
+          required: true
+          schema:
+            type: integer
+          description: The issue number
+      responses:
+        "200":
+          description: A list of simplified comments and a link to the issue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentsResponse"
+        "500":
+          description: An error occurred while fetching comments
+  /github/pr-comments/{owner}/{repo}/{pull}:
+    get:
+      operationId: getSimplifiedPRComments
+      summary: Get simplified comments from a GitHub pull request
+      parameters:
+        - in: path
+          name: owner
+          required: true
+          schema:
+            type: string
+          description: The owner of the repository
+        - in: path
+          name: repo
+          required: true
+          schema:
+            type: string
+          description: The repository name
+        - in: path
+          name: pull
+          required: true
+          schema:
+            type: integer
+          description: The pull request number
+      responses:
+        "200":
+          description: A list of simplified comments and a link to the pull request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PRCommentsResponse"
+        "500":
+          description: An error occurred while fetching comments
   /file-editor/open:
     post:
       summary: Open a file in an in a stateful in-memory REST friendly editor only visible to ChatGPT.
@@ -329,3 +393,47 @@ components:
             Files with content exceeding the lines of the window will be truncated.
             Additional content can be seen by using the window movement endpoints.
             Consider this when replacing window contents as the actual contents of the file may be longer than the window.
+    SimplifiedComment:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The username of the user who posted the comment
+        comment:
+          type: string
+          description: The text of the comment
+        likes:
+          type: integer
+          description: The total count of reactions to the comment
+    SimplifiedPRComment:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The username of the user who posted the comment
+        comment:
+          type: string
+          description: The text of the comment
+        likes:
+          type: integer
+          description: The total count of reactions to the comment
+    CommentsResponse:
+      type: object
+      properties:
+        issueLink:
+          type: string
+          description: A link to the issue that the comments are associated with
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimplifiedComment"
+    PRCommentsResponse:
+      type: object
+      properties:
+        pullLink:
+          type: string
+          description: A link to the pull request that the comments are associated with
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/SimplifiedPRComment"
