@@ -1,293 +1,63 @@
 openapi: 3.0.1
 info:
-  title: Pair Program
-  description: A plugin that enables ChatGPT to pair program with the user. It provides ChatGPT with the ability to edit files richly, execute terminal commands. It also enables ChatGPT to create hierarchical plans, execute them, iteratively update them, and track its progress toward completing a goal.
+  title: Pair Programmer
+  description: |
+    A plugin that enables ChatGPT to pair program with the user.
+    It provides ChatGPT with the ability to edit files richly and execute terminal commands.
+    It also enables ChatGPT to create hierarchical plans, execute them, iteratively update them, and track its progress toward completing a goal.
   version: "v1"
 servers:
   - url: http://localhost:5004
 paths:
-  /github/comments/{owner}/{repo}/{issue}:
+  /system/info:
     get:
-      operationId: getSimplifiedIssueComments
-      summary: Get simplified comments from a GitHub issue
-      parameters:
-        - in: path
-          name: owner
-          required: true
-          schema:
-            type: string
-          description: The owner of the repository
-        - in: path
-          name: repo
-          required: true
-          schema:
-            type: string
-          description: The repository name
-        - in: path
-          name: issue
-          required: true
-          schema:
-            type: integer
-          description: The issue number
-      responses:
-        "200":
-          description: A list of simplified comments and a link to the issue
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CommentsResponse"
-        "500":
-          description: An error occurred while fetching comments
-  /github/pr-comments/{owner}/{repo}/{pull}:
-    get:
-      operationId: getSimplifiedPRComments
-      summary: Get simplified comments from a GitHub pull request
-      parameters:
-        - in: path
-          name: owner
-          required: true
-          schema:
-            type: string
-          description: The owner of the repository
-        - in: path
-          name: repo
-          required: true
-          schema:
-            type: string
-          description: The repository name
-        - in: path
-          name: pull
-          required: true
-          schema:
-            type: integer
-          description: The pull request number
-      responses:
-        "200":
-          description: A list of simplified comments and a link to the pull request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PRCommentsResponse"
-        "500":
-          description: An error occurred while fetching comments
-  /file-editor/open:
-    post:
-      summary: Open a file in an in a stateful in-memory REST friendly editor only visible to ChatGPT.
-      operationId: openFile
-      requestBody:
-        description: >
-          Opens a file in a stateful in-memory REST friendly editor only visible to ChatGPT.
-          A window is provided for viewing small portions of the file.
-          The window can be moved up and down, and the file can be edited.
-          The file can be saved to disk.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                filePath:
-                  required: true
-                  type: string
-                  description: The path of the file to open
-      responses:
-        "200":
-          description: File opened successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-        "500":
-          description: An error occurred while opening the file
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: object
-                    description: The error object thrown by the exception
-  /file-editor/window:
-    get:
-      summary: Get the current file contents displayed in the window of the editor
-      operationId: getWindow
-      responses:
-        "200":
-          description: Current file contents displayed in the window of the editor
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-    post:
-      summary: Replace the current file contents displayed in the window of the editor
-      operationId: replaceWindow
-      requestBody:
-        description: The new content for the window
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                content:
-                  type: string
-                  description: New content to replace the content currently shown in the editor window. File content outside of the view of the current window will not be affected. Replacement content does not have to be the same length or have the same line count as the window content.
-      responses:
-        "200":
-          description: Window replaced successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-        "500":
-          description: An error occurred while replacing the window
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: object
-                    description: The error object thrown by the exception
-  /file-editor/window/scroll-up:
-    post:
-      summary: Scroll the window up
-      operationId: scrollUp
-      requestBody:
-        description: >
-          Scrolls the window up the file contents by the specified number of lines.
-          Useful for making small adjustments to the window position and preparing for precise editing.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                lines:
-                  type: number
-                  required: true
-                  description: >
-                    The number of lines to scroll the window down the file contents.
-                    The window will stop when it reaches the top or the bottom of the file.
-      responses:
-        "200":
-          description: Window scrolled up successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/scroll-down:
-    post:
-      summary: Scroll the window down
-      operationId: scrollDown
-      requestBody:
-        description: >
-          Scrolls the window down the file contents by the specified number of lines.
-          Useful for making small adjustments to the window position and preparing for precise editing.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                lines:
-                  type: number
-                  required: true
-                  description: >
-                    The number of lines to scroll the window down the file contents.
-                    The window will stop when it reaches the top or the bottom of the file.
-      responses:
-        "200":
-          description: Window scrolled down successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/scroll-to-top:
-    get:
-      summary: Scroll the window to the top of the file.
-      operationId: scrollToTop
-      responses:
-        "200":
-          description: Window scrolled to the top successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/scroll-to-bottom:
-    get:
-      summary: Scroll the window to the bottom of the file.
-      operationId: scrollToBottom
-      responses:
-        "200":
-          description: Window scrolled to the bottom successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/page-up:
-    get:
-      summary: Scroll the window up by one page
-      operationId: pageUp
-      description: Scroll the window up by one full window of lines. Useful for scanning the file contents.
-      responses:
-        "200":
-          description: Window scrolled up by one page successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /file-editor/window/page-down:
-    get:
-      summary: Page the window down the file contents.
-      operationId: pageDown
-      description: Scroll the window down by one full window of lines. Useful for scanning the file contents.
-      responses:
-        "200":
-          description: Window scrolled down by one page successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/EditorView"
-  /gpt/get-started:
-    get:
-      summary: Get the GPT get started guide
-      description: |
-        This endpoint retrieves the content of the "GPT_GET_STARTED.md" file, which provides a guide for getting started with GPT. The content of the file is returned in the response body. If an error occurs while reading the file, an error message is returned.
-      operationId: getGptStarted
+      summary: Retrieve System Information
+      description: >
+        Fetches various system details such as the current working directory,
+        system architecture, platform, and versions of various tools like Git, Node.js, Prettier, and ESLint.
+      operationId: getSystemInfo
       tags:
-        - GPT Operations
-      responses:
-        "200":
-          description: The guide was retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: string
-                    description: The content of the guide
-                    example: "GPT Get Started Guide content"
-        "500":
-          description: An error occurred while retrieving the guide
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    description: The error message from the exception, if available
-                    example: "Error retrieving guide"
-  #
-  # Paths - System
-  #
+        - System Operations
+  /system/exec:
+    post:
+      summary: Execute a system command
+      description: |
+        Executes a system command provided in the request body.
+        The command is executed in the current working directory, or in a directory specified in the request body.
+        The output of the command, as well as any error message, are returned in the response body.
+      operationId: execSystemCommand
+      tags:
+        - System Operations
+      requestBody:
+        description: The command to execute and the directory to execute it in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The system command to execute
+                  example: "echo 'export default 42' >> answer.js"
+                cwd:
+                  type: string
+                  description: The path of the directory to execute the command in
+                  example: "/path/to/directory"
+                  required: true
+                reason:
+                  type: string
+                  description: The reason for executing the command
+                  example: "Add answer to the universe as default export to answer.js"
+                  required: true
   /system/tree:
     get:
       summary: Get the system tree
       description: |
-        Retrieves a tree structure of the file system, excluding the "node_modules" directory. The tree is generated using the tree command. The command is executed in the current working directory or a specified directory. Returns the output of the command and any error message.
+        Retrieves a tree structure of the file system, excluding the "node_modules" directory.
+        The tree is generated using the tree command.
+        The command is executed in the current working directory or a specified directory.
+        Returns the output of the command and any error message.
       operationId: getSystemTree
       tags:
         - System Operations
@@ -303,137 +73,12 @@ paths:
                   type: string
                   description: The path of the directory to execute the command in
                   example: "/path/to/directory"
-      responses:
-        "200":
-          description: The tree was retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  stdout:
-                    type: string
-                    description: The output of the tree command
-                    example: "Directory tree structure"
-                  stderr:
-                    type: string
-                    description: The error output of the tree command
-                    example: ""
-                  error:
-                    type: string
-                    description: The error message from the exception, if available
-                    example: "Error retrieving tree"
-  /system/exec:
+  /system/lint:
     post:
-      summary: Execute a system command
+      summary: Run Lint on the project
       description: |
-        This endpoint executes a system command provided in the request body. The command is executed in the current working directory, or in a directory specified in the request body. The output of the command, as well as any error message, are returned in the response body.
-      operationId: execSystemCommand
+        Lints project directory using the pre-existing ESLint configuration.
+        Returns the linting results, including any errors or warnings.
+      operationId: runLint
       tags:
         - System Operations
-      requestBody:
-        description: The command to execute and the directory to execute it in
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                command:
-                  type: string
-                  description: The system command to execute
-                  example: "ls -l"
-                cwd:
-                  type: string
-                  description: The path of the directory to execute the command in
-                  example: "/path/to/directory"
-      responses:
-        "200":
-          description: The command was executed successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  stdout:
-                    type: string
-                    description: The output of the command
-                    example: "Command output"
-                  stderr:
-                    type: string
-                    description: The error output of the command
-                    example: ""
-                  error:
-                    type: string
-                    description: The error message from the exception, if available
-                    example: "Error executing command"
-components:
-  schemas:
-    EditorView:
-      type: object
-      description: >
-        Be careful when editing the file as the file contents often continue beyond the view of the window.
-      properties:
-        fileLineCount:
-          type: number
-          description: The number of lines in the file. Useful for planning window navigation.
-        linesAboveWindow:
-          type: number
-          description: The number of lines above the window. Useful for planning upward window navigation.
-        linesBelowWindow:
-          type: number
-          description: The number of lines below the window. Useful for planning downward window navigation.
-        window:
-          type: string
-          description: >
-            The file contents are displayed using a terminal GUI.
-            The GUI includes a frame around the file contents, line numbers, and the path of the file.
-            An indicator is shown regarding how many lines exist outside the file window.
-            An EOF indicator is shown when the end of the file is reached.
-            Files with content exceeding the lines of the window will be truncated.
-            Additional content can be seen by using the window movement endpoints.
-            Consider this when replacing window contents as the actual contents of the file may be longer than the window.
-    SimplifiedComment:
-      type: object
-      properties:
-        user:
-          type: string
-          description: The username of the user who posted the comment
-        comment:
-          type: string
-          description: The text of the comment
-        likes:
-          type: integer
-          description: The total count of reactions to the comment
-    SimplifiedPRComment:
-      type: object
-      properties:
-        user:
-          type: string
-          description: The username of the user who posted the comment
-        comment:
-          type: string
-          description: The text of the comment
-        likes:
-          type: integer
-          description: The total count of reactions to the comment
-    CommentsResponse:
-      type: object
-      properties:
-        issueLink:
-          type: string
-          description: A link to the issue that the comments are associated with
-        comments:
-          type: array
-          items:
-            $ref: "#/components/schemas/SimplifiedComment"
-    PRCommentsResponse:
-      type: object
-      properties:
-        pullLink:
-          type: string
-          description: A link to the pull request that the comments are associated with
-        comments:
-          type: array
-          items:
-            $ref: "#/components/schemas/SimplifiedPRComment"

@@ -1,3 +1,8 @@
+/**
+ *
+ * NOTE: This was a failure as there is no reliable way to capture terminal UI.
+ *
+ */
 import fs from "fs";
 
 import express from "express";
