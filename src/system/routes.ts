@@ -4,11 +4,14 @@ import { Express } from "express";
 import { ESLint } from "eslint";
 
 import { trimStringToTokens } from "../utils";
-import { GPT_4_MAX_TOKENS, GPT_HOME } from "../config";
+import { GPT_4_MAX_TOKENS, GPT_HOME, PROJECT_ROOT } from "../config";
 
-const TERMINAL_STREAM_MAX_TOKENS = GPT_4_MAX_TOKENS / 3;
+// response object has stdout, stderr, plus eslint results
+// limit those as they can be very large
+const TERMINAL_STREAM_MAX_TOKENS = GPT_4_MAX_TOKENS / 8;
 
-const getCWD = (cwd: string = ".") => path.resolve(GPT_HOME, cwd);
+// const getCWD = (cwd: string = ".") => path.resolve(GPT_HOME, cwd);
+const getCWD = (cwd: string = ".") => path.resolve(PROJECT_ROOT, cwd);
 
 const run = (
   command: string,
@@ -23,11 +26,17 @@ const run = (
 
   return new Promise((resolve, reject) => {
     exec(command, { cwd: safeCWD }, (error, stdout, stderr) => {
-      resolve({
-        error: error,
-        stdout: trimStringToTokens(stdout, TERMINAL_STREAM_MAX_TOKENS).trim(),
-        stderr: trimStringToTokens(stderr, TERMINAL_STREAM_MAX_TOKENS).trim(),
-      });
+      const stdoutClean = trimStringToTokens(stdout, TERMINAL_STREAM_MAX_TOKENS)
+        // remove console colors from the output
+        .replace(/\u001b\[.*?m/g, "")
+        .trim();
+
+      const stderrClean = trimStringToTokens(stderr, TERMINAL_STREAM_MAX_TOKENS)
+        // remove console colors from the output
+        .replace(/\u001b\[.*?m/g, "")
+        .trim();
+
+      resolve({ error, stdout: stdoutClean, stderr: stderrClean });
     });
   });
 };
@@ -56,33 +65,36 @@ const isCommitNeeded = async () => {
   return status.stdout.trim() !== "";
 };
 
-const runLint = async () => {
+const runJest = async () => {
+  const result = await run(
+    [
+      `yarn node --experimental-vm-modules`,
+      `$(yarn bin jest) ${getCWD()}`,
+      `--bail=1`,
+      `--reporters="jest-silent-reporter"`,
+      `--reporters="summary"`,
+    ].join(" "),
+  );
+  return result.error?.code !== 0 ? result : "OK";
+};
+const runESLint = async () => {
   try {
-    const eslint = new ESLint();
+    const eslint = new ESLint({
+      cwd: getCWD(),
+      errorOnUnmatchedPattern: false,
+    });
     const results = await eslint.lintFiles([getCWD()]);
     const formatter = await eslint.loadFormatter("stylish");
     const result = await formatter.format(results);
 
-    return {
-      error: null,
-      result: result
-        // remove console colors from the output
-        .replace(/\u001b\[.*?m/g, "")
+    const parsedResult = result
+      // remove console colors from the output
+      .replace(/\u001b\[.*?m/g, "")
+      // make paths relative to the project root
+      .replace(new RegExp(getCWD(), "g"), "")
+      .trim();
 
-        // make paths relative to the project root
-        .replace(new RegExp(getCWD(), "g"), "")
-
-        // make console output into an array of lines
-        .split("\n")
-
-        // remove empty lines
-        .reduce((acc: string[], line: string) => {
-          if (line.trim() !== "") {
-            acc.push(line);
-          }
-          return acc;
-        }, []),
-    };
+    return parsedResult || "OK";
   } catch (error) {
     return {
       error,
@@ -92,19 +104,10 @@ const runLint = async () => {
 };
 
 const runPrettier = async () => {
-  try {
-    const result = await run(`cd ${getCWD()} && prettier --write "."`);
-
-    return {
-      error: null,
-      result: result.stdout,
-    };
-  } catch (error) {
-    return {
-      error,
-      result: null,
-    };
-  }
+  const result = await run(
+    `cd ${getCWD()} && prettier --write "." --no-error-on-unmatched-pattern`,
+  );
+  return result.error || result.stderr ? result : "OK";
 };
 
 export const addSystemRoutes = (app: Express) => {
@@ -122,36 +125,36 @@ export const addSystemRoutes = (app: Express) => {
 
     const shouldCommit = await isCommitNeeded();
 
-    const lint = await runLint();
-    console.log("...lint", lint);
-
-    const prettier = await runPrettier();
-    console.log("...prettier", prettier);
+    let eslint = null;
+    let prettier = null;
+    // let jest = null;
 
     if (shouldCommit) {
+      eslint = await runESLint();
+      console.log("...eslint", eslint);
+
+      prettier = await runPrettier();
+      console.log("...prettier", prettier);
+
+      // jest = await runJest();
+      // console.log("...jest", jest);
+
       console.log("...committing changes:", reason);
       await run(`git add -A .`);
       await run(`git commit -m "gpt: ${reason}"`);
     }
 
-    res.status(200).json({ lint, shell, prettier });
+    res.status(200).json({ shell, eslint, prettier /*, jest */ });
   });
 
-  app.get("/system/tree", async (req, res) => {
-    const command = `tree -a -L 3 -F --noreport --filelimit 500 --dirsfirst -I "node_modules"`;
-    const { cwd } = req.body.cwd;
-    console.log("/system/tree", { command, cwd });
-
-    const result = await run(command, cwd);
-    console.log("system/tree", result);
-
-    const system = await getSystemInfo();
-    res.status(200).json({ result, system: system });
-  });
-
-  app.post("/system/lint", async (req, res) => {
-    const result = await runLint();
-
-    res.json(result);
-  });
+  // app.get("/system/tree", async (req, res) => {
+  //   const command = `tree -a -L 3 -F --noreport --filelimit 500 --dirsfirst -I "node_modules"`;
+  //   const cwd = req.body.cwd;
+  //   console.log("/system/tree", { command, cwd });
+  //
+  //   const result = await run(command, cwd);
+  //   console.log("system/tree", result);
+  //
+  //   res.status(200).json(result);
+  // });
 };

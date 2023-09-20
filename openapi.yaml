@@ -50,35 +50,26 @@ paths:
                   description: The reason for executing the command
                   example: "Add answer to the universe as default export to answer.js"
                   required: true
-  /system/tree:
-    get:
-      summary: Get the system tree
-      description: |
-        Retrieves a tree structure of the file system, excluding the "node_modules" directory.
-        The tree is generated using the tree command.
-        The command is executed in the current working directory or a specified directory.
-        Returns the output of the command and any error message.
-      operationId: getSystemTree
-      tags:
-        - System Operations
-      requestBody:
-        description: The directory to execute the command in
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                cwd:
-                  type: string
-                  description: The path of the directory to execute the command in
-                  example: "/path/to/directory"
-  /system/lint:
-    post:
-      summary: Run Lint on the project
-      description: |
-        Lints project directory using the pre-existing ESLint configuration.
-        Returns the linting results, including any errors or warnings.
-      operationId: runLint
-      tags:
-        - System Operations
+#  /system/tree:
+#    get:
+#      summary: Get the system tree
+#      description: |
+#        Retrieves a tree structure of the file system, excluding the "node_modules" directory.
+#        The tree is generated using the tree command.
+#        The command is executed in the current working directory or a specified directory.
+#        Returns the output of the command and any error message.
+#      operationId: getSystemTree
+#      tags:
+#        - System Operations
+#      requestBody:
+#        description: The directory to execute the command in
+#        required: false
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              properties:
+#                cwd:
+#                  type: string
+#                  description: The path of the directory to execute the command in
+#                  example: "/path/to/directory"

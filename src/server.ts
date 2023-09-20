@@ -45,7 +45,7 @@ addGitHubRoutes(app);
 app.get("/gpt/get-started", async (_, res) => {
   const filePath = path.resolve(
     PROJECT_ROOT,
-    "gpt-ignore/GPT_FIX_GITHUB_ISSUE.md"
+    "gpt-ignore/GPT_FIX_GITHUB_ISSUE.md",
   );
   fs.readFile(filePath, "utf8", (error, data) => {
     res.setHeader("Content-Type", "application/json");

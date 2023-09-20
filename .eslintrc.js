@@ -3,17 +3,11 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:jsdoc/recommended-error",
-  ],
+  extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   overrides: [
     {
-      env: {
-        node: true,
-      },
-      files: [".eslintrc.{js,cjs}"],
+      files: [".eslintrc.js"],
+      env: { node: true },
       parserOptions: {
         sourceType: "script",
       },
@@ -24,6 +18,6 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["@typescript-eslint", "jsdoc"],
+  plugins: ["@typescript-eslint"],
   rules: {},
 };
