@@ -3,13 +3,11 @@ info:
   title: System Tool
   version: "v1"
 paths:
-  /system/info:
+  /system/docs/architecture:
     get:
-      summary: Retrieve System Information
-      description: >
-        Fetches various system details such as the current working directory,
-        system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
-      operationId: getSystemInfo
+      summary: Fetch the architecture document
+      description: Returns the content of the architecture.md file.
+      operationId: getArchitectureDocument
   /system/exec:
     post:
       summary: Execute a system command
@@ -35,6 +33,13 @@ paths:
                   description: The path of the directory to execute the command in
                   example: "/path/to/directory"
                   required: true
+  /system/info:
+    get:
+      summary: Retrieve System Information
+      description: >
+        Fetches various system details such as the current working directory,
+        system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
+      operationId: getSystemInfo
   /system/tree:
     get:
       summary: Get the system tree

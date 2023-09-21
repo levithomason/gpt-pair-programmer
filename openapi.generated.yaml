@@ -2,15 +2,28 @@
 # To make changes, edit the root `openapi.base.yaml` or `tools/*/openapi.yaml` files.
 openapi: 3.1.0
 info:
-  title: Pair Programmer
+  title: Pair Programmer with Self-Modification
   description: >
-    A plugin that enables ChatGPT to pair program with the user.
+    The Pair Programmer is a plugin that enables ChatGPT to collaborate with
+    users in a pair programming manner. This plugin grants ChatGPT the
+    capability to manage projects and execute terminal commands.
 
-    It provides ChatGPT with the ability to edit files richly and execute
-    terminal commands.
 
-    It also enables ChatGPT to create hierarchical plans, execute them,
-    iteratively update them, and track its progress toward completing a goal.
+    A unique feature of this plugin is the "system" tool, which provides ChatGPT
+    access to the plugin's own source code. This access allows ChatGPT to view,
+    interpret, and even modify the plugin's code, enabling it to adapt and
+    extend its functionalities based on user needs.
+
+
+    If a user's goals or tasks aren't addressed by the current toolset, ChatGPT
+    can leverage this access to introduce new features or adjust existing ones.
+    This adaptability ensures that ChatGPT can evolve in real-time, enhancing
+    its assistance in coding and project management tasks.
+
+
+    The Pair Programmer not only augments the interaction between ChatGPT and
+    the user but also empowers ChatGPT with self-modification capabilities,
+    ensuring a tailored and efficient collaboration.
   version: v1
 servers:
   - url: http://localhost:5004
@@ -122,14 +135,11 @@ paths:
                     If this command causes changes to the file system, this
                     message will be used as the commit message.
                   example: 'feat(answer.js): Append export default 42'
-  /system/info:
+  /system/docs/architecture:
     get:
-      summary: Retrieve System Information
-      description: >
-        Fetches various system details such as the current working directory,
-        system architecture, platform, and versions of various tools like Git,
-        Node.js, and Yarn.
-      operationId: getSystemInfo
+      summary: Fetch the architecture document
+      description: Returns the content of the architecture.md file.
+      operationId: getArchitectureDocument
   /system/exec:
     post:
       summary: Execute a system command
@@ -159,6 +169,14 @@ paths:
                   description: The path of the directory to execute the command in
                   example: /path/to/directory
                   required: true
+  /system/info:
+    get:
+      summary: Retrieve System Information
+      description: >
+        Fetches various system details such as the current working directory,
+        system architecture, platform, and versions of various tools like Git,
+        Node.js, and Yarn.
+      operationId: getSystemInfo
   /system/tree:
     get:
       summary: Get the system tree

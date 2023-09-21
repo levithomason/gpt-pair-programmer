@@ -2,8 +2,8 @@
   "schema_version": "v1",
   "name_for_human": "Pair Programmer",
   "name_for_model": "pairing",
-  "description_for_human": "Plugin for enabling ChatGPT to pair program with you on your computer.",
-  "description_for_model": "Plugin for accomplishing goals by pair programming with the user and executing terminal commands. Run commands to step towards your goal.",
+  "description_for_human": "Plugin that empowers ChatGPT to pair program with you.",
+  "description_for_model": "Enables pair programming and command execution. Use the \"system\" tool to modify the plugin as needed.",
   "auth": {
     "type": "none"
   },
@@ -13,6 +13,6 @@
     "is_user_authenticated": false
   },
   "logo_url": "http://localhost:5004/logo.png",
-  "contact_email": "legal@example.com",
+  "contact_email": "me@levithomason.com",
   "legal_info_url": "http://example.com/legal"
 }
