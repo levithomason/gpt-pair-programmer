@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "DOM Monitor and Form Completer",
+  "version": "1.0",
+  "description": "A Chrome extension to monitor DOM changes, complete form fields, and communicate with a server.",
+  "permissions": ["storage", "activeTab", "http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

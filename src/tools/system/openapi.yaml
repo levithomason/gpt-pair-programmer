@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: System Tool
+  version: "v1"
+paths:
+  /system/info:
+    get:
+      summary: Retrieve System Information
+      description: >
+        Fetches various system details such as the current working directory,
+        system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
+      operationId: getSystemInfo
+  /system/exec:
+    post:
+      summary: Execute a system command
+      description: |
+        The command is executed in the root of this API project, outside the scope of projects.
+        Do not execute commands are long-running or require input.
+        Only execute commands that are expected to complete in a short amount of time.
+      operationId: execSystemCommand
+      requestBody:
+        description: The command to execute and the directory to execute it in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The system command to execute
+                  example: "echo 'export default 42' >> answer.js"
+                cwd:
+                  type: string
+                  description: The path of the directory to execute the command in
+                  example: "/path/to/directory"
+                  required: true
+  /system/tree:
+    get:
+      summary: Get the system tree
+      description: |
+        Retrieves a tree structure of the file system.
+      operationId: getSystemTree

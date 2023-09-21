@@ -1,15 +1,23 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
+
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import { json } from "body-parser";
+import debug from "debug";
+import yaml from "js-yaml";
+import { PROJECT_ROOT } from "./config";
+import { OpenAPISpec } from "./types";
 
-import { GPT_4_MAX_TOKENS, PROJECT_ROOT } from "./config";
-import { addSystemRoutes } from "./system/routes";
-import { addGitHubRoutes } from "./github/routes";
+const generatedSpecPath = path.join(PROJECT_ROOT, "openapi.generated.yaml");
+
+const log = debug("server:main");
 
 const app = express();
+
+// enable debug logging
+debug.enable("*");
 
 // ============================================================================
 // Middleware
@@ -20,48 +28,61 @@ app.use(cors({ origin: "https://chat.openai.com" }));
 app.use(json());
 
 // ============================================================================
-// API
+// Tool Routes
 // ============================================================================
+const toolsDir = path.join(__dirname, "tools");
+const mainSpec = yaml.load(
+  fs.readFileSync(path.join(PROJECT_ROOT, "openapi.base.yaml"), "utf8"),
+) as OpenAPISpec;
 
-//
-// GitHub
-//
-addGitHubRoutes(app);
+fs.readdirSync(toolsDir).forEach((tool) => {
+  const toolDir = path.join(toolsDir, tool);
 
-//
-// File Operations
-//
+  fs.readdirSync(toolDir).forEach((file) => {
+    const hasRoute = path.basename(file) === "routes.ts";
 
-// ChatGPT was not able to edit files based on start/end position or line/column
-// addFileEditPositionRoutes(app);
+    if (!hasRoute) {
+      return;
+    }
 
-// ChatGPT was not able to use a text based file editor
-// addFileEditorRoutes(app);
+    const printPath = path.relative(__dirname, toolDir);
+    log("Load:", printPath);
 
-//
-// GPT
-//
+    // Tool spec
+    const toolSpecPath = path.join(toolsDir, tool, "openapi.yaml");
+    if (!fs.existsSync(toolSpecPath)) {
+      throw new Error(`Tool "${tool}" is missing an openapi.yaml spec.`);
+    } else {
+      const toolSpec = yaml.load(
+        fs.readFileSync(toolSpecPath, "utf8"),
+      ) as OpenAPISpec;
+      mainSpec.paths = { ...mainSpec.paths, ...toolSpec.paths };
+    }
 
-app.get("/gpt/get-started", async (_, res) => {
-  const filePath = path.resolve(
-    PROJECT_ROOT,
-    "gpt-ignore/GPT_FIX_GITHUB_ISSUE.md",
-  );
-  fs.readFile(filePath, "utf8", (error, data) => {
-    res.setHeader("Content-Type", "application/json");
-    res.status(error ? 500 : 200).send({ error, data });
+    // Tool route
+    try {
+      const { addRoutes } = require(path.join(toolDir, file));
+      addRoutes(app);
+    } catch (error) {
+      log(`Error loading tool:`, error);
+      process.exit(1);
+    }
   });
 });
 
-//
-// System
-//
+const generatedSpec = [
+  "# WARNING: This file is generated. Do not edit it directly.",
+  "# To make changes, edit the root `openapi.base.yaml` or `tools/*/openapi.yaml` files.",
+  yaml.dump(mainSpec),
+].join("\n");
 
-addSystemRoutes(app);
+const relativeOpenAPIPath = path.relative(process.cwd(), generatedSpecPath);
+log(`Generated ${relativeOpenAPIPath}`);
+fs.writeFileSync(generatedSpecPath, generatedSpec);
 
-//
-// OpenAI Plugin
-//
+// ============================================================================
+// OpenAI Plugin Routes
+// ============================================================================
 
 app.get("/logo.png", async (_, res) => {
   const filename = "logo.png";
@@ -81,7 +102,7 @@ app.get("/.well-known/ai-plugin.json", async (_, res) => {
 });
 
 app.get("/openapi.yaml", async (_, res) => {
-  fs.readFile("openapi.yaml", "utf8", (error, data) => {
+  fs.readFile(generatedSpecPath, "utf8", (error, data) => {
     if (error) {
       console.error(error);
       res.status(500).send("Error");

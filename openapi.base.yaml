@@ -1,0 +1,12 @@
+openapi: 3.1.0
+info:
+  title: Pair Programmer
+  description: |
+    A plugin that enables ChatGPT to pair program with the user.
+    It provides ChatGPT with the ability to edit files richly and execute terminal commands.
+    It also enables ChatGPT to create hierarchical plans, execute them, iteratively update them, and track its progress toward completing a goal.
+  version: "v1"
+servers:
+  - url: http://localhost:5004
+paths:
+  # Paths are aggregated from src/tools/*/openapi.yaml

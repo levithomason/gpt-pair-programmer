@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: Projects Tool
+  version: "v1"
+paths:
+  /projects:
+    get:
+      summary: Retrieve the list of projects
+      description: >
+        Fetches the list of projects. The list is an array of project names.
+      operationId: getProjects
+      tags:
+        - Projects
+    post:
+      summary: Create a new project
+      description: >
+        Creates a new project in the users file system with the given name.
+      operationId: createProject
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the new project to create.
+                  example: "new-project"
+    delete:
+      summary: Delete an existing project
+      description: >
+        Deletes an existing project with the given name.
+      operationId: deleteProject
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the project to delete.
+                  example: "existing-project"
+  /projects/active:
+    get:
+      summary: Retrieve the active project
+      description: >
+        Fetches the name of the currently active project.
+      operationId: getActiveProject
+      tags:
+        - Projects
+    post:
+      summary: Set the active project
+      description: >
+        Sets the currently active project with the given name.
+      operationId: setActiveProject
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the project to set as active.
+                  example: "new-active-project"
+  /projects/active/tree:
+    get:
+      summary: Get the project tree
+      description: |
+        Retrieves a tree structure of the active project.
+      operationId: getProjectTree
+  /projects/active/exec:
+    post:
+      summary: Execute a shell command in the active project
+      description: |
+        The command is executed in the currently active project.
+        Do not execute commands are long-running or require input.
+        Only execute commands that are expected to complete in a short amount of time.
+      operationId: execProjectCommand
+      requestBody:
+        description: The command to execute in the active project
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  required: true
+                  type: string
+                  description: The system command to execute
+                  example: "echo 'export default 42' >> answer.js"
+                gitCommitMessage:
+                  required: false
+                  type: string
+                  description: |
+                    If this command causes changes to the file system, this message will be used as the commit message.
+                  example: "feat(answer.js): Append export default 42"

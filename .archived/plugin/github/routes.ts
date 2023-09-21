@@ -1,5 +1,4 @@
 import axios from "axios";
-import { GPT_4_MAX_TOKENS } from "../config";
 import { Express } from "express";
 
 export type SimplifiedComment = {
