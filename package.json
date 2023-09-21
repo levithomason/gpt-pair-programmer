@@ -9,7 +9,11 @@
   },
   "keywords": [],
   "author": "me@levithomason.com",
-  "license": "ISC",
+  "license": "MIT",
+  "engines": {
+    "npm": "Use yarn only.",
+    "yarn": ">=1.22.0"
+  },
   "devDependencies": {
     "@types/cors": "^2.8.13",
     "@types/debug": "^4.1.8",

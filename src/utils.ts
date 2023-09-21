@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { TERMINAL_STREAM_MAX_TOKENS } from "./config";
 
 /**
  * Trims a string to a certain number of estimated tokens.
@@ -26,7 +27,10 @@ export const trimStringToTokens = (str: string, tokens: number) => {
  * Removes ANSI escape codes (colors) from a string and trims it.
  */
 export const cleanShellOutput = (str: string) => {
-  return str.replace(/\u001b\[.*?m/g, "").trim();
+  return trimStringToTokens(
+    str.replace(/\u001b\[.*?m/g, "").trim(),
+    TERMINAL_STREAM_MAX_TOKENS,
+  );
 };
 
 /**

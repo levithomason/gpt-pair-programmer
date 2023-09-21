@@ -2,7 +2,7 @@
 # To make changes, edit the root `openapi.base.yaml` or `tools/*/openapi.yaml` files.
 openapi: 3.1.0
 info:
-  title: Pair Programmer with Self-Modification
+  title: Self-Modifying Pair Programmer
   description: >
     The Pair Programmer is a plugin that enables ChatGPT to collaborate with
     users in a pair programming manner. This plugin grants ChatGPT the
