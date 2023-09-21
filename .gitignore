@@ -18,3 +18,6 @@ dist/
 
 # working directory for gpt
 gpt-home/
+
+# generated files
+openapi.generated.yaml
