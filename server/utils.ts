@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { TERMINAL_STREAM_MAX_TOKENS } from "./config";
+import { TERMINAL_STREAM_MAX_TOKENS } from "../config";
 
 /**
  * Trims a string to a certain number of estimated tokens.

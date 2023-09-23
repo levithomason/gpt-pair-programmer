@@ -3,7 +3,7 @@ import path from "path";
 
 import debug from "debug";
 
-import { PROJECT_ROOT } from "../../config";
+import { PROJECT_ROOT } from "../../../config";
 import { cleanShellOutput } from "../../utils";
 import axios from "axios";
 
@@ -40,6 +40,7 @@ export const getSystemInfo = async () => {
  * Returns the current location of the user.
  */
 export const getSystemLocation = async () => {
+  log("getSystemLocation()");
   const response = await axios.get("http://ipinfo.io/json");
   return response.data;
 };

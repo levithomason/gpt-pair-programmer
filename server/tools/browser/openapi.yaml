@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Webpage Open API
+  version: 1.0.0
+paths:
+  /browser/goto:
+    post:
+      summary: Go to a url
+      description: |
+        Navigates to the url in a headless puppeteer browser on the user's system.
+        Only one page can be open at a time.
+        Returns the readable text of the page.
+      operationId: browserGoTo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: The URL of the webpage to open
+                  example: https://example.com
+  /browser/dom:
+    get:
+      summary: Read the browser's DOM
+      operationId: getBrowserDOM
+  /browser/console:
+    get:
+      summary: Read console logs
+      operationId: getBrowserConsole
+    delete:
+      summary: Clear console logs
+      operationId: clearBrowserConsole
+  /browser/read:
+    get:
+      summary: Read browser page
+      description: Get a human readable version of the current browser page
+      operationId: readBrowser

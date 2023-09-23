@@ -3,23 +3,9 @@ import puppeteer, { Browser, ConsoleMessage, Page } from "puppeteer";
 import * as htmlToText from "html-to-text";
 
 import { trimStringToTokens } from "../../utils";
-import { GPT_4_MAX_TOKENS } from "../../config";
+import { GPT_4_MAX_TOKENS } from "../../../config";
 
 export const log = debug("gpp:tools:webpage");
-
-let browser: Browser;
-let page: Page;
-let consoleMessages: string = "";
-
-const getBrowser = async (): Promise<Browser> => {
-  if (browser) {
-    return browser;
-  }
-
-  browser = await puppeteer.launch({ headless: "new" });
-
-  return browser;
-};
 
 const formatConsoleMessage = (msg: ConsoleMessage): string => {
   const { url, lineNumber: line, columnNumber: col } = msg.location();
@@ -33,30 +19,54 @@ const formatConsoleMessage = (msg: ConsoleMessage): string => {
   return message;
 };
 
-export const openPage = async (url: string) => {
-  log("openPage", url);
-  clearConsole();
+//
+// State
+//
 
-  const browser = await getBrowser();
-  page = await browser.newPage();
-
-  page.on("console", (msg: ConsoleMessage) => {
-    consoleMessages += `\n${formatConsoleMessage(msg)}`;
-    consoleMessages.trim();
-  });
-
-  await page.goto(url);
+let browser: Browser;
+const getBrowser = async () => {
+  if (!browser) {
+    browser = await puppeteer.launch({ headless: "new" });
+  }
+  return browser;
 };
 
-export const closeBrowser = async () => {
-  log("closePage");
-  await browser.close();
+let page: Page;
+const getPage = async () => {
+  if (!page) {
+    const browser = await getBrowser();
+    page = await browser.newPage();
+  }
+  return page;
+};
+
+let $console = "";
+(async () => {
+  const page = await getPage();
+
+  page.on("console", (msg: ConsoleMessage) => {
+    const formattedMessage = formatConsoleMessage(msg);
+    log("console", formattedMessage);
+    $console += `\n${formattedMessage}`;
+    $console.trim();
+  });
+})();
+
+//
+// Functions
+//
+export const goto = async (url: string) => {
+  log("openPage", url);
+  clearConsole();
+  const page = await getPage();
+
+  await page.goto(url, {
+    waitUntil: "networkidle0",
+  });
 };
 
 export const getDOM = async () => {
-  if (!page) {
-    throw new Error("Page is not open.");
-  }
+  const page = await getPage();
 
   log("getDOM");
   const domString = await page.evaluate(() => {
@@ -69,15 +79,12 @@ export const getDOM = async () => {
 };
 
 export const readPage = async () => {
-  if (!page) {
-    throw new Error("Page is not open.");
-  }
-
   log("readPage");
+
+  const page = await getPage();
   const domString = await page.evaluate(() => {
     return document.body.outerHTML;
   });
-
   const readableText = htmlToText.convert(domString);
 
   log("readPage", readableText);
@@ -86,17 +93,16 @@ export const readPage = async () => {
 };
 
 export const readConsole = () => {
-  const trimmedConsoleMessages = trimStringToTokens(
-    consoleMessages,
-    GPT_4_MAX_TOKENS,
-  );
+  log("readConsole");
 
-  log("readConsole", trimStringToTokens);
+  const trimmed = trimStringToTokens($console, GPT_4_MAX_TOKENS);
 
-  return trimmedConsoleMessages;
+  log("readConsole", trimmed);
+
+  return trimmed;
 };
 
 export const clearConsole = () => {
   log("clearConsole");
-  consoleMessages = "";
+  $console = "";
 };

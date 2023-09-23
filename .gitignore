@@ -1,23 +1,5 @@
-# Node.js dependencies
 node_modules/
-
-# TypeScript build output
 dist/
 
-# Environment variables
 .env
-
-# Editor generated files
-.vscode/
-*.log
-*.swp
-*.swo
-*.bak
-*.tmp
-*.sublime-*
-
-# working directory for gpt
-gpt-home/
-
-# generated files
 openapi.generated.yaml

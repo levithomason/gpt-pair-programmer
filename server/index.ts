@@ -7,10 +7,10 @@ import cors from "cors";
 import { json } from "body-parser";
 import debug from "debug";
 import yaml from "js-yaml";
-import { PROJECT_ROOT } from "./config";
+import { PUBLIC_ROOT, SERVER_ROOT } from "../config";
 import { OpenAPISpec } from "./types";
 
-const generatedSpecPath = path.join(PROJECT_ROOT, "openapi.generated.yaml");
+const generatedSpecPath = path.join(SERVER_ROOT, "openapi.generated.yaml");
 
 const log = debug("gpp:server:main");
 
@@ -32,7 +32,7 @@ app.use(json());
 // ============================================================================
 const toolsDir = path.join(__dirname, "tools");
 const mainSpec = yaml.load(
-  fs.readFileSync(path.join(PROJECT_ROOT, "openapi.base.yaml"), "utf8"),
+  fs.readFileSync(path.join(SERVER_ROOT, "openapi.base.yaml"), "utf8"),
 ) as OpenAPISpec;
 
 fs.readdirSync(toolsDir).forEach((tool) => {
@@ -86,7 +86,7 @@ fs.writeFileSync(generatedSpecPath, generatedSpec);
 
 app.get("/logo.png", async (_, res) => {
   const filename = "logo.png";
-  res.sendFile(filename, { root: "." });
+  res.sendFile(filename, { root: PUBLIC_ROOT });
 });
 
 app.get("/.well-known/ai-plugin.json", async (_, res) => {

@@ -2,7 +2,7 @@ import { Express } from "express";
 import fs from "fs";
 
 import { getSystemInfo, getSystemLocation, log, run } from "./utils";
-import { PROJECT_ROOT } from "../../config";
+import { PROJECT_ROOT } from "../../../config";
 import { generateTree } from "../../utils";
 import path from "path";
 

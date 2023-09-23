@@ -1,9 +1,6 @@
 import debug from "debug";
 import axios from "axios";
 
-import { GPT_4_MAX_TOKENS } from "../../config";
-import { trimStringToTokens } from "../../utils";
-
 export const log = debug("gpp:tools:google");
 
 const { GOOGLE_API_KEY, SEARCH_ENGINE_ID } = process.env;
