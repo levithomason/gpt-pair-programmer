@@ -71,3 +71,6 @@ The `types.ts` file defines the data structure for an OpenAPI specification. Thi
 ## Appendices
 
 - **OpenAPI Specification**: The project uses OpenAPI specifications to define the structure and endpoints of the API. This ensures clear documentation and understanding of the API for consumers.
+
+_This was authored by ChatGPT_
+_https://chat.openai.com/share/92ce93c4-6013-4239-809b-f44ad00e424f_

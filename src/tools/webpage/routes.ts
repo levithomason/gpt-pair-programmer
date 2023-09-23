@@ -41,7 +41,7 @@ export const addRoutes = (app: Express) => {
 
   app.get("/webpage/read", async (req, res) => {
     try {
-      res.json({ dom: await getDOM() });
+      res.json(await readPage());
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
     }

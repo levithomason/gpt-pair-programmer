@@ -7,5 +7,3 @@ export const GPT_4_MAX_TOKENS = 4000;
 export const TERMINAL_STREAM_MAX_TOKENS = GPT_4_MAX_TOKENS / 10;
 
 export const PROJECT_ROOT = path.resolve(__dirname, "..");
-export const GPT_HOME = path.resolve(PROJECT_ROOT, "gpt-home");
-export const GPT_PROJECTS = path.resolve(GPT_HOME, "projects");
