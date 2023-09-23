@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Google Search API
+  version: 1.0.0
+paths:
+  /google:
+    post:
+      summary: Perform a Google search
+      description: |
+        This endpoint allows you to perform a Google search by providing a search query in the request body.
+      operationId: googleSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: The search query.
+                  example: "What's the weather like today?"

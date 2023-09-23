@@ -6,8 +6,8 @@ import debug from "debug";
 import { GPT_PROJECTS } from "../../config";
 import { cleanShellOutput, generateTree } from "../../utils";
 
-const logRun = debug("server:system:run");
-const logESLint = debug("server:system:eslint");
+const logRun = debug("gpp:server:system:run");
+const logESLint = debug("gpp:server:system:eslint");
 
 /**
  * Returns a tree of the current project.

@@ -40,6 +40,12 @@ paths:
         Fetches various system details such as the current working directory,
         system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
       operationId: getSystemInfo
+  /system/location:
+    get:
+      summary: Retrieve physical location information of the user's device
+      description: >
+        Fetches the physical location of the user's device using the IP address.
+      operationId: getSystemLocation
   /system/tree:
     get:
       summary: Get the system tree

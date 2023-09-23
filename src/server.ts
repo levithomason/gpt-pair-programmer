@@ -12,12 +12,12 @@ import { OpenAPISpec } from "./types";
 
 const generatedSpecPath = path.join(PROJECT_ROOT, "openapi.generated.yaml");
 
-const log = debug("server:main");
+const log = debug("gpp:server:main");
 
 const app = express();
 
 // enable debug logging
-debug.enable("*");
+debug.enable("gpp:*");
 
 // ============================================================================
 // Middleware

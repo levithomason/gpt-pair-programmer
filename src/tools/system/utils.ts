@@ -5,8 +5,9 @@ import debug from "debug";
 
 import { PROJECT_ROOT } from "../../config";
 import { cleanShellOutput } from "../../utils";
+import axios from "axios";
 
-export const log = debug("tools:system");
+export const log = debug("gpp:tools:system");
 
 /**
  * Returns the current working directory for the active project.
@@ -33,6 +34,14 @@ export const getSystemInfo = async () => {
   log("getSystemInfo()", result);
 
   return result;
+};
+
+/**
+ * Returns the current location of the user.
+ */
+export const getSystemLocation = async () => {
+  const response = await axios.get("http://ipinfo.io/json");
+  return response.data;
 };
 
 export const run = (

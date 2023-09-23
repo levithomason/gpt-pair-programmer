@@ -1,7 +1,7 @@
 import { Express } from "express";
 import fs from "fs";
 
-import { getSystemInfo, log, run } from "./utils";
+import { getSystemInfo, getSystemLocation, log, run } from "./utils";
 import { PROJECT_ROOT } from "../../config";
 import { generateTree } from "../../utils";
 import path from "path";
@@ -33,6 +33,12 @@ export const addRoutes = (app: Express) => {
 
   app.get("/system/info", async (req, res) => {
     const systemInfo = await getSystemInfo();
+
+    res.status(200).json(systemInfo);
+  });
+
+  app.get("/system/location", async (req, res) => {
+    const systemInfo = await getSystemLocation();
 
     res.status(200).json(systemInfo);
   });
