@@ -1,5 +1,11 @@
 import * as React from "react";
+import { ChatInterface } from "./ChatInterface";
 
 export const App = () => {
-  return <div>Hello, world!</div>;
+  return (
+    <div>
+      <h1>Welcome to the Chat App</h1>
+      <ChatInterface />
+    </div>
+  );
 };
