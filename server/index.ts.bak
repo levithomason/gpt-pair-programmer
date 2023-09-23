@@ -31,15 +31,7 @@ const app = express();
 // ============================================================================
 
 app.use(morgan("dev"));
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://chat.openai.com",
-      "http://0.0.0.0:5004",
-    ],
-  }),
-);
+app.use(cors({ origin: "https://chat.openai.com" }));
 app.use(json());
 
 // ============================================================================

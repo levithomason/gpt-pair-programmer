@@ -71,7 +71,9 @@ export const google = async (query: string) => {
     }
   } catch (error) {
     return [
-      `An error occurred while making the request: ${(error as Error).message}`,
+      `An error occurred while making the request: ${(
+        error as Error
+      ).toString()}`,
     ];
   }
 };

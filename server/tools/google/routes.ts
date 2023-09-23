@@ -10,7 +10,7 @@ export const addRoutes = (app: Express) => {
     try {
       res.json(await google(query));
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      res.status(500).json({ error: (error as Error).toString() });
     }
   });
 };

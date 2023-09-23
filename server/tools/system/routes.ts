@@ -44,7 +44,7 @@ export const addRoutes = (app: Express) => {
   });
 
   app.get("/system/tree", async (req, res) => {
-    const tree = generateTree(PROJECT_ROOT, 2);
+    const tree = generateTree(PROJECT_ROOT, 3);
     log("/system/tree", tree);
     res.status(200).json({ tree });
   });

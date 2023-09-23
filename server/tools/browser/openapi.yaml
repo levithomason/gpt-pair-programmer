@@ -39,3 +39,29 @@ paths:
       summary: Read browser page
       description: Get a human readable version of the current browser page
       operationId: readBrowser
+  /browser/execute:
+    post:
+      summary: Execute a Puppeteer command
+      description: |
+        Executes a specified Puppeteer command on the user's system.
+        Allows for actions like typing text, clicking buttons, and evaluating JavaScript.
+      operationId: browserExecute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The Puppeteer command to execute (e.g., 'type', 'click', 'evaluate')
+                  example: "click"
+                selector:
+                  type: string
+                  description: The CSS selector to target (relevant for 'type' and 'click')
+                  example: "#sendButton"
+                value:
+                  type: string
+                  description: Any value to use (e.g., the text to type or the JavaScript code to evaluate)
+                  example: "Hello, world!"

@@ -78,7 +78,14 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
     for (const entry of entries) {
       const nextPath = path.join(dir, entry);
       const dirSlash = isDirectory(nextPath) ? "/" : "";
-      localTree += `${indent.repeat(currentDepth - 1)}${entry}${dirSlash}\n`;
+      const itemCount =
+        currentDepth === maxDepth && isDirectory(nextPath)
+          ? ` (${fs.readdirSync(nextPath).length})`
+          : "";
+
+      localTree += `${indent.repeat(
+        currentDepth - 1,
+      )}${entry}${dirSlash}${itemCount}\n`;
 
       if (shouldIterate(nextPath)) {
         localTree += recurse(nextPath, currentDepth + 1);

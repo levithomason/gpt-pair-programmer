@@ -106,3 +106,44 @@ export const clearConsole = () => {
   log("clearConsole");
   $console = "";
 };
+
+export const evaluate = async (
+  command: string,
+  selector: string,
+  value?: string,
+) => {
+  log("evaluate", command, selector, value);
+
+  const page = await getPage();
+  let result;
+
+  switch (command) {
+    case "click":
+      await page.click(selector);
+      result = "Clicked successfully";
+      break;
+
+    case "type":
+      if (!value) {
+        throw new Error("Value is required");
+      }
+      await page.type(selector, value);
+      result = "Typed successfully";
+      break;
+
+    case "evaluate":
+      if (!value) {
+        throw new Error("Value is required");
+      }
+      result = await page.evaluate(value);
+      break;
+
+    default:
+      result = "Unknown command";
+      break;
+  }
+
+  log("evaluate", result);
+
+  return result;
+};
