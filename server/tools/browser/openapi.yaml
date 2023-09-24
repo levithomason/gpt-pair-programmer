@@ -3,11 +3,11 @@ info:
   title: Webpage Open API
   version: 1.0.0
 paths:
-  /browser/goto:
+  /browser/open:
     post:
       summary: Go to a url
       description: |
-        Navigates to the url in a headless puppeteer browser on the user's system.
+        Navigates to the url in a headless puppeteer browser.
         Only one page can be open at a time.
         Returns the readable text of the page.
       operationId: browserGoTo
@@ -43,7 +43,7 @@ paths:
     post:
       summary: Execute a Puppeteer command
       description: |
-        Executes a specified Puppeteer command on the user's system.
+        Executes a specified Puppeteer command in the browser.
         Allows for actions like typing text, clicking buttons, and evaluating JavaScript.
       operationId: browserExecute
       requestBody:

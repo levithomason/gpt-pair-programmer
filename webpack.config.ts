@@ -6,7 +6,7 @@ import path from "path";
 
 export default {
   mode: "development",
-  devtool: "source-map",
+  devtool: "eval-source-map",
   entry: path.join(APP_ROOT, "index.tsx"),
   output: {
     path: DIST_ROOT,
@@ -18,6 +18,11 @@ export default {
       {
         test: /\.tsx?$/,
         use: "ts-loader",
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.css?$/,
+        use: ["style-loader", "css-loader"],
         exclude: /node_modules/,
       },
     ],

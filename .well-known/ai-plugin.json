@@ -1,9 +1,9 @@
 {
   "schema_version": "v1",
   "name_for_human": "Pair Programmer",
-  "name_for_model": "pairing",
+  "name_for_model": "pair_programmer",
   "description_for_human": "Plugin that empowers ChatGPT to pair program with you.",
-  "description_for_model": "Enables pair programming and command execution. Use the \"system\" tool to modify the plugin as needed.",
+  "description_for_model": "Plugin for accomplishing goals by pair programming with the user. Run commands to step towards your goal.",
   "auth": {
     "type": "none"
   },

@@ -8,7 +8,6 @@ import { json } from "body-parser";
 import debug from "debug";
 import yaml from "js-yaml";
 import { OpenAI } from "openai";
-import { pipeline } from "node:stream/promises";
 
 import { PUBLIC_ROOT, SERVER_ROOT } from "../config";
 import { OpenAPISpec } from "./types";
@@ -101,18 +100,28 @@ fs.writeFileSync(GENERATED_SPEC_PATH, generatedSpec);
 // ============================================================================
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-app.post("/chat", async (req, res) => {
-  const prompt = req.body.prompt;
+app.get("/chat", async (req, res) => {
+  const message = req.query.message as string;
+  log("/chat:", message);
 
   try {
     const stream = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content: message }],
       stream: true,
     });
-    await pipeline(stream, res);
+
+    res.setHeader("Content-Type", "text/event-stream");
+
+    for await (const part of stream) {
+      const text = part.choices[0].delta.content || "";
+      log("/chat stream:", text);
+      res.write(text);
+    }
+
+    res.end();
   } catch (error) {
-    res.status(500).json({ error: "OpenAI API error" });
+    res.status(500).json({ error: (error as Error).toString() });
   }
 });
 
