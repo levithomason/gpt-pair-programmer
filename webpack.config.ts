@@ -25,6 +25,10 @@ export default {
         use: ["style-loader", "css-loader"],
         exclude: /node_modules/,
       },
+      {
+        test: /\.(png|jpe?g|gif|avif)$/i,
+        type: "asset/resource",
+      },
     ],
   },
   resolve: {

@@ -1,84 +1,170 @@
 import * as React from "react";
-import axios from "axios";
+import { FormEvent } from "react";
 import debug from "debug";
 
 import { ChatMessage } from "./chat-message";
-import * as events from "events";
+import { ErrorBanner } from "../banner/error-banner";
+import "./chat.css";
 
 const log = debug("app:components:chat");
 
+type Message = {
+  role: "user" | "gpt";
+  content: string;
+  timestamp: number;
+};
+
 export const Chat = () => {
-  const [messages, setMessages] = React.useState<string[]>([]);
-  const [message, setMessage] = React.useState<string>("ping");
-  const [error, setError] = React.useState<string>("");
+  const [messages, setMessages] = React.useState<Message[]>([
+    {
+      role: "user",
+      content: "What is your name?",
+      timestamp: Date.now(),
+    },
+    {
+      role: "gpt",
+      content: "Hello, I'm GPT-3.",
+      timestamp: Date.now(),
+    },
+    {
+      role: "gpt",
+      content: "What can I help you with?",
+      timestamp: Date.now(),
+    },
+    {
+      role: "user",
+      content: "test",
+      timestamp: Date.now(),
+    },
+    {
+      role: "gpt",
+      content:
+        'There are many ways to interpret the word "test." In the context of a question or prompt, it usually implies assessing someone\'s knowledge or skills. It can also refer to an examination or assessment given in an academic or professional setting. In some cases, a test may be used to evaluate the effectiveness or functionality of a product or system. Overall, a test can serve as a measure of performance, understanding, or quality.',
+      timestamp: Date.now(),
+    },
+    {
+      role: "user",
+      content:
+        "Make a table of car accidents by year in the US compared to motorcycles",
+      timestamp: Date.now(),
+    },
+    {
+      role: "gpt",
+      content: `| Year | Car Accidents (US) | Motorcycle Accidents (US) |\n| ---- | ------------------ | ------------------------- |\n| 2015 | 6,296,000 | 88,000 |\n| 2016 | 6,821,000 | 95,000 |\n| 2017 | 6,452,000 | 89,000 |\n| 2018 | 6,734,000 | 91,000 |\n| 2019 | 6,756,000 | 88,000 |`,
+      timestamp: Date.now(),
+    },
+  ]);
+  const [message, setMessage] = React.useState<string>("");
+  const [reply, setReply] = React.useState<string>("");
+
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string>("");
 
-  const handleSend = React.useCallback(() => {
-    setLoading(true);
-    log("messages", messages);
+  const chatMessagesRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-    const url = `http://0.0.0.0:5004/chat?message=${encodeURIComponent(
-      message,
-    )}`;
+  const scrollToBottom = () => {
+    chatMessagesRef.current?.scrollTo({
+      top: chatMessagesRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  };
 
-    log("url", url);
-    const eventSource = new EventSource(url);
+  const handleSend = React.useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
 
-    eventSource.onmessage = (event) => {
-      log("Received data:", event.data);
+      if (loading) {
+        return;
+      }
 
-      setMessages((prevMessages) => [...prevMessages, event.data]);
-    };
+      if (!message.trim()) {
+        setMessage("");
+        return;
+      }
 
-    eventSource.onerror = (event) => {
-      log("EventSource failed:", event);
-      eventSource.close();
-      setError("Error receiving message from server.");
-    };
+      setLoading(true);
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: message, timestamp: Date.now() },
+      ]);
+      setMessage("");
+      scrollToBottom();
 
-    return () => {
-      eventSource.close();
-    };
-  }, [message, messages]);
+      const messageURI = encodeURIComponent(message);
+      const url = `http://localhost:5004/chat?message=${messageURI}`;
 
-  log("messages", messages);
+      fetch(url).then(async (res) => {
+        log("res", res);
+        const reader = res.body!.getReader();
+
+        log("reader", reader);
+        const decoder = new TextDecoder();
+
+        const read = async () => {
+          const { done, value } = await reader.read();
+          const decoded = decoder.decode(value);
+          log(decoded);
+
+          if (!done) {
+            setReply((prevReply) => {
+              scrollToBottom();
+              return prevReply + decoded;
+            });
+            await read();
+            return;
+          }
+
+          log("done");
+          setReply((prevReply) => {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { role: "gpt", content: prevReply, timestamp: Date.now() },
+            ]);
+            return "";
+          });
+          setLoading(false);
+          scrollToBottom();
+        };
+
+        await read();
+      });
+    },
+    [message, loading],
+  );
+
+  React.useEffect(() => {
+    if (!reply && !loading) {
+      inputRef.current?.focus();
+    }
+  }, [reply, loading]);
+
+  log("render", { messages, message, reply, loading, error });
 
   return (
-    <div>
-      <div
-        style={{
-          transition: "all 0.5s ease-in-out",
-          position: "fixed",
-          padding: "1rem 2rem",
-          margin: "0 auto",
-          top: "-100px",
-          width: "calc(100% - 4rem)",
-          minWidth: "400px",
-          maxWidth: "800px",
-          textAlign: "center",
-          color: "white",
-          backgroundColor: "#D88",
-          borderRadius: "8px",
-          opacity: 0,
-          ...(error && {
-            top: "16px",
-            opacity: 1,
-          }),
-        }}
-      >
-        {error}
-      </div>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <button onClick={handleSend}>Send</button>
-      <div>
+    <div id="chat">
+      <ErrorBanner error={error} />
+      <div ref={chatMessagesRef} className="chat-messages">
         {messages.map((msg, index) => (
-          <ChatMessage key={index}>{msg}</ChatMessage>
+          <ChatMessage key={index} role={msg.role}>
+            {msg.content}
+          </ChatMessage>
         ))}
+        {reply && <ChatMessage role="gpt">{reply}</ChatMessage>}
       </div>
+      <form onSubmit={handleSend} className="chat-form">
+        <input
+          ref={inputRef}
+          disabled={loading}
+          placeholder={loading ? "" : "Send a message"}
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "🤖" : "👉"}
+        </button>
+      </form>
     </div>
   );
 };

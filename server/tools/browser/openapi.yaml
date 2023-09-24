@@ -3,7 +3,7 @@ info:
   title: Webpage Open API
   version: 1.0.0
 paths:
-  /browser/open:
+  /browser/goto:
     post:
       summary: Go to a url
       description: |

@@ -7,15 +7,6 @@ import { generateTree } from "../../utils";
 import path from "path";
 
 export const addRoutes = (app: Express) => {
-  app.get("/system/docs/architecture", async (req, res) => {
-    const architecture = fs.readFileSync(
-      path.resolve(PROJECT_ROOT, "docs/architecture.md"),
-      "utf8",
-    );
-    log("/system/architecture", architecture);
-    res.status(200).json({ architecture });
-  });
-
   app.post("/system/exec", async (req, res) => {
     const { command, cwd = "." } = req.body;
     log("/system/exec", { command, cwd });

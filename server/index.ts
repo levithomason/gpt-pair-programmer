@@ -130,7 +130,7 @@ app.get("/chat", async (req, res) => {
 // ============================================================================
 
 app.get("/logo.png", async (_, res) => {
-  const filename = "logo.png";
+  const filename = "logo-white-bg.png";
   res.sendFile(filename, { root: PUBLIC_ROOT });
 });
 

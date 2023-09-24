@@ -1,10 +1,32 @@
 import * as React from "react";
-import "./chat-message.css";
+import { micromark } from "micromark";
+import { gfm, gfmHtml } from "micromark-extension-gfm";
 
 export type ChatMessageProps = {
-  children: React.ReactNode;
+  children: string;
+  role: "user" | "gpt";
+};
+
+const removeWrappingPTag = (html: string) => {
+  if (html.startsWith("<p>") && html.endsWith("</p>")) {
+    return html.slice(3, -4);
+  }
+
+  return html;
 };
 
 export const ChatMessage = (props: ChatMessageProps) => {
-  return <div className="chat-message">{props.children}</div>;
+  return (
+    <div
+      className={`chat-message chat-message--${props.role}`}
+      dangerouslySetInnerHTML={{
+        __html: removeWrappingPTag(
+          micromark(props.children, {
+            extensions: [gfm()],
+            htmlExtensions: [gfmHtml()],
+          }),
+        ),
+      }}
+    />
+  );
 };

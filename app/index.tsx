@@ -4,19 +4,11 @@ import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "react-error-boundary";
 
 import "./index.css";
-import { App } from "./components/App";
+import { App } from "./components/app";
 
 debug.enable("app:*");
 
-const lightEl = document.createElement("img");
-lightEl.id = "light";
-document.body.appendChild(lightEl);
-
-const rootEl = document.createElement("div");
-rootEl.id = "root";
-document.body.appendChild(rootEl);
-
-const root = createRoot(rootEl);
+const root = createRoot(document.body);
 root.render(
   <ErrorBoundary fallback={<div>Something went wrong</div>}>
     <App />

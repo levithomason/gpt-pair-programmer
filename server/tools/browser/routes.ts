@@ -10,7 +10,7 @@ import {
 } from "./utils";
 
 export const addRoutes = (app: Express) => {
-  app.post("/browser/open", async (req, res) => {
+  app.post("/browser/goto", async (req, res) => {
     const { url } = req.body;
     if (!url) {
       return res.status(400).json({ error: "URL is required" });
