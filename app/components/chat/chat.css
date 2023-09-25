@@ -25,8 +25,8 @@
   padding-right: 16px;
   align-self: flex-end;
   background: linear-gradient(
-    225deg,
-    rgba(84, 49, 57, 0.4) 0%,
+    202.5deg,
+    rgba(84, 49, 57, 0.15) 0%,
     transparent 100%
   );
 }
@@ -38,7 +38,7 @@
   padding-left: 16px;
   align-self: flex-start;
   background: linear-gradient(
-    135deg,
+    112.5deg,
     rgba(49, 64, 84, 0.5) 0%,
     transparent 100%
   );

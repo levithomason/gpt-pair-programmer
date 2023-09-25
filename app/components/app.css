@@ -41,6 +41,6 @@
   width: 100vw;
   height: 100vh;
   mix-blend-mode: soft-light;
-  opacity: 0.2;
+  opacity: 0.1;
   pointer-events: none;
 }
