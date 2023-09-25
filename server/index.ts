@@ -135,15 +135,19 @@ app.get("/logo.png", async (_, res) => {
 });
 
 app.get("/.well-known/ai-plugin.json", async (_, res) => {
-  fs.readFile(".well-known/ai-plugin.json", "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Error");
-      return;
-    }
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).send(data);
-  });
+  fs.readFile(
+    path.resolve(SERVER_ROOT, ".well-known", "ai-plugin.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send("Error");
+        return;
+      }
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(data);
+    },
+  );
 });
 
 app.get("/openapi.yaml", async (_, res) => {
