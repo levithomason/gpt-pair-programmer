@@ -5,14 +5,9 @@ import debug from "debug";
 import { ChatMessage } from "./chat-message";
 import { ErrorBanner } from "../banner/error-banner";
 import "./chat.css";
+import { Message } from "./types";
 
-const log = debug("app:components:chat");
-
-type Message = {
-  role: "user" | "gpt";
-  content: string;
-  timestamp: number;
-};
+const log = debug("gpp:app:components:chat");
 
 export const Chat = () => {
   const [messages, setMessages] = React.useState<Message[]>([
@@ -22,12 +17,12 @@ export const Chat = () => {
       timestamp: Date.now(),
     },
     {
-      role: "gpt",
+      role: "assistant",
       content: "Hello, I'm GPT-3.",
       timestamp: Date.now(),
     },
     {
-      role: "gpt",
+      role: "assistant",
       content: "What can I help you with?",
       timestamp: Date.now(),
     },
@@ -37,7 +32,7 @@ export const Chat = () => {
       timestamp: Date.now(),
     },
     {
-      role: "gpt",
+      role: "assistant",
       content:
         'There are many ways to interpret the word "test." In the context of a question or prompt, it usually implies assessing someone\'s knowledge or skills. It can also refer to an examination or assessment given in an academic or professional setting. In some cases, a test may be used to evaluate the effectiveness or functionality of a product or system. Overall, a test can serve as a measure of performance, understanding, or quality.',
       timestamp: Date.now(),
@@ -49,7 +44,7 @@ export const Chat = () => {
       timestamp: Date.now(),
     },
     {
-      role: "gpt",
+      role: "assistant",
       content: `| Year | Car Accidents (US) | Motorcycle Accidents (US) |\n| ---- | ------------------ | ------------------------- |\n| 2015 | 6,296,000 | 88,000 |\n| 2016 | 6,821,000 | 95,000 |\n| 2017 | 6,452,000 | 89,000 |\n| 2018 | 6,734,000 | 91,000 |\n| 2019 | 6,756,000 | 88,000 |`,
       timestamp: Date.now(),
     },
@@ -119,7 +114,7 @@ export const Chat = () => {
           setReply((prevReply) => {
             setMessages((prevMessages) => [
               ...prevMessages,
-              { role: "gpt", content: prevReply, timestamp: Date.now() },
+              { role: "assistant", content: prevReply, timestamp: Date.now() },
             ]);
             return "";
           });
@@ -150,7 +145,7 @@ export const Chat = () => {
             {msg.content}
           </ChatMessage>
         ))}
-        {reply && <ChatMessage role="gpt">{reply}</ChatMessage>}
+        {reply && <ChatMessage role="assistant">{reply}</ChatMessage>}
       </div>
       <form onSubmit={handleSend} className="chat-form">
         <input

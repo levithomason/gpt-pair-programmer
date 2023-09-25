@@ -6,7 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import "./index.css";
 import { App } from "./components/app";
 
-debug.enable("app:*");
+debug.enable("gpp:*");
 
 const root = createRoot(document.body);
 root.render(

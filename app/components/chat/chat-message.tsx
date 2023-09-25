@@ -2,9 +2,11 @@ import * as React from "react";
 import { micromark } from "micromark";
 import { gfm, gfmHtml } from "micromark-extension-gfm";
 
+import { MessageRole } from "./types";
+
 export type ChatMessageProps = {
   children: string;
-  role: "user" | "gpt";
+  role: MessageRole;
 };
 
 const removeWrappingPTag = (html: string) => {

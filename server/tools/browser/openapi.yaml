@@ -5,12 +5,12 @@ info:
 paths:
   /browser/goto:
     post:
+      operationId: browserGoTo
       summary: Go to a url
       description: |
         Navigates to the url in a headless puppeteer browser.
         Only one page can be open at a time.
         Returns the readable text of the page.
-      operationId: browserGoTo
       requestBody:
         required: true
         content:
@@ -25,27 +25,27 @@ paths:
                   example: https://example.com
   /browser/dom:
     get:
-      summary: Read the browser's DOM
       operationId: getBrowserDOM
+      summary: Read the browser's DOM
   /browser/console:
     get:
-      summary: Read console logs
       operationId: getBrowserConsole
+      summary: Read console logs
     delete:
-      summary: Clear console logs
       operationId: clearBrowserConsole
+      summary: Clear console logs
   /browser/read:
     get:
+      operationId: readBrowser
       summary: Read browser page
       description: Get a human readable version of the current browser page
-      operationId: readBrowser
   /browser/execute:
     post:
+      operationId: browserExecute
       summary: Execute a Puppeteer command
       description: |
         Executes a specified Puppeteer command in the browser.
         Allows for actions like typing text, clicking buttons, and evaluating JavaScript.
-      operationId: browserExecute
       requestBody:
         required: true
         content:

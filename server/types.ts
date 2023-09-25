@@ -1,3 +1,16 @@
+type OpenAPIProperties = {
+  [name: string]: {
+    type: string;
+    description?: string;
+    required?: boolean;
+  };
+};
+
+type OpenAPISchema = {
+  type: "object";
+  properties?: OpenAPIProperties;
+};
+
 export type OpenAPISpec = {
   openapi: string;
   info: {
@@ -11,7 +24,27 @@ export type OpenAPISpec = {
   }[];
   paths: {
     [path: string]: {
-      [method: string]: object;
+      [method: string]: {
+        operationId: string;
+        description?: string;
+        requestBody?: {
+          content?: {
+            "application/json"?: {
+              schema?: OpenAPISchema;
+            };
+          };
+        };
+      };
     };
+  };
+};
+
+export type OpenAIFunction = {
+  name: string;
+  description?: string;
+  parameters: {
+    type: "object";
+    properties: OpenAPIProperties;
+    required?: string[];
   };
 };

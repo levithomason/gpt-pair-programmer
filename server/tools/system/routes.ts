@@ -19,7 +19,7 @@ export const addRoutes = (app: Express) => {
     const shell = await run(command, cwd);
     log("system/exec", { shell });
 
-    res.status(200).json({ shell });
+    res.status(200).json(shell);
   });
 
   app.get("/system/info", async (req, res) => {

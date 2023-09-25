@@ -40,7 +40,7 @@ export const addRoutes = (app: Express) => {
   });
 
   app.get("/browser/console", async (req, res) => {
-    res.json({ console: readConsole() });
+    res.json(readConsole());
   });
 
   app.delete("/browser/console", async (req, res) => {

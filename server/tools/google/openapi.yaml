@@ -5,10 +5,10 @@ info:
 paths:
   /google:
     post:
+      operationId: googleSearch
       summary: Perform a Google search
       description: |
         This endpoint allows you to perform a Google search by providing a search query in the request body.
-      operationId: googleSearch
       requestBody:
         required: true
         content:

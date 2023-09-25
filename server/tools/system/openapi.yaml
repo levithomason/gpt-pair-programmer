@@ -3,19 +3,14 @@ info:
   title: System Tool
   version: "v1"
 paths:
-  /system/docs/architecture:
-    get:
-      summary: Fetch the architecture document
-      description: Returns the content of the architecture.md file.
-      operationId: getArchitectureDocument
   /system/exec:
     post:
+      operationId: execSystemCommand
       summary: Execute a system command
       description: |
         The command is executed in the root of this API project, outside the scope of projects.
         Do not execute commands are long-running or require input.
         Only execute commands that are expected to complete in a short amount of time.
-      operationId: execSystemCommand
       requestBody:
         description: The command to execute and the directory to execute it in
         required: true
@@ -35,20 +30,20 @@ paths:
                   required: true
   /system/info:
     get:
+      operationId: getSystemInfo
       summary: Retrieve System Information
       description: >
         Fetches various system details such as the current working directory,
         system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
-      operationId: getSystemInfo
   /system/location:
     get:
+      operationId: getSystemLocation
       summary: Retrieve physical location information of the user's device
       description: >
         Fetches the physical location of the user's device using the IP address.
-      operationId: getSystemLocation
   /system/tree:
     get:
+      operationId: getSystemTree
       summary: Get the system tree
       description: |
         Retrieves a tree structure of the file system.
-      operationId: getSystemTree
