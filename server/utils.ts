@@ -56,6 +56,8 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
     return file !== "node_modules" && !file.startsWith(".");
   };
 
+  const showMore = (dir: string) => ` (${fs.readdirSync(dir).length})`;
+
   const recurse = (dir: string, currentDepth: number = 1): string => {
     if (currentDepth > maxDepth) {
       return "";
@@ -75,19 +77,21 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
         return a < b ? -1 : 1;
       });
 
+    const isMaxDepth = currentDepth === maxDepth;
+    const currIndent = indent.repeat(currentDepth - 1);
+
     for (const entry of entries) {
       const nextPath = path.join(dir, entry);
-      const dirSlash = isDirectory(nextPath) ? "/" : "";
+      const isDir = isDirectory(nextPath);
+      const willIterate = shouldIterate(nextPath);
+
+      const dirSlash = isDir ? "/" : "";
       const itemCount =
-        currentDepth === maxDepth && isDirectory(nextPath)
-          ? ` (${fs.readdirSync(nextPath).length})`
-          : "";
+        isDir && (isMaxDepth || !willIterate) ? showMore(nextPath) : "";
 
-      localTree += `${indent.repeat(
-        currentDepth - 1,
-      )}${entry}${dirSlash}${itemCount}\n`;
+      localTree += `${currIndent}${entry}${dirSlash}${itemCount}\n`;
 
-      if (shouldIterate(nextPath)) {
+      if (willIterate) {
         localTree += recurse(nextPath, currentDepth + 1);
       }
     }

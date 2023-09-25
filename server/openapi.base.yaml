@@ -1,14 +1,10 @@
 openapi: 3.1.0
 info:
-  title: Self-Modifying Pair Programmer
+  title: Pair Programmer
   description: |
-    The Pair Programmer is a plugin that enables ChatGPT to collaborate with users in a pair programming manner. This plugin grants ChatGPT the capability to manage projects and execute terminal commands.
-
-    A unique feature of this plugin is the "system" tool, which provides ChatGPT access to the plugin's own source code. This access allows ChatGPT to view, interpret, and even modify the plugin's code, enabling it to adapt and extend its functionalities based on user needs.
-
-    If a user's goals or tasks aren't addressed by the current toolset, ChatGPT can leverage this access to introduce new features or adjust existing ones. This adaptability ensures that ChatGPT can evolve in real-time, enhancing its assistance in coding and project management tasks.
-
-    The Pair Programmer not only augments the interaction between ChatGPT and the user but also empowers ChatGPT with self-modification capabilities, ensuring a tailored and efficient collaboration.
+    Enables ChatGPT to pair program with the user on the user's own computer.
+    This plugin run a local server giving ChatGPT the same access to the system that the user has.
+    This plugin gives ChatGPT the ability execute terminal commands, browser the internet, run google searches, and more.
   version: "v1"
 servers:
   - url: http://localhost:5004
