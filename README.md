@@ -52,31 +52,32 @@ Gives ChatGPT access to the (Tools)[#tools] listed above.
 
 ## Roadmap
 
-**Cost Tracking**:
+**Cost Tracking**  
 Track and display the cost of conversations.
 
-**Memory**:
-Persistent memory features for the GPT.
+**Memory**  
+Persistent memory features for GPT. `/mind/memory` could allow GPT to journal memories (POST) of relevant events and information. GPT could then first see if it "remembers" (GET) anything about various topics before responding, creating plans, or taking action. 
 
-**Cognition**:
+**Cognition**  
 Beyond simple Q&A, enabling more complex problem-solving.
+Planning - see `.archived/research/reasoning.md`.
 
-**Projects**:
+**Projects**  
 Point the application to a directory on your computer to start a pair programming session. The directory will be indexed for quick search, retrieval, and reasoning by GPT.
 
-**IDE Tool**:
+**IDE Tool**  
 An IDE tool specialized for GPT to use to understand the working context (tree, tabs, current file, etc.). Improve file editing capabilities (GPT-4 currently uses the command line). See `.archived/research/file-editing`.
 
-**Approvals**:
+**Approvals**  
 A workflow for approving GPT responses.
 
 ### Other Considerations
 
-**Chrome Extension**:
+**Chrome Extension**  
 Give GPT-4 access to your browser via a Chrome extension. See what you see, read console, access devtools, etc.
 
-**IDE Extension**:
+**IDE Extension**  
 Give GPT-4 insights about your IDE session. See what you see, open file contents, clipboard, location history, current edit history, etc.
 
-**Cloud**:
+**Cloud**  
 A cloud-based version of the application, for those who don't want to install anything. This would be a hosted version of the desktop app, served as a web app.

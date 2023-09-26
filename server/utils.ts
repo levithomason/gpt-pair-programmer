@@ -37,6 +37,8 @@ export const cleanShellOutput = (str: string) => {
  * Returns a tree for a given directory.
  */
 export const generateTree = (dir: string, maxDepth: number = 1): string => {
+  // node modules, dotfiles, and dot directories
+  const skipRegex = /node_modules|^\..*/;
   const indent = "  ";
 
   const filterEntries = (entry: string) => {
@@ -53,12 +55,44 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       return false;
     }
 
-    return file !== "node_modules" && !file.startsWith(".");
+    return !skipRegex.test(file);
   };
 
-  const showMore = (dir: string) => ` (${fs.readdirSync(dir).length})`;
+  const reportSkipped = (dir: string) => {
+    let files = 0;
+    let dirs = 0;
+    fs.readdirSync(dir).forEach((entry) => {
+      const nextPath = path.join(dir, entry);
+      if (isDirectory(nextPath)) {
+        dirs++;
+      } else {
+        files++;
+      }
+    });
 
-  const recurse = (dir: string, currentDepth: number = 1): string => {
+    return [`SKIP`, dirs && `${dirs} folders`, files && `${files} files`]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  const reportMaxDepth = (dir: string) => {
+    let files = 0;
+    let dirs = 0;
+    fs.readdirSync(dir).forEach((entry) => {
+      const nextPath = path.join(dir, entry);
+      if (isDirectory(nextPath)) {
+        dirs++;
+      } else {
+        files++;
+      }
+    });
+
+    return [`MAX`, dirs && `${dirs} folders`, files && `${files} files`]
+      .filter(Boolean)
+      .join(" ");
+  };
+
+  const recurse = (dir: string, currentDepth: number): string => {
     if (currentDepth > maxDepth) {
       return "";
     }
@@ -87,7 +121,11 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
 
       const dirSlash = isDir ? "/" : "";
       const itemCount =
-        isDir && (isMaxDepth || !willIterate) ? showMore(nextPath) : "";
+        isDir && isMaxDepth
+          ? ` (${reportMaxDepth(nextPath)})`
+          : isDir && !willIterate
+          ? ` (${reportSkipped(nextPath)})`
+          : "";
 
       localTree += `${currIndent}${entry}${dirSlash}${itemCount}\n`;
 
@@ -99,5 +137,5 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
     return localTree;
   };
 
-  return recurse(dir, 1);
+  return [`MAX DEPTH: ${maxDepth}\n`, recurse(dir, 1)].join("\n");
 };
