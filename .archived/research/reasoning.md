@@ -57,3 +57,30 @@ These are the tools that come to mind for helping GPT build context and reason:
 - Some kind of knowledge graph of the codebase
 - Potential vector storage query interface for the specific codebase
 - `/mind/memories` tool to save learnings to storage over time. GPT could query its memories to see if it "remembers" anything about various topics before planning, responding, or taking action.
+
+---
+
+#### ChatGPT's Tool Ideas
+
+Given the emphasis on context acquisition and retention, here are ten unique tools that could significantly enhance my ability to navigate and operate within a large codebase:
+
+1. **Codebase Knowledge Graph:** A graph-based representation of the codebase that captures relationships between modules, functions, classes, and other entities. This would allow for quick navigation and understanding of dependencies.
+
+2. **Vector Storage Interface:** A system that encodes parts of the codebase into vectors (using techniques like word embeddings) and allows for semantic querying. This would enable me to find code snippets or modules that are semantically related to a given query, even if the exact terms aren't used.
+ 
+4. **mindMemories Storage:** A persistent memory storage where I can save and retrieve learnings about the codebase over time. This would help in recalling past interactions, decisions, or explanations related to the code. 
+4. **Codebase Change Tracker:** An interface to track changes in the codebase over time, integrated with version control systems like Git. This would provide context on recent updates, bug fixes, or feature additions.
+ 
+6. **Automated Codebase Summarizer:** A tool that can provide concise summaries of large code sections, modules, or functions. This would help in quickly understanding the purpose and functionality of unfamiliar parts of the code.
+ 
+7. **Codebase Dependency Visualizer:** A visual tool that displays dependencies between different parts of the codebase, such as libraries, modules, or functions. This would aid in understanding how changes in one part might affect others.
+ 
+8. **Contextual Documentation Fetcher:** A tool that can quickly fetch and display relevant documentation or comments related to a specific part of the codebase. This would provide immediate context when navigating unfamiliar sections.
+ 
+9. **Codebase Interaction Simulator:** A sandbox environment where I can simulate interactions with the codebase without making actual changes. This would allow for safe experimentation and understanding of code behavior.
+ 
+10. **Task Contextualizer:** A tool that analyzes a given task and provides relevant context from the codebase, such as related modules, past bug reports, or relevant documentation. This would help in understanding the broader context of a task before diving in.
+ 
+11. **Historical Context Retriever:** An interface that can retrieve past interactions, decisions, or discussions related to specific parts of the codebase. This would be especially useful for understanding the rationale behind certain design decisions or changes.
+ 
+These tools, when combined, would provide a comprehensive framework for understanding, navigating, and interacting with a large codebase. They would address the primary challenge of missing context by offering multiple avenues to acquire, retain, and retrieve relevant information.
