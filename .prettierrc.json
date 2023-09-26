@@ -1,3 +1,10 @@
 {
-  "printWidth": 120
+  "overrides": [
+    {
+      "files": ["*.json", "*.md"],
+      "options": {
+        "printWidth": 120
+      }
+    }
+  ]
 }

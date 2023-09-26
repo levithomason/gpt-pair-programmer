@@ -56,7 +56,7 @@ Gives ChatGPT access to the (Tools)[#tools] listed above.
 Track and display the cost of conversations.
 
 **Memory**  
-Persistent memory features for GPT. `/mind/memory` could allow GPT to journal memories (POST) of relevant events and information. GPT could then first see if it "remembers" (GET) anything about various topics before responding, creating plans, or taking action. 
+Persistent memory features for GPT. `/mind/memory` could allow GPT to journal memories (POST) of relevant events and information. GPT could then first see if it "remembers" (GET) anything about various topics before responding, creating plans, or taking action.
 
 **Cognition**  
 Beyond simple Q&A, enabling more complex problem-solving.

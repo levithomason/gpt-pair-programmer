@@ -34,7 +34,11 @@ const app = express();
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://chat.openai.com", "http://0.0.0.0:5004"],
+    origin: [
+      "http://localhost:3000",
+      "https://chat.openai.com",
+      "http://0.0.0.0:5004",
+    ],
   }),
 );
 app.use(json());
@@ -45,7 +49,9 @@ app.use(json());
 const tools: Array<{ operationId: string; fn: Function }> = [];
 
 const toolsDir = path.join(__dirname, "tools");
-const mainSpec = yaml.load(fs.readFileSync(path.join(SERVER_ROOT, "openapi.base.yaml"), "utf8")) as OpenAPISpec;
+const mainSpec = yaml.load(
+  fs.readFileSync(path.join(SERVER_ROOT, "openapi.base.yaml"), "utf8"),
+) as OpenAPISpec;
 
 fs.readdirSync(toolsDir).forEach((tool) => {
   const toolDir = path.join(toolsDir, tool);
@@ -65,7 +71,9 @@ fs.readdirSync(toolsDir).forEach((tool) => {
     if (!fs.existsSync(toolSpecPath)) {
       throw new Error(`Tool "${tool}" is missing an openapi.yaml spec.`);
     } else {
-      const toolSpec = yaml.load(fs.readFileSync(toolSpecPath, "utf8")) as OpenAPISpec;
+      const toolSpec = yaml.load(
+        fs.readFileSync(toolSpecPath, "utf8"),
+      ) as OpenAPISpec;
       mainSpec.paths = { ...mainSpec.paths, ...toolSpec.paths };
     }
 
@@ -100,7 +108,9 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const openapiSpec = yaml.load(generatedSpec) as OpenAPISpec;
 
-export const convertOpenAPIToFunctions = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
+export const convertOpenAPIToFunctions = (
+  openAPISpec: OpenAPISpec,
+): OpenAIFunction[] => {
   const functions: OpenAIFunction[] = [];
 
   for (const [path, info = {}] of Object.entries(openAPISpec.paths)) {
@@ -108,7 +118,9 @@ export const convertOpenAPIToFunctions = (openAPISpec: OpenAPISpec): OpenAIFunct
       const name = details.operationId;
       const description = details.description;
 
-      const openAPIProperties = details.requestBody?.content?.["application/json"]?.schema?.properties || {};
+      const openAPIProperties =
+        details.requestBody?.content?.["application/json"]?.schema
+          ?.properties || {};
 
       const required: OpenAIFunction["parameters"]["required"] = [];
       const properties: OpenAIFunction["parameters"]["properties"] = {};
@@ -153,7 +165,8 @@ app.get("/chat", async (req, res) => {
         // TODO: better system message, possibly expose setting to end user
         {
           role: "system",
-          content: "You are a pair programmer with complete access to the user's computer.",
+          content:
+            "You are a pair programmer with complete access to the user's computer.",
         },
         { role: "user", content: message },
       ],
@@ -175,7 +188,9 @@ app.get("/chat", async (req, res) => {
         log("/chat function call", name, args);
 
         // return early as is not yet implemented
-        res.status(400).json({ error: "Function calls are not yet supported." });
+        res
+          .status(400)
+          .json({ error: "Function calls are not yet supported." });
         return;
 
         // const tool = tools.find((t) => t.operationId === name);
@@ -224,15 +239,19 @@ app.get("/logo.png", async (_, res) => {
 });
 
 app.get("/.well-known/ai-plugin.json", async (_, res) => {
-  fs.readFile(path.resolve(SERVER_ROOT, ".well-known", "ai-plugin.json"), "utf8", (err, data) => {
-    if (err) {
-      log(err);
-      res.status(500).send("Error");
-      return;
-    }
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).send(data);
-  });
+  fs.readFile(
+    path.resolve(SERVER_ROOT, ".well-known", "ai-plugin.json"),
+    "utf8",
+    (err, data) => {
+      if (err) {
+        log(err);
+        res.status(500).send("Error");
+        return;
+      }
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(data);
+    },
+  );
 });
 
 app.get("/openapi.yaml", async (_, res) => {

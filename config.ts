@@ -16,7 +16,8 @@ export const DIST_ROOT = path.resolve(PROJECT_ROOT, "dist");
 export const OPENAI_MODELS: OpenAIModel[] = [
   {
     name: "gpt-3.5-turbo",
-    description: "Most capable GPT-3.5 model and optimized for chat at 1/10th the cost of text-davinci-003.",
+    description:
+      "Most capable GPT-3.5 model and optimized for chat at 1/10th the cost of text-davinci-003.",
     context: 4097,
     inputCost: 0.0015,
     outputCost: 0.002,
@@ -27,7 +28,8 @@ export const OPENAI_MODELS: OpenAIModel[] = [
   },
   {
     name: "gpt-3.5-turbo-0613",
-    description: "Snapshot of gpt-3.5-turbo from June 13th 2023 with function calling data.",
+    description:
+      "Snapshot of gpt-3.5-turbo from June 13th 2023 with function calling data.",
     context: 4097,
     inputCost: 0.0015,
     outputCost: 0.002,
@@ -38,7 +40,8 @@ export const OPENAI_MODELS: OpenAIModel[] = [
   },
   {
     name: "gpt-3.5-turbo-16k",
-    description: "Same capabilities as the standard gpt-3.5-turbo model but with 4 times the context.",
+    description:
+      "Same capabilities as the standard gpt-3.5-turbo model but with 4 times the context.",
     context: 16385,
     inputCost: 0.003,
     outputCost: 0.004,
@@ -60,7 +63,8 @@ export const OPENAI_MODELS: OpenAIModel[] = [
   },
   {
     name: "gpt-4",
-    description: "More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.",
+    description:
+      "More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.",
     context: 8192,
     inputCost: 0.03,
     outputCost: 0.06,
@@ -71,7 +75,8 @@ export const OPENAI_MODELS: OpenAIModel[] = [
   },
   {
     name: "gpt-4-0613",
-    description: "Same improvements as gpt-4 but with function calling capability.",
+    description:
+      "Same improvements as gpt-4 but with function calling capability.",
     context: 8192,
     inputCost: 0.03,
     outputCost: 0.06,
@@ -82,7 +87,8 @@ export const OPENAI_MODELS: OpenAIModel[] = [
   },
   {
     name: "gpt-4-32k",
-    description: "Same capabilities as the standard gpt-4 mode but with 4x the context length.",
+    description:
+      "Same capabilities as the standard gpt-4 mode but with 4x the context length.",
     context: 32768,
     inputCost: 0.06,
     outputCost: 0.12,
@@ -93,7 +99,8 @@ export const OPENAI_MODELS: OpenAIModel[] = [
   },
   {
     name: "gpt-4-32k-0613",
-    description: "Same improvements as gpt-4-32k but with function calling capability.",
+    description:
+      "Same improvements as gpt-4-32k but with function calling capability.",
     context: 32768,
     inputCost: 0.06,
     outputCost: 0.12,
