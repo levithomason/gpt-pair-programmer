@@ -4,7 +4,7 @@
 
 Let GPT-4 pair program with you, on your computer.
 
-This project gives GPT-4 access to (Tools)[#tools] (e.g. shell, browser, google, etc.)
+This project gives GPT-4 access to [Tools](#tools) (e.g. shell, browser, google, etc.)
 on your computer, allowing GPT-4 to pair program with you just as a colleague would.
 
 This repo is an experiment with many undocumented features. It is not ready for use.
@@ -48,7 +48,7 @@ A chat interface is provided, similar to ChatGPT, but with additional features.
 Give GPT access to your computer via the ChatGPT plugin.
 This is the easiest way to get started, but is limited in functionality.
 
-Gives ChatGPT access to the (Tools)[#tools] listed above.
+Gives ChatGPT access to the [Tools](#tools) listed above.
 
 ## Roadmap
 
