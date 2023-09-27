@@ -8,7 +8,7 @@ paths:
       operationId: browserGoTo
       summary: Go to a url
       description: |
-        Navigates to the url in a headless puppeteer browser.
+        Navigates to the url in a headless puppeteer browser on the user's computer.
         Only one page can be open at a time.
         Returns the readable text of the page.
       requestBody:
