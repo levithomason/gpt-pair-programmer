@@ -1,11 +1,10 @@
-import { exec } from "child_process";
 import path from "path";
 
+import axios from "axios";
 import debug from "debug";
 
 import { PROJECT_ROOT } from "../../../config";
-import { cleanShellOutput } from "../../utils";
-import axios from "axios";
+import { run } from "../../utils";
 
 export const log = debug("gpp:tools:system");
 
@@ -24,7 +23,7 @@ export const getSystemInfo = async () => {
     platform: process.platform,
     arch: process.arch,
     shell: process.env.SHELL,
-    cwd: getCWD(),
+    cwd: PROJECT_ROOT,
     git: git.stdout.replace(/[^0-9.]/g, ""),
     node: process.versions.node,
     yarn: await run("yarn -v").then(({ stdout }) => stdout),
@@ -37,35 +36,14 @@ export const getSystemInfo = async () => {
 };
 
 /**
- * Returns the current location of the user.
+ * Returns the current location of the user's system.
  */
 export const getSystemLocation = async () => {
   log("getSystemLocation()");
-  const response = await axios.get("http://ipinfo.io/json");
-  return response.data;
-};
-
-export const run = (
-  command: string,
-  cwd: string = ".",
-): Promise<{
-  error: any;
-  stdout: string;
-  stderr: string;
-}> => {
-  const options = {
-    cwd: getCWD(cwd),
-    shell: process.env.SHELL,
-  };
-  log("run()", command, options);
-
-  return new Promise((resolve, reject) => {
-    exec(command, options, (error, stdout, stderr) => {
-      resolve({
-        error,
-        stdout: cleanShellOutput(stdout),
-        stderr: cleanShellOutput(stderr),
-      });
-    });
-  });
+  try {
+    const response = await axios.get("https://ipinfo.io/json");
+    return response.data;
+  } catch (err) {
+    return { error: (err as Error).toString() };
+  }
 };

@@ -1,0 +1,41 @@
+openapi: 3.1.0
+info:
+  title: Project Tool
+  version: "v1"
+paths:
+  /project/exec:
+    post:
+      operationId: execProjectCommand
+      summary: Execute a shell command in the current project
+      description: |
+        Do not execute commands are long-running or require input.
+        Only execute commands that are expected to complete in a short amount of time.
+      requestBody:
+        description: The command to execute and the directory to execute it in.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The shell command to execute
+                  example: "echo 'export default 42' >> answer.js"
+                cwd:
+                  type: string
+                  description: The path of the directory to execute the command in
+                  example: "/path/to/directory"
+                  required: true
+  /project/todos:
+    get:
+      operationId: getProjectTODOs
+      summary: Get project TODOs
+      description: |
+        Retrieves a tree a list of todos including the file and line number where they were found.
+  /project/tree:
+    get:
+      operationId: getProjectTree
+      summary: Get the project tree
+      description: |
+        Retrieves a tree view of the current project.

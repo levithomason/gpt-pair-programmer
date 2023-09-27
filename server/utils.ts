@@ -1,6 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { TERMINAL_STREAM_MAX_TOKENS } from "../config";
+import { exec } from "child_process";
+
+import debug from "debug";
+
+import { PROJECT_ROOT, TERMINAL_STREAM_MAX_TOKENS } from "../config";
+
+export const log = debug("gpp:utils");
 
 /**
  * Trims a string to a certain number of estimated tokens.
@@ -31,6 +37,32 @@ export const cleanShellOutput = (str: string) => {
     str.replace(/\u001b\[.*?m/g, "").trim(),
     TERMINAL_STREAM_MAX_TOKENS,
   );
+};
+
+/**
+ * Runs a shell command in the root of the project.
+ * @param command
+ * @param cwd
+ */
+export const run = (
+  command: string,
+  cwd: string = ".",
+): Promise<{ error: any; stdout: string; stderr: string }> => {
+  const options = {
+    cwd: path.resolve(PROJECT_ROOT, cwd),
+    shell: process.env.SHELL,
+  };
+  log("run()", command, options);
+
+  return new Promise((resolve, reject) => {
+    exec(command, options, (error, stdout, stderr) => {
+      resolve({
+        error,
+        stdout: cleanShellOutput(stdout),
+        stderr: cleanShellOutput(stderr),
+      });
+    });
+  });
 };
 
 /**

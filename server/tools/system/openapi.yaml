@@ -3,47 +3,15 @@ info:
   title: System Tool
   version: "v1"
 paths:
-  /system/exec:
-    post:
-      operationId: execSystemCommand
-      summary: Execute a system command
-      description: |
-        The command is executed in the root of this API project, outside the scope of projects.
-        Do not execute commands are long-running or require input.
-        Only execute commands that are expected to complete in a short amount of time.
-      requestBody:
-        description: The command to execute and the directory to execute it in
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                command:
-                  type: string
-                  description: The system command to execute
-                  example: "echo 'export default 42' >> answer.js"
-                cwd:
-                  type: string
-                  description: The path of the directory to execute the command in
-                  example: "/path/to/directory"
-                  required: true
   /system/info:
     get:
       operationId: getSystemInfo
-      summary: Retrieve System Information
+      summary: Get System Information
       description: >
-        Fetches various system details such as the current working directory,
-        system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
+        Fetches various system details such as system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
   /system/location:
     get:
       operationId: getSystemLocation
-      summary: Retrieve physical location information of the user's device
+      summary: Get System Location
       description: >
         Fetches the physical location of the user's device using the IP address.
-  /system/tree:
-    get:
-      operationId: getSystemTree
-      summary: Get the system tree
-      description: |
-        Retrieves a tree structure of the file system.
