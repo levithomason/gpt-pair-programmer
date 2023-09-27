@@ -58,7 +58,7 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
     return !skipRegex.test(file);
   };
 
-  const reportSkipped = (dir: string) => {
+  const reportIgnored = (dir: string) => {
     let files = 0;
     let dirs = 0;
     fs.readdirSync(dir).forEach((entry) => {
@@ -70,7 +70,7 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       }
     });
 
-    return [`SKIP`, dirs && `${dirs} folders`, files && `${files} files`]
+    return [`IGNORE`, dirs && `${dirs} folders`, files && `${files} files`]
       .filter(Boolean)
       .join(" ");
   };
@@ -124,7 +124,7 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
         isDir && isMaxDepth
           ? ` (${reportMaxDepth(nextPath)})`
           : isDir && !willIterate
-          ? ` (${reportSkipped(nextPath)})`
+          ? ` (${reportIgnored(nextPath)})`
           : "";
 
       localTree += `${currIndent}${entry}${dirSlash}${itemCount}\n`;
