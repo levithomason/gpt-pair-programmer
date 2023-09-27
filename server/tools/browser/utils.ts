@@ -32,25 +32,22 @@ const getBrowser = async () => {
 };
 
 let page: Page;
+let $console = "";
 const getPage = async () => {
-  if (!page) {
+  if (!page || page.isClosed()) {
     const browser = await getBrowser();
     page = await browser.newPage();
+
+    page.on("console", (msg: ConsoleMessage) => {
+      const formattedMessage = formatConsoleMessage(msg);
+      log("console", formattedMessage);
+      $console += `\n${formattedMessage}`;
+      $console.trim();
+    });
   }
+
   return page;
 };
-
-let $console = "";
-(async () => {
-  const page = await getPage();
-
-  page.on("console", (msg: ConsoleMessage) => {
-    const formattedMessage = formatConsoleMessage(msg);
-    log("console", formattedMessage);
-    $console += `\n${formattedMessage}`;
-    $console.trim();
-  });
-})();
 
 //
 // Functions
@@ -59,10 +56,12 @@ export const goto = async (url: string) => {
   log("openPage", url);
   clearConsole();
   const page = await getPage();
-
-  await page.goto(url, {
-    waitUntil: "networkidle0",
-  });
+  try {
+    await page.goto(url, { waitUntil: "networkidle0" });
+  } catch (error) {
+    log("Error in goto:", error);
+    throw error;
+  }
 };
 
 export const getDOM = async () => {
