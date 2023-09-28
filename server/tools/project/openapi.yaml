@@ -5,11 +5,11 @@ info:
 paths:
   /project/exec:
     post:
-      operationId: execProjectCommand
-      summary: Execute a shell command in the current project
+      operationId: runShellCommand
+      summary: Run a shell command
       description: |
-        Do not execute commands are long-running or require input.
-        Only execute commands that are expected to complete in a short amount of time.
+        Executes a background command in the project directory on the user's computer.
+        Do not execute commands that require user input, the user cannot see the shell.
       requestBody:
         description: The command to execute and the directory to execute it in.
         required: true
@@ -27,9 +27,15 @@ paths:
                   description: The path of the directory to execute the command in
                   example: "/path/to/directory"
                   required: true
+  /project/info:
+    get:
+      operationId: getProjectInfo
+      summary: Get Project Info
+      description: |
+        Retrieves information about the current project.
   /project/todos:
     get:
-      operationId: getProjectTODOs
+      operationId: getProjectTodos
       summary: Get project TODOs
       description: |
         Retrieves a tree a list of todos including the file and line number where they were found.

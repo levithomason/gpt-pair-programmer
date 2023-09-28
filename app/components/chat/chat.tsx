@@ -9,46 +9,18 @@ import { Message } from "./types";
 
 const log = debug("gpp:app:components:chat");
 
+const suggestedMessages = [
+  "Test",
+  "Where am I",
+  "Look up my weather",
+  [
+    "Make a plan to understand the project in detail using your tools, then execute it immediately.",
+    "Summarize each tool response before moving on to the next one.",
+  ].join(" "),
+];
+
 export const Chat = () => {
-  const [messages, setMessages] = React.useState<Message[]>([
-    {
-      role: "user",
-      content: "What is your name?",
-      timestamp: Date.now(),
-    },
-    {
-      role: "assistant",
-      content: "Hello, I'm GPT-3.",
-      timestamp: Date.now(),
-    },
-    {
-      role: "assistant",
-      content: "What can I help you with?",
-      timestamp: Date.now(),
-    },
-    {
-      role: "user",
-      content: "test",
-      timestamp: Date.now(),
-    },
-    {
-      role: "assistant",
-      content:
-        'There are many ways to interpret the word "test." In the context of a question or prompt, it usually implies assessing someone\'s knowledge or skills. It can also refer to an examination or assessment given in an academic or professional setting. In some cases, a test may be used to evaluate the effectiveness or functionality of a product or system. Overall, a test can serve as a measure of performance, understanding, or quality.',
-      timestamp: Date.now(),
-    },
-    {
-      role: "user",
-      content:
-        "Make a table of car accidents by year in the US compared to motorcycles",
-      timestamp: Date.now(),
-    },
-    {
-      role: "assistant",
-      content: `| Year | Car Accidents (US) | Motorcycle Accidents (US) |\n| ---- | ------------------ | ------------------------- |\n| 2015 | 6,296,000 | 88,000 |\n| 2016 | 6,821,000 | 95,000 |\n| 2017 | 6,452,000 | 89,000 |\n| 2018 | 6,734,000 | 91,000 |\n| 2019 | 6,756,000 | 88,000 |`,
-      timestamp: Date.now(),
-    },
-  ]);
+  const [messages, setMessages] = React.useState<Message[]>([]);
   const [message, setMessage] = React.useState<string>("");
   const [reply, setReply] = React.useState<string>("");
 
@@ -57,6 +29,7 @@ export const Chat = () => {
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const abortRef = React.useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     chatMessagesRef.current?.scrollTo({
@@ -86,44 +59,57 @@ export const Chat = () => {
       setMessage("");
       scrollToBottom();
 
+      const endpoint = `http://localhost:5004/chat`;
       const messageURI = encodeURIComponent(message);
-      const url = `http://localhost:5004/chat?message=${messageURI}`;
+      const getUrl = `${endpoint}?message=${messageURI}`;
 
-      fetch(url).then(async (res) => {
-        log("res", res);
-        const reader = res.body!.getReader();
+      // abortRef.current = new AbortController();
 
-        log("reader", reader);
-        const decoder = new TextDecoder();
+      // https://stackoverflow.com/questions/31061838/how-to-cancel-an-http-fetch-request
+      // signal: abortRef.current.signal,
+      fetch(getUrl)
+        .then(async (res) => {
+          log("res", res);
+          const reader = res.body!.getReader();
 
-        const read = async () => {
-          const { done, value } = await reader.read();
-          const decoded = decoder.decode(value);
-          log(decoded);
+          log("reader", reader);
+          const decoder = new TextDecoder();
 
-          if (!done) {
+          const read = async () => {
+            const { done, value } = await reader.read();
+            const decoded = decoder.decode(value);
+            log(decoded);
+
+            if (!done) {
+              setReply((prevReply) => {
+                scrollToBottom();
+                return prevReply + decoded;
+              });
+              await read();
+              return;
+            }
+
+            log("done");
             setReply((prevReply) => {
-              scrollToBottom();
-              return prevReply + decoded;
+              setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                  role: "assistant",
+                  content: prevReply,
+                  timestamp: Date.now(),
+                },
+              ]);
+              return "";
             });
-            await read();
-            return;
-          }
+            setLoading(false);
+            scrollToBottom();
+          };
 
-          log("done");
-          setReply((prevReply) => {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              { role: "assistant", content: prevReply, timestamp: Date.now() },
-            ]);
-            return "";
-          });
-          setLoading(false);
-          scrollToBottom();
-        };
-
-        await read();
-      });
+          await read();
+        })
+        .finally(() => {
+          abortRef.current = null;
+        });
     },
     [message, loading],
   );
@@ -147,6 +133,42 @@ export const Chat = () => {
         ))}
         {reply && <ChatMessage role="assistant">{reply}</ChatMessage>}
       </div>
+      <div
+        style={{
+          display: "flex",
+          maxWidth: "80%",
+          left: 0,
+          right: 0,
+          margin: "0 auto",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "1rem",
+          position: "absolute",
+          zIndex: 1,
+          bottom: "100px",
+        }}
+      >
+        {suggestedMessages.map((msg) => (
+          <button
+            key={msg}
+            style={{
+              maxWidth: "400px",
+              height: "auto",
+            }}
+            onClick={(e) => {
+              setMessage(msg);
+              setTimeout(() => {
+                const button = document.querySelector(
+                  "button[type=submit]",
+                ) as HTMLButtonElement;
+                button.click();
+              }, 100);
+            }}
+          >
+            {msg}
+          </button>
+        ))}
+      </div>
       <form onSubmit={handleSend} className="chat-form">
         <input
           ref={inputRef}
@@ -156,6 +178,17 @@ export const Chat = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
+        {/*{typeof abortRef.current?.abort === "function" && (*/}
+        {/*  <button*/}
+        {/*    onClick={() => {*/}
+        {/*      abortRef.current.abort();*/}
+        {/*      setLoading(false);*/}
+        {/*      abortRef.current = null;*/}
+        {/*    }}*/}
+        {/*  >*/}
+        {/*    Stop*/}
+        {/*  </button>*/}
+        {/*)}*/}
         <button type="submit" disabled={loading}>
           {loading ? "🤖" : "👉"}
         </button>

@@ -2,28 +2,48 @@ import fs from "fs";
 import path from "path";
 
 import express from "express";
+import session from "express-session";
 import morgan from "morgan";
 import cors from "cors";
 import { json } from "body-parser";
 import debug from "debug";
 import yaml from "js-yaml";
 import { OpenAI } from "openai";
-
+import { ChatCompletionMessageParam } from "openai/resources/chat";
+import { tools } from "./tools";
 import "./database";
 
-import { PUBLIC_ROOT, SERVER_ROOT } from "../config";
-import { OpenAIFunction, OpenAPISpec } from "./types";
+import {
+  GPT_4_MAX_TOKENS,
+  OPENAI_MODELS,
+  PUBLIC_ROOT,
+  SERVER_ROOT,
+  TOOLS_ROOT,
+} from "../config";
+import { OpenAIFunction, OpenAPIMethod, OpenAPISpec } from "./types";
+import {
+  PairProgrammerError,
+  relPath,
+  ToolError,
+  trimStringToTokens,
+} from "./utils";
+
+debug.enable("gpp:*");
 
 const { OPENAI_API_KEY } = process.env;
 
 if (!OPENAI_API_KEY) {
-  throw new Error("Missing OPENAI_API_KEY environment variable.");
+  throw new PairProgrammerError("Missing OPENAI_API_KEY environment variable.");
 }
 
+const BASE_SPEC_PATH = path.join(SERVER_ROOT, "openapi.base.yaml");
 const GENERATED_SPEC_PATH = path.join(SERVER_ROOT, "openapi.generated.yaml");
 
+const baseSpec = yaml.load(
+  fs.readFileSync(BASE_SPEC_PATH, "utf8"),
+) as OpenAPISpec;
+
 const log = debug("gpp:server:main");
-debug.enable("gpp:*");
 
 const app = express();
 
@@ -43,89 +63,137 @@ app.use(
 );
 app.use(json());
 
+// session
+const sess = {
+  secret: "foo bar baz",
+  cookie: { secure: false },
+};
+
+if (app.get("env") === "production") {
+  app.set("trust proxy", 1); // trust first proxy
+  sess.cookie.secure = true; // serve secure cookies
+}
+
+app.use(session(sess));
+
 // ============================================================================
-// Tool Routes
+// Aggregate OpenAPI Tool Specs
 // ============================================================================
-const tools: Array<{ operationId: string; fn: Function }> = [];
 
-const toolsDir = path.join(__dirname, "tools");
-const mainSpec = yaml.load(
-  fs.readFileSync(path.join(SERVER_ROOT, "openapi.base.yaml"), "utf8"),
-) as OpenAPISpec;
+fs.readdirSync(TOOLS_ROOT).forEach((tool) => {
+  const toolDir = path.join(TOOLS_ROOT, tool);
+  if (!fs.statSync(toolDir).isDirectory()) {
+    return;
+  }
 
-fs.readdirSync(toolsDir).forEach((tool) => {
-  const toolDir = path.join(toolsDir, tool);
+  const specPath = path.join(toolDir, "openapi.yaml");
+  if (!fs.existsSync(specPath)) {
+    throw new PairProgrammerError(
+      `Tool "${relPath(toolDir)}" is missing an openapi.yaml spec.`,
+    );
+  }
 
-  fs.readdirSync(toolDir).forEach((file) => {
-    const hasRoute = path.basename(file) === "routes.ts";
+  log("Aggregating:", relPath(specPath));
+  const specYaml = fs.readFileSync(specPath, "utf8");
+  const specJson = yaml.load(specYaml) as OpenAPISpec;
 
-    if (!hasRoute) {
-      return;
-    }
-
-    const printPath = path.relative(__dirname, toolDir);
-    log("Load:", printPath);
-
-    // Tool spec
-    const toolSpecPath = path.join(toolsDir, tool, "openapi.yaml");
-    if (!fs.existsSync(toolSpecPath)) {
-      throw new Error(`Tool "${tool}" is missing an openapi.yaml spec.`);
-    } else {
-      const toolSpec = yaml.load(
-        fs.readFileSync(toolSpecPath, "utf8"),
-      ) as OpenAPISpec;
-      mainSpec.paths = { ...mainSpec.paths, ...toolSpec.paths };
-    }
-
-    // Tool route
-    try {
-      const { addRoutes } = require(path.join(toolDir, file));
-      addRoutes(app);
-
-      // TODO: Add tools here
-      //  need to separate tool fns from routes to call them more reasonably
-    } catch (error) {
-      log(`Error loading tool:`, error);
-      process.exit(1);
-    }
-  });
+  baseSpec.paths = { ...baseSpec.paths, ...specJson.paths };
 });
 
-const generatedSpec = [
+const generatedSpecYaml = [
   "# WARNING: This file is generated. Do not edit it directly.",
   "# To make changes, edit the root `openapi.base.yaml` or `tools/*/openapi.yaml` files.",
-  yaml.dump(mainSpec),
+  yaml.dump(baseSpec),
 ].join("\n");
 
-const relativeOpenAPIPath = path.relative(process.cwd(), GENERATED_SPEC_PATH);
-log(`Generated ${relativeOpenAPIPath}`);
-fs.writeFileSync(GENERATED_SPEC_PATH, generatedSpec);
+fs.writeFileSync(GENERATED_SPEC_PATH, generatedSpecYaml);
+log(`Generated: ${relPath(GENERATED_SPEC_PATH)}`);
+const generatedSpecJson = yaml.load(generatedSpecYaml) as OpenAPISpec;
 
 // ============================================================================
-// OpenAI Chat Routes
+// Parse Generated OpenAPI Spec
 // ============================================================================
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-const openapiSpec = yaml.load(generatedSpec) as OpenAPISpec;
+// const tools: Record<string, ToolFunction<any, any>> = {};
+const openAIFunctions: OpenAIFunction[] = [];
 
-export const convertOpenAPIToFunctions = (
-  openAPISpec: OpenAPISpec,
-): OpenAIFunction[] => {
-  const functions: OpenAIFunction[] = [];
-
-  for (const [path, info = {}] of Object.entries(openAPISpec.paths)) {
-    for (const [method, details] of Object.entries(info)) {
-      const name = details.operationId;
-      const description = details.description;
-
-      const openAPIProperties =
+const parseOpenAPISpec = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
+  for (const [endpoint, methods] of Object.entries(openAPISpec.paths)) {
+    for (const [method, details] of Object.entries(methods)) {
+      const { operationId, description } = details;
+      const requestBodyProperties =
         details.requestBody?.content?.["application/json"]?.schema
           ?.properties || {};
 
+      // //
+      // // Build tools object { [endpoint]: toolFn }
+      // //
+      // const toolType = endpoint.split("/")[1];
+      // const toolFile = operationId + `.ts`;
+      // const toolPath = path.resolve(TOOLS_ROOT, toolType, toolFile);
+      //
+      // try {
+      //   tools[endpoint] = require(toolPath).default;
+      // } catch (err) {
+      //   log(`failed to require() tool: ${toolPath}`);
+      //   const toolFiles = fs.readdirSync(path.resolve(TOOLS_ROOT, toolType));
+      //   throw new PairProgrammerError(
+      //     [
+      //       `OpenAPI ${endpoint} ${operationId} doesn't match any ${toolType} tool:`,
+      //       ...toolFiles.map((file) => `  - ${file}`),
+      //     ].join("\n"),
+      //   );
+      // }
+      //
+      // if (!tools[endpoint]) {
+      //   throw new PairProgrammerError(
+      //     `Tool "${toolFile}" does not have a default export.`,
+      //   );
+      // }
+
+      //
+      // Dynamically add routes for each tool
+      //
+      app[method as OpenAPIMethod](endpoint, async (req, res) => {
+        log(method, endpoint, "args:", req.body);
+
+        // pick the args from the request body based on the OpenAPI spec
+        const args = Object.keys(requestBodyProperties).reduce(
+          (acc, next) => {
+            acc[next] = req.body[next];
+            return acc;
+          },
+          {} as Record<string, any>,
+        );
+
+        const tool = tools[operationId];
+
+        if (!tool) {
+          res.status(400).json({ error: `Tool ${operationId} not found.` });
+          return;
+        }
+
+        try {
+          log(endpoint, { tool });
+          const data = await tool(args);
+          log(endpoint, data);
+          res.status(200).send(data);
+        } catch (error) {
+          if (error instanceof ToolError) {
+            res.status(400).json({ error: error.toString() });
+          } else {
+            res.status(500).json({ error: (error as Error).toString() });
+          }
+        }
+      });
+
+      //
+      // Build OpenAI functions
+      //
       const required: OpenAIFunction["parameters"]["required"] = [];
       const properties: OpenAIFunction["parameters"]["properties"] = {};
 
-      Object.entries(openAPIProperties).forEach(([name, property]) => {
+      Object.entries(requestBodyProperties).forEach(([name, property]) => {
         if (property.required) {
           delete property.required;
           required.push(name);
@@ -134,23 +202,58 @@ export const convertOpenAPIToFunctions = (
       });
 
       const func: OpenAIFunction = {
-        name,
+        name: operationId,
         description,
-        parameters: { type: "object", required, properties },
+        parameters: { type: "object", properties, required },
       };
 
-      functions.push(func);
+      openAIFunctions.push(func);
     }
   }
 
-  return functions;
+  return openAIFunctions;
 };
 
-const functions = convertOpenAPIToFunctions(openapiSpec);
+parseOpenAPISpec(generatedSpecJson);
+
+// log("openAIFunctions", JSON.stringify(openAIFunctions, null, 2));
+
+// ============================================================================
+// Chat Route
+// ============================================================================
+
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+
+// TODO: better system message, possibly expose setting to end user
+const systemMessage: ChatCompletionMessageParam = {
+  role: "system",
+  content: [
+    "You are the world's wisest pair programmer AI with thousands of years of combined experience.",
+    "You are running on complete access to the user's computer.",
+  ].join("\n"),
+};
+
+let messageStack: ChatCompletionMessageParam[] = [systemMessage];
+let lastSessionID: string;
+
+const MODEL = OPENAI_MODELS["gpt-3.5-turbo"];
 
 app.get("/chat", async (req, res) => {
+  // TODO: Fix hacky way to reset the messages on refresh
+  if (lastSessionID !== req.sessionID) {
+    lastSessionID = req.sessionID;
+    messageStack = [systemMessage];
+  }
+
   const message = req.query.message as string;
-  log("/chat:", message);
+  log("/chat", message);
+
+  const userMessage: ChatCompletionMessageParam = {
+    role: "user",
+    content: message,
+  };
+
+  messageStack.push(userMessage);
 
   // TODO: count tokens & cost:
   //       - https://github.com/niieani/gpt-tokenizer
@@ -158,75 +261,135 @@ app.get("/chat", async (req, res) => {
   //   NOTE: OpenAPI responses include token "usage" if not streaming
   //   https://platform.openai.com/docs/api-reference/chat/object
 
-  try {
-    const stream = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-0613",
-      messages: [
-        // TODO: better system message, possibly expose setting to end user
-        {
-          role: "system",
-          content:
-            "You are a pair programmer with complete access to the user's computer.",
-        },
-        { role: "user", content: message },
-      ],
-      stream: true,
-      n: 1,
-      functions,
-      function_call: "auto",
-    });
+  const callModel = async (messages: ChatCompletionMessageParam[]) => {
+    // TODO: crude measure of function call cost
+    let lenOfAllMessages = JSON.stringify(openAIFunctions).length;
 
-    for await (const part of stream) {
-      const choice = part.choices[0];
+    const trimmedMessages = messages
+      .map((message) => {
+        lenOfAllMessages += message.content.length;
+        return message;
+      })
+      .map((message) => {
+        const percentageOfTotal = lenOfAllMessages / message.content.length;
+        return {
+          ...message,
+          content: trimStringToTokens(
+            message.content,
+            percentageOfTotal * MODEL.contextMaxTokens * 0.8, // leave headroom
+          ),
+        };
+      });
 
-      //
-      // Function call
-      //
-      if (choice.delta.function_call) {
-        const name = choice.delta.function_call.name;
-        const args = JSON.parse(choice.delta.function_call.arguments as string);
-        log("/chat function call", name, args);
+    log("/chat callModel", trimmedMessages);
 
-        // return early as is not yet implemented
-        res
-          .status(400)
-          .json({ error: "Function calls are not yet supported." });
-        return;
+    try {
+      const stream = await openai.chat.completions.create({
+        model: MODEL.name,
+        messages: trimmedMessages,
+        stream: true,
+        n: 1,
+        functions: openAIFunctions,
+        function_call: "auto",
+      });
 
-        // const tool = tools.find((t) => t.operationId === name);
-        //
-        // if (!tool) {
-        //   res.status(400).json({ error: `Function "${name}" not found.` });
-        //   return;
-        // }
-        //
-        // try {
-        //   const result = await tool.fn(args);
-        //   log("/chat function result", result);
-        // } catch (error) {
-        //   log("/chat function error", error);
-        //   res.status(500).json({ error: (error as Error).toString() });
-        //   return;
-        // }
-      }
+      // Function call args stream in, build them up
+      let func = "";
+      let args = "";
 
-      //
       // Stream
-      //
-      res.setHeader("Content-Type", "text/event-stream");
+      // res.setHeader("Content-Type", "text/event-stream");
+      for await (const part of stream) {
+        const { delta, finish_reason } = part.choices[0];
+        log("/chat part", JSON.stringify({ delta, finish_reason }, null, 2));
 
-      log("/chat", choice);
-      // log("/chat finish_reason: ", choice.finish_reason);
+        if (finish_reason === "stop") {
+          res.write("\n\n(...stopped)");
+          break;
+        }
 
-      const text = choice.delta.content || "";
-      // log("/chat content", text);
-      res.write(text);
+        if (finish_reason === "length") {
+          res.write("\n\n(...truncated due to max length)");
+          break;
+        }
+
+        if (delta?.function_call?.name) {
+          res.write(`\n\n\`\`\`\n${delta.function_call.name}(`);
+          func = delta?.function_call?.name;
+        }
+
+        if (delta?.function_call?.arguments) {
+          args += delta?.function_call?.arguments;
+          res.write(delta?.function_call?.arguments);
+        }
+
+        if (finish_reason === "function_call") {
+          res.write(")\n```\n\n");
+          log("/chat finish_reason:function_call", { func, args });
+
+          try {
+            const argsJSon = JSON.parse(args);
+            const result = await callFunction(func, argsJSon);
+            messageStack.push({
+              role: "function",
+              name: func,
+              content: JSON.stringify(result),
+            });
+
+            return await callModel(messageStack);
+          } catch (err) {
+            res.write(
+              '\n\nError calling function: "' +
+                (err as Error).toString() +
+                '"' +
+                "\n\n",
+            );
+            log("/chat function_call error", err);
+          }
+        }
+
+        if (finish_reason === null) {
+          const text = delta.content || "";
+          log("/chat content", text);
+          res.write(text);
+        } else {
+          log("/chat Unknown finish_reason", finish_reason);
+          res.write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
+        }
+      }
+    } catch (error) {
+      res.write('\n\n500 Error: "' + error + '"' + "\n\n");
+      res.status(500).write((error as Error).toString());
     }
 
     res.end();
-  } catch (error) {
-    res.status(500).json({ error: (error as Error).toString() });
-  }
+  };
+
+  const callFunction = async (func: string, args: object) => {
+    const tool = tools[func];
+
+    const argsString = JSON.stringify(args, null, 2);
+    log(`/chat callFunction ${func}(${argsString})`);
+
+    if (!tool) {
+      throw new PairProgrammerError(`Tool ${func} not found.`);
+    }
+
+    // TODO: before doing this action, what memories or thoughts are triggered from considering?
+    //       const remembered = mind.memory.query(<context>)
+    //       have a thinking process to evaluate this decision and adjust if needed
+    try {
+      return await tool(args);
+    } catch (err) {
+      if (err instanceof ToolError) {
+        res.write('\n\n400 ToolError: "' + err + '"' + "\n\n");
+      } else {
+        res.write('\n\n500 Error: "' + err + '"' + "\n\n");
+      }
+    }
+  };
+
+  await callModel(messageStack);
 });
 
 // ============================================================================

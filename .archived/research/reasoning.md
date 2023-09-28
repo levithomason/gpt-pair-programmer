@@ -22,10 +22,7 @@ ChatGPT has the knowledge for the answer, but it is not able to retrieve it from
 
 Humans ask themselves questions to prompt their own thoughts, then analyze these thoughts to form conclusions. Can ChatGPT can do the same?
 
-This was attempted in simulation here:
-https://chat.openai.com/share/b057177a-61c5-48ec-9436-7025ca827490
-
-Even with clues, ChatGPT is unable to interrogate itself to find the answer.
+This was attempted in simulation, but ChatGPT was not able to ask itself questions and then answer them in a way that lead it to the correct answer. Even with several clues increasing in specificity and strength, ChatGPT is unable to interrogate itself to find the answer.
 
 ### Handcrafted Context
 

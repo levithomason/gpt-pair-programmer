@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
     "moduleResolution": "node",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "target": "es2020",
     "outDir": "dist",
     "jsx": "react"
-  }
+  },
+  "exclude": [".archived", "node_modules"]
 }

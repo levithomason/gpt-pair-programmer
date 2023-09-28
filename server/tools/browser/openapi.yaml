@@ -19,33 +19,33 @@ paths:
               type: object
               properties:
                 url:
+                  required: true
                   type: string
                   format: uri
                   description: The URL of the webpage to open
                   example: https://example.com
   /browser/dom:
     get:
-      operationId: getBrowserDOM
+      operationId: browserGetDom
       summary: Read the browser's DOM
   /browser/console:
     get:
-      operationId: getBrowserConsole
+      operationId: browserGetConsole
       summary: Read console logs
     delete:
-      operationId: clearBrowserConsole
+      operationId: browserClearConsole
       summary: Clear console logs
   /browser/read:
     get:
-      operationId: readBrowser
+      operationId: browserReadPage
       summary: Read browser page
       description: Get a human readable version of the current browser page
-  /browser/execute:
+  /browser/evaluate:
     post:
-      operationId: browserExecute
-      summary: Execute a Puppeteer command
+      operationId: browserEvaluate
+      summary: Evaluate a string
       description: |
-        Executes a specified Puppeteer command in the browser.
-        Allows for actions like typing text, clicking buttons, and evaluating JavaScript.
+        Evaluates a string in the page's context and returns the result.
       requestBody:
         required: true
         content:
@@ -57,11 +57,41 @@ paths:
                   type: string
                   description: The Puppeteer command to execute (e.g., 'type', 'click', 'evaluate')
                   example: "click"
+  /browser/click:
+    post:
+      operationId: browserClick
+      summary: Click an element
+      description: |
+        Clicks an element in the page.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
                 selector:
                   type: string
-                  description: The CSS selector to target (relevant for 'type' and 'click')
+                  description: The CSS selector to target
+                  example: "#sendButton"
+  /browser/type:
+    post:
+      operationId: browserType
+      summary: Type text
+      description: |
+        Types text into an element in the page.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                selector:
+                  type: string
+                  description: The CSS selector to target
                   example: "#sendButton"
                 value:
                   type: string
-                  description: Any value to use (e.g., the text to type or the JavaScript code to evaluate)
+                  description: The text to type
                   example: "Hello, world!"

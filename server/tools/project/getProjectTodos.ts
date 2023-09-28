@@ -1,17 +1,23 @@
+import { PROJECT_ROOT } from "../../../config";
+import { ToolFunction } from "../../utils";
 import fs from "fs";
 import path from "path";
 
-import debug from "debug";
-import { PROJECT_ROOT } from "../../../config";
+type Todo = {
+  line: number;
+  comment: string;
+};
 
-export const log = debug("gpp:tools:project");
+type TodoReport = {
+  [dir: string]: Todo[];
+};
 
 /**
  * Extracts TODO comments from a file.
  * Handles //, /*, and /** comments.
  * Includes the entire comment which contains the word "TODO".
  */
-export function findTODOsInFile(filePath: string) {
+export function findTodosInFile(filePath: string) {
   const content = fs.readFileSync(filePath, "utf-8");
   const todoComments = [];
 
@@ -41,8 +47,8 @@ export function findTODOsInFile(filePath: string) {
 /**
  * Recursively searches a directory for TODO comments.
  */
-export function findTODOsInDirectory(dirPath: string) {
-  const results: { [dir: string]: { line: number; comment: string }[] } = {};
+export function findTodosInDirectory(dirPath: string) {
+  const results: TodoReport = {};
   const files = fs.readdirSync(dirPath);
 
   for (const file of files) {
@@ -54,10 +60,10 @@ export function findTODOsInDirectory(dirPath: string) {
     }
 
     if (stats.isDirectory()) {
-      Object.assign(results, findTODOsInDirectory(fullPath));
+      Object.assign(results, findTodosInDirectory(fullPath));
     } else {
       if (stats.isFile() && /\.(ts|tsx|js|jsx|cjs)?$/.test(file)) {
-        const todos = findTODOsInFile(fullPath);
+        const todos = findTodosInFile(fullPath);
 
         if (todos.length > 0) {
           const relPath = path.relative(PROJECT_ROOT, fullPath);
@@ -69,3 +75,9 @@ export function findTODOsInDirectory(dirPath: string) {
 
   return results;
 }
+
+const getProjectTodos: ToolFunction<never, TodoReport> = async () => {
+  return findTodosInDirectory(PROJECT_ROOT);
+};
+
+export default getProjectTodos;

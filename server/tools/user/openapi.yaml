@@ -1,0 +1,18 @@
+openapi: 3.1.0
+info:
+  title: User Tool
+  version: "v1"
+paths:
+  /user/info:
+    get:
+      operationId: getUserProfile
+      summary: Get User Profile
+      description: >
+        Get user information such as fullName, email, username, linkedIn, github, time, and timezone.
+        This is the user you are pair programming wii
+  /user/location:
+    get:
+      operationId: getUserLocation
+      summary: Get User Location
+      description: >
+        Fetches the physical location of the user's device using the IP address of their system.

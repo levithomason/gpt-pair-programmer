@@ -25,6 +25,7 @@ body {
 }
 
 pre {
+  display: inline-block;
   font-family: "Roboto Mono", monospace;
   font-size: 16px;
   line-height: 1.5;
@@ -33,18 +34,15 @@ pre {
     rgba(255, 255, 255, 0.05) 0%,
     rgba(255, 255, 255, 0) 100%
   );
-  mix-blend-mode: difference;
   border: 1px solid #ffffff11;
   border-radius: 0.25rem;
-  padding: 1rem;
+  padding: 0.25rem 0.5rem;
 }
 
 code {
   font-family: "Roboto Mono", monospace;
   font-size: 16px;
   line-height: 1.5;
-  color: #333;
-  background-color: #fff;
   padding: 0;
 }
 

@@ -8,10 +8,5 @@ paths:
       operationId: getSystemInfo
       summary: Get System Information
       description: >
-        Fetches various system details such as system architecture, platform, and versions of various tools like Git, Node.js, and Yarn.
-  /system/location:
-    get:
-      operationId: getSystemLocation
-      summary: Get System Location
-      description: >
-        Fetches the physical location of the user's device using the IP address.
+        System details such as username, permissions, os, cpu, memory, disk, terminal, clis, timezone, and time.
+        This is the system environment that you are pair programming with the user on.

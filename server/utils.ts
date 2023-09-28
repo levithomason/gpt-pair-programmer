@@ -6,7 +6,9 @@ import debug from "debug";
 
 import { PROJECT_ROOT, TERMINAL_STREAM_MAX_TOKENS } from "../config";
 
-export const log = debug("gpp:utils");
+export const log = debug("gpp:server:utils");
+
+export const relPath = (p: string) => path.relative(PROJECT_ROOT, p);
 
 /**
  * Trims a string to a certain number of estimated tokens.
@@ -19,7 +21,7 @@ export const trimStringToTokens = (str: string, tokens: number) => {
   const maxCharacters = tokens * 4;
 
   if (str.length > maxCharacters) {
-    const divider = "\n\n...\n\n";
+    const divider = "\n\n[TRUNCATED]\n\n";
     const start = str.slice(0, maxCharacters / 2 - divider.length);
     const end = str.slice(-maxCharacters / 2 + divider.length);
 
@@ -40,9 +42,7 @@ export const cleanShellOutput = (str: string) => {
 };
 
 /**
- * Runs a shell command in the root of the project.
- * @param command
- * @param cwd
+ * Executes a shell command.
  */
 export const run = (
   command: string,
@@ -171,3 +171,23 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
 
   return [`MAX DEPTH: ${maxDepth}\n`, recurse(dir, 1)].join("\n");
 };
+
+// TODO: Tools that return extra properties in their return object don't throw a type error
+//       ToolDefinition should be stricter
+export type ToolFunction<ArgObj, Return = void> = (
+  args: ArgObj,
+) => Promise<Return>;
+
+export class ToolError extends Error {
+  constructor(tool: string, message: string) {
+    super(message);
+    this.name = tool + "Error";
+  }
+}
+
+export class PairProgrammerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PairProgrammerError";
+  }
+}

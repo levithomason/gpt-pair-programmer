@@ -8,5 +8,5 @@ info:
   version: "v1"
 servers:
   - url: http://localhost:5004
-# Paths are aggregated from src/tools/*/openapi.yaml
+# Paths are aggregated from tools/*/openapi.yaml
 paths: {}

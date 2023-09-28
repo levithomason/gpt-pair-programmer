@@ -7,7 +7,6 @@ import debug from "debug";
 import { GPT_PROJECTS } from "../../config";
 import { generateProjectTree, isCommitNeeded, run } from "./utils";
 import { getSystemInfo } from "../system/utils";
-
 const log = debug("gpp:tools:projects");
 
 //

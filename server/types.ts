@@ -11,6 +11,20 @@ type OpenAPISchema = {
   properties?: OpenAPIProperties;
 };
 
+export type OpenAPIMethod = "get" | "post" | "put" | "delete" | "patch";
+
+export type OpenAPIMethodDetails = {
+  operationId: string;
+  description?: string;
+  requestBody?: {
+    content?: {
+      "application/json"?: {
+        schema?: OpenAPISchema;
+      };
+    };
+  };
+};
+
 export type OpenAPISpec = {
   openapi: string;
   info: {
@@ -24,17 +38,7 @@ export type OpenAPISpec = {
   }[];
   paths: {
     [path: string]: {
-      [method: string]: {
-        operationId: string;
-        description?: string;
-        requestBody?: {
-          content?: {
-            "application/json"?: {
-              schema?: OpenAPISchema;
-            };
-          };
-        };
-      };
+      [method in OpenAPIMethod]: OpenAPIMethodDetails;
     };
   };
 };
