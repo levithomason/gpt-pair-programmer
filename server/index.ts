@@ -13,13 +13,7 @@ import { ChatCompletionMessageParam } from "openai/resources/chat";
 import { tools } from "./tools";
 import "./database";
 
-import {
-  GPT_4_MAX_TOKENS,
-  OPENAI_MODELS,
-  PUBLIC_ROOT,
-  SERVER_ROOT,
-  TOOLS_ROOT,
-} from "../config";
+import { OPENAI_MODELS, PUBLIC_ROOT, SERVER_ROOT, TOOLS_ROOT } from "../config";
 import { OpenAIFunction, OpenAPIMethod, OpenAPISpec } from "./types";
 import {
   PairProgrammerError,
@@ -234,17 +228,15 @@ const systemMessage: ChatCompletionMessageParam = {
 };
 
 let messageStack: ChatCompletionMessageParam[] = [systemMessage];
-let lastSessionID: string;
 
 const MODEL = OPENAI_MODELS["gpt-3.5-turbo"];
 
-app.get("/chat", async (req, res) => {
-  // TODO: Fix hacky way to reset the messages on refresh
-  if (lastSessionID !== req.sessionID) {
-    lastSessionID = req.sessionID;
-    messageStack = [systemMessage];
-  }
+app.post("/chat/new", async (req, res) => {
+  messageStack = [systemMessage];
+  res.json(messageStack);
+});
 
+app.get("/chat", async (req, res) => {
   const message = req.query.message as string;
   log("/chat", message);
 
@@ -267,16 +259,17 @@ app.get("/chat", async (req, res) => {
 
     const trimmedMessages = messages
       .map((message) => {
-        lenOfAllMessages += message.content.length;
+        lenOfAllMessages += JSON.stringify(message).length;
         return message;
       })
       .map((message) => {
-        const percentageOfTotal = lenOfAllMessages / message.content.length;
+        const percentageOfTotal =
+          lenOfAllMessages / JSON.stringify(message).length;
         return {
           ...message,
           content: trimStringToTokens(
             message.content,
-            percentageOfTotal * MODEL.contextMaxTokens * 0.8, // leave headroom
+            percentageOfTotal * MODEL.contextMaxTokens * 0.52, // leave headroom
           ),
         };
       });
@@ -301,10 +294,14 @@ app.get("/chat", async (req, res) => {
       // res.setHeader("Content-Type", "text/event-stream");
       for await (const part of stream) {
         const { delta, finish_reason } = part.choices[0];
-        log("/chat part", JSON.stringify({ delta, finish_reason }, null, 2));
+        if (finish_reason) {
+          log("/chat finish_reason", finish_reason);
+        } else if (delta?.content) {
+          log(delta.content);
+        }
 
         if (finish_reason === "stop") {
-          res.write("\n\n(...stopped)");
+          log("\n\n[stopped]");
           break;
         }
 
@@ -314,18 +311,18 @@ app.get("/chat", async (req, res) => {
         }
 
         if (delta?.function_call?.name) {
-          res.write(`\n\n\`\`\`\n${delta.function_call.name}(`);
           func = delta?.function_call?.name;
         }
 
         if (delta?.function_call?.arguments) {
           args += delta?.function_call?.arguments;
-          res.write(delta?.function_call?.arguments);
         }
 
         if (finish_reason === "function_call") {
-          res.write(")\n```\n\n");
-          log("/chat finish_reason:function_call", { func, args });
+          const printArgs = args === "{}" ? "" : args;
+          res.write(` \`\n${func}(${printArgs})\` `);
+
+          log("/chat function_call", func, args);
 
           try {
             const argsJSon = JSON.parse(args);
@@ -337,24 +334,20 @@ app.get("/chat", async (req, res) => {
             });
 
             return await callModel(messageStack);
-          } catch (err) {
-            res.write(
-              '\n\nError calling function: "' +
-                (err as Error).toString() +
-                '"' +
-                "\n\n",
-            );
-            log("/chat function_call error", err);
+          } catch (error) {
+            const str = (error as Error).toString();
+            res.write(`\n\nError calling function: "${str}"\n\n`);
+            log("/chat function_call error", str);
           }
         }
 
         if (finish_reason === null) {
-          const text = delta.content || "";
-          log("/chat content", text);
-          res.write(text);
+          if (typeof delta.content === "string") {
+            res.write(delta.content);
+          }
         } else {
-          log("/chat Unknown finish_reason", finish_reason);
           res.write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
+          log("unknown finish_reason", finish_reason);
         }
       }
     } catch (error) {

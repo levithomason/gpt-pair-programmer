@@ -53,10 +53,10 @@ paths:
             schema:
               type: object
               properties:
-                command:
+                code:
                   type: string
-                  description: The Puppeteer command to execute (e.g., 'type', 'click', 'evaluate')
-                  example: "click"
+                  description: The JavaScript string to evaluate.
+                  example: "document.querySelector('#sendButton').click();"
   /browser/click:
     post:
       operationId: browserClick

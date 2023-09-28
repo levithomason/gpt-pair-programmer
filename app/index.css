@@ -25,14 +25,13 @@ body {
 }
 
 pre {
-  display: inline-block;
+  width: fit-content;
   font-family: "Roboto Mono", monospace;
-  font-size: 16px;
   line-height: 1.5;
   background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0) 100%
+    0deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0) 100%
   );
   border: 1px solid #ffffff11;
   border-radius: 0.25rem;
@@ -41,9 +40,16 @@ pre {
 
 code {
   font-family: "Roboto Mono", monospace;
-  font-size: 16px;
-  line-height: 1.5;
-  padding: 0;
+  padding: 0.125rem 0.125rem;
+  margin: 0 0.25rem;
+  font-size: 14px;
+  background: rgba(51, 16, 3, 0.13);
+  border-bottom: 1px dotted rgba(222, 184, 135, 0.5);
+  box-shadow: 0 2px 0 2px #00000022;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  text-shadow: none;
+  color: rgb(222, 184, 135);
 }
 
 /* make form elements match in height */
@@ -99,20 +105,20 @@ blockquote {
 
 /* link color */
 a {
-  color: #3399ff;
+  color: #5ca1e6;
   text-decoration: none;
-  box-shadow: inset 0 -1px 0 0 #3399ff88;
+  border-bottom: 1px solid #3399ff88;
 }
 a:hover {
-  text-decoration: none;
-  box-shadow:
-    inset 0 -1px 0 0 #3399ff,
-    0 1px 0 0 #3399ff;
+  border-bottom: 2px solid #3399ff;
 }
 a:visited {
-  color: #1a4bff;
-  text-decoration: none;
-  box-shadow: none;
+  color: #7266cc;
+  border-bottom: none;
+}
+a:visited:hover {
+  color: #7266cc;
+  border-bottom: none;
 }
 
 /* scrollbars */

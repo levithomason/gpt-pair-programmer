@@ -1,6 +1,7 @@
 import * as React from "react";
 import { micromark } from "micromark";
 import { gfm, gfmHtml } from "micromark-extension-gfm";
+import hljs from "highlight.js";
 
 import { MessageRole } from "./types";
 
@@ -18,6 +19,10 @@ const removeWrappingPTag = (html: string) => {
 };
 
 export const ChatMessage = (props: ChatMessageProps) => {
+  React.useLayoutEffect(() => {
+    hljs.highlightAll();
+  });
+
   return (
     <div
       className={`chat-message chat-message--${props.role}`}

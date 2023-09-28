@@ -2,15 +2,15 @@ import { ToolFunction } from "../../utils";
 import { evaluate } from "./utils";
 
 type Args = {
-  string: string;
+  code: string;
 };
 
 type Return = any;
 
 export const browserEvaluate: ToolFunction<Args, Return> = async ({
-  string,
+  code,
 }) => {
-  return await evaluate(string);
+  return await evaluate(code);
 };
 
 export default browserEvaluate;

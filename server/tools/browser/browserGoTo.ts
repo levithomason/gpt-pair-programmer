@@ -8,7 +8,13 @@ type Args = {
 type Return = string;
 
 export const browserGoTo: ToolFunction<Args, Return> = async ({ url }) => {
-  return await goTo(url);
+  let result = "";
+  try {
+    result = await goTo(url);
+  } catch (error) {
+    result = error.toString();
+  }
+  return result;
 };
 
 export default browserGoTo;

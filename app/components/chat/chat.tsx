@@ -13,14 +13,20 @@ const suggestedMessages = [
   "Test",
   "Where am I",
   "Look up my weather",
-  [
-    "Make a plan to understand the project in detail using your tools, then execute it immediately.",
-    "Summarize each tool response before moving on to the next one.",
-  ].join(" "),
+  `Make a detailed plan to document "tools" in the project.`,
 ];
 
+// reset the chat
+fetch("http://localhost:5004/chat/new", { method: "POST" });
+
 export const Chat = () => {
-  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [messages, setMessages] = React.useState<Message[]>([
+    {
+      role: "assistant",
+      content: `Here's a markdown link: [Google](https://google.com)`,
+      timestamp: Date.now(),
+    },
+  ]);
   const [message, setMessage] = React.useState<string>("");
   const [reply, setReply] = React.useState<string>("");
 
@@ -154,6 +160,9 @@ export const Chat = () => {
             style={{
               maxWidth: "400px",
               height: "auto",
+              color: "rgba(255, 255, 255, 0.6)",
+              background: "transparent",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
             }}
             onClick={(e) => {
               setMessage(msg);
