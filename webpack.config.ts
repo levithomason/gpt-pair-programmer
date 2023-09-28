@@ -23,7 +23,6 @@ export default {
       {
         test: /\.css?$/,
         use: ["style-loader", "css-loader"],
-        exclude: /node_modules/,
       },
       {
         test: /\.(png|jpe?g|gif|avif)$/i,

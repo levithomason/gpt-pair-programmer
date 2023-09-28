@@ -11,27 +11,31 @@ This repo is an experiment with many undocumented features. It is not ready for 
 
 ## Tools
 
-Tools allow GPT-4 to interact with your computer.
+Tools (`server/tools`) allow GPT-4 to interact with your computer.
 
 **Browser**
 
-- `browserGoTo` - Go to a url
-- `getBrowserDOM` - Read the browser's DOM
-- `getBrowserConsole` - Read console logs
-- `clearBrowserConsole` - Clear console logs
-- `readBrowser` - Read browser page
-- `browserExecute` - Execute a Puppeteer command
+Launch, interact, control, inspect and debug a browser.
+
+**File**
+
+Read, write, and search files.
 
 **Google**
 
-- `googleSearch` - Perform a Google search
+Run Google searches.
+
+**Project**
+
+Project info, todos, tree, and other helpful information.
 
 **System**
 
-- `execSystemCommand` - Execute a system command
-- `getSystemInfo` - Retrieve System Information
-- `getSystemLocation` - Retrieve physical location information of the user's device
-- `getSystemTree` - Get the system tree
+Get information about your system's hardware and software.
+
+**User**
+
+Location, profile, and other information the user shares.
 
 ## Interfaces
 

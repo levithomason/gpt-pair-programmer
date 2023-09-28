@@ -2,6 +2,7 @@ import * as React from "react";
 import { micromark } from "micromark";
 import { gfm, gfmHtml } from "micromark-extension-gfm";
 import hljs from "highlight.js";
+import "highlight.js/styles/atom-one-dark-reasonable.css";
 
 import { MessageRole } from "./types";
 
@@ -19,8 +20,12 @@ const removeWrappingPTag = (html: string) => {
 };
 
 export const ChatMessage = (props: ChatMessageProps) => {
-  React.useLayoutEffect(() => {
-    hljs.highlightAll();
+  React.useEffect(() => {
+    document.querySelectorAll("pre > code").forEach((el) => {
+      console.log(el);
+      hljs.highlightElement(el as HTMLElement);
+    });
+    console.log("highlighted");
   });
 
   return (

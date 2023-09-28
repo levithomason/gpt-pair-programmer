@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Google Search API
+  version: 1.0.0
+paths:
+  /file:
+    get:
+      operationId: fileRead
+      summary: Read a project file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relPath:
+                  required: true
+                  type: string
+                  description: Relative path to the file from the root of the project.
+                  example: server/tools/file/openapi.yaml
+    post:
+      operationId: fileWrite
+      summary: Write a project file
+      description: |
+        This endpoint allows you to perform a Google search by providing a search query in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relPath:
+                  required: true
+                  type: string
+                  description: Relative path to the file from the root of the project.
+                  example: server/tools/file/openapi.yaml
+                contents:
+                  required: true
+                  type: string
+                  description: The contents of the file.
+  /file/search:
+    post:
+      operationId: fileSearch
+      summary: Search for files in the project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  required: true
+                  type: string
+                  description: The search query.
+                  example: openapi

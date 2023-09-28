@@ -9,6 +9,7 @@ import { PROJECT_ROOT, TERMINAL_STREAM_MAX_TOKENS } from "../config";
 export const log = debug("gpp:server:utils");
 
 export const relPath = (p: string) => path.relative(PROJECT_ROOT, p);
+export const absPath = (p: string) => path.resolve(PROJECT_ROOT, p);
 
 /**
  * Trims a string to a certain number of estimated tokens.

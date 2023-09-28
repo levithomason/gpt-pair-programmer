@@ -10,23 +10,19 @@ import { Message } from "./types";
 const log = debug("gpp:app:components:chat");
 
 const suggestedMessages = [
-  "Test",
-  "Where am I",
-  "Look up my weather",
-  `Make a detailed plan to document "tools" in the project.`,
+  "Read the README.md",
+  "Where am I?",
+  "What's my weather?",
+  `Make a plan on how you will use your functions to document the project's "tools" for me.`,
 ];
 
 // reset the chat
-fetch("http://localhost:5004/chat/new", { method: "POST" });
+fetch("http://localhost:5004/chat/new", { method: "POST" }).then(() => {
+  log("Chat messages reset (POST /chat/new)");
+});
 
 export const Chat = () => {
-  const [messages, setMessages] = React.useState<Message[]>([
-    {
-      role: "assistant",
-      content: `Here's a markdown link: [Google](https://google.com)`,
-      timestamp: Date.now(),
-    },
-  ]);
+  const [messages, setMessages] = React.useState<Message[]>([]);
   const [message, setMessage] = React.useState<string>("");
   const [reply, setReply] = React.useState<string>("");
 

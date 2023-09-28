@@ -10,13 +10,15 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: 64px 0 256px;
+  padding: 64px 0 32px;
+  margin-bottom: 160px;
   overflow-y: auto;
-  /*border: 2px solid cyan;*/
+  /* border: 2px solid cyan; */
+  border-bottom: 4px solid hsla(99, 14%, 29%, 0.3);
 }
 
 .chat-message {
-  padding: 4px;
+  padding: 8px 16px;
   max-width: 80%;
 }
 

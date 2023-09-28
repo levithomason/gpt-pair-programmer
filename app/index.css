@@ -8,7 +8,7 @@
 
 html {
   --body-bg: hsl(0, 0%, 20%);
-  --body-color: #eeeeeecc;
+  --body-color: #eeeeeedd;
 }
 
 body {
@@ -25,30 +25,39 @@ body {
 }
 
 pre {
+  overflow: hidden;
   width: fit-content;
+  max-width: 100%;
+  max-height: 60vh;
+  font-size: 14px;
   font-family: "Roboto Mono", monospace;
-  line-height: 1.5;
-  background: linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.05) 0%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  border: 1px solid #ffffff11;
-  border-radius: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  /*mix-blend-mode: screen;*/
+  filter: contrast(1.1) brightness(1.2);
+  border-top: 1px solid #00000088;
+  border-bottom: 1px solid #ffffff11;
+  border-radius: 4px;
 }
-
 code {
   font-family: "Roboto Mono", monospace;
-  padding: 0.125rem 0.125rem;
+  text-shadow: none;
+}
+pre code {
+  overflow: auto;
+  width: fit-content;
+  max-width: inherit;
+  max-height: inherit;
+  border-radius: inherit;
+  box-shadow: inset 0 2px 2px 1px #00000022;
+}
+code:not(pre code) {
+  font-family: "Roboto Mono", monospace;
+  padding: 2px 6px 1px 6px;
   margin: 0 0.25rem;
   font-size: 14px;
-  background: rgba(51, 16, 3, 0.13);
-  border-bottom: 1px dotted rgba(222, 184, 135, 0.5);
-  box-shadow: 0 2px 0 2px #00000022;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  text-shadow: none;
+  background: rgba(77, 70, 36, 0.33);
+  border-bottom: 1px dashed rgba(222, 184, 135, 0.5);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.13);
+  border-radius: 4px;
   color: rgb(222, 184, 135);
 }
 
@@ -110,15 +119,13 @@ a {
   border-bottom: 1px solid #3399ff88;
 }
 a:hover {
-  border-bottom: 2px solid #3399ff;
+  border-bottom: 1px solid #3399ff;
 }
 a:visited {
   color: #7266cc;
-  border-bottom: none;
 }
 a:visited:hover {
   color: #7266cc;
-  border-bottom: none;
 }
 
 /* scrollbars */
@@ -126,6 +133,7 @@ a:visited:hover {
   width: 8px;
   height: 8px;
 }
+::-webkit-scrollbar-corner,
 ::-webkit-scrollbar-track {
   background: transparent;
 }

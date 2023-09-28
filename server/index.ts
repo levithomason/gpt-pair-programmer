@@ -294,18 +294,13 @@ app.get("/chat", async (req, res) => {
       // res.setHeader("Content-Type", "text/event-stream");
       for await (const part of stream) {
         const { delta, finish_reason } = part.choices[0];
-        if (finish_reason) {
-          log("/chat finish_reason", finish_reason);
-        } else if (delta?.content) {
-          log(delta.content);
-        }
-
         if (finish_reason === "stop") {
-          log("\n\n[stopped]");
+          log("finish_reason", finish_reason);
           break;
         }
 
         if (finish_reason === "length") {
+          log("finish_reason", finish_reason);
           res.write("\n\n(...truncated due to max length)");
           break;
         }
@@ -318,29 +313,36 @@ app.get("/chat", async (req, res) => {
           args += delta?.function_call?.arguments;
         }
 
+        //
+        // Call function
+        //
         if (finish_reason === "function_call") {
+          log("finish_reason", finish_reason);
+
           const printArgs = args === "{}" ? "" : args;
           res.write(` \`\n${func}(${printArgs})\` `);
 
-          log("/chat function_call", func, args);
-
+          // parse args
+          let argsJSon = {};
           try {
-            const argsJSon = JSON.parse(args);
-            const result = await callFunction(func, argsJSon);
-            messageStack.push({
-              role: "function",
-              name: func,
-              content: JSON.stringify(result),
-            });
-
-            return await callModel(messageStack);
+            argsJSon = JSON.parse(args);
           } catch (error) {
-            const str = (error as Error).toString();
-            res.write(`\n\nError calling function: "${str}"\n\n`);
-            log("/chat function_call error", str);
+            log("JSON.parse(args) Fail", error);
+            res.write(`\n\nError parsing JSON: "${error}"\n\n`);
+            // TODO: break? retry? The function will not get the correct args.
           }
+
+          // call function
+          const result = await callFunction(func, argsJSon);
+          const content = JSON.stringify(result);
+          messageStack.push({ role: "function", name: func, content });
+
+          return await callModel(messageStack);
         }
 
+        //
+        // Send text
+        //
         if (finish_reason === null) {
           if (typeof delta.content === "string") {
             res.write(delta.content);
@@ -365,7 +367,7 @@ app.get("/chat", async (req, res) => {
     log(`/chat callFunction ${func}(${argsString})`);
 
     if (!tool) {
-      throw new PairProgrammerError(`Tool ${func} not found.`);
+      res.write(`\n\nTool "${func}" not found.\n\n`);
     }
 
     // TODO: before doing this action, what memories or thoughts are triggered from considering?
@@ -375,9 +377,9 @@ app.get("/chat", async (req, res) => {
       return await tool(args);
     } catch (err) {
       if (err instanceof ToolError) {
-        res.write('\n\n400 ToolError: "' + err + '"' + "\n\n");
+        res.write('\n\nToolError: "' + err + '"' + "\n\n");
       } else {
-        res.write('\n\n500 Error: "' + err + '"' + "\n\n");
+        res.write('\n\nError: "' + err + '"' + "\n\n");
       }
     }
   };

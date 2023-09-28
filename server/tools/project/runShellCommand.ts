@@ -11,11 +11,9 @@ type Return = {
   stderr: string;
 };
 
-const name = __filename;
-
 const runShellCommand: ToolFunction<Args, Return> = async (args) => {
   if (!args.command) {
-    throw new ToolError(name, "No command provided");
+    throw new ToolError("runShellCommand", "No command provided");
   }
 
   return await run(args.command, args.cwd);
