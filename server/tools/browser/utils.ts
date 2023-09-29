@@ -19,7 +19,10 @@ export const formatConsoleMessage = (msg: ConsoleMessage): string => {
 let browser: Browser;
 export const getBrowser = async () => {
   if (!browser) {
-    browser = await puppeteer.launch({ headless: "new" });
+    browser = await puppeteer.launch({
+      // headless: "new",
+      headless: false,
+    });
   }
   return browser;
 };

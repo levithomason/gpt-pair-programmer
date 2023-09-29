@@ -7,10 +7,12 @@ type Args = {
 
 type Return = any;
 
-export const browserEvaluate: ToolFunction<Args, Return> = async ({
-  code,
-}) => {
-  return await evaluate(code);
+export const browserEvaluate: ToolFunction<Args, Return> = async ({ code }) => {
+  try {
+    return await evaluate(code);
+  } catch (err) {
+    return err.toString();
+  }
 };
 
 export default browserEvaluate;

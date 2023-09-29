@@ -18,7 +18,10 @@ const fileRead: ToolFunction<Args, Return> = async (file) => {
   try {
     return fs.readFileSync(fileAbsPath, "utf8");
   } catch (err) {
-    throw new ToolError("fileRead", `Error reading file: ${err.message}`);
+    return new ToolError(
+      "fileRead",
+      `Error reading file: ${err.message}`,
+    ).toString();
   }
 };
 

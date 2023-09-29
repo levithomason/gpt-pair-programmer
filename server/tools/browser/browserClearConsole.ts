@@ -8,8 +8,12 @@ type Args = {
 type Return = string;
 
 export const browserClearConsole: ToolFunction<Args, Return> = async () => {
-  clearConsole();
-  return readConsole();
+  try {
+    clearConsole();
+    return readConsole();
+  } catch (err) {
+    return err.toString();
+  }
 };
 
 export default browserClearConsole;

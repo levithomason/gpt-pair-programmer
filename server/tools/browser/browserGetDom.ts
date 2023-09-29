@@ -8,7 +8,11 @@ type Args = {
 type Return = string;
 
 export const browserGetDom: ToolFunction<Args, Return> = async () => {
-  return await getDom();
+  try {
+    return await getDom();
+  } catch (err) {
+    return err.toString();
+  }
 };
 
 export default browserGetDom;

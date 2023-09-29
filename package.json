@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "app": "nodemon --watch webpack.config.ts --exec \"webpack serve\"",
-    "server": "nodemon --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
+    "server": "nodemon --watch server --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
     "server:start": "ts-node server/index.ts"
   },
   "keywords": [],
@@ -52,6 +52,7 @@
     "glob": "^10.3.10",
     "highlight.js": "^11.8.0",
     "html-to-text": "^9.0.5",
+    "mermaid": "^10.4.0",
     "micromark": "^4.0.0",
     "micromark-extension-gfm": "^3.0.0",
     "morgan": "^1.10.0",

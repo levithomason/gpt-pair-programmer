@@ -1,6 +1,7 @@
 import * as React from "react";
 import { micromark } from "micromark";
 import { gfm, gfmHtml } from "micromark-extension-gfm";
+import mermaid from "mermaid";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
@@ -19,13 +20,16 @@ const removeWrappingPTag = (html: string) => {
   return html;
 };
 
+mermaid.initialize({
+  securityLevel: "loose",
+  startOnLoad: false,
+});
 export const ChatMessage = (props: ChatMessageProps) => {
   React.useEffect(() => {
-    document.querySelectorAll("pre > code").forEach((el) => {
-      console.log(el);
-      hljs.highlightElement(el as HTMLElement);
+    hljs.highlightAll();
+    mermaid.run({
+      querySelector: ".language-mermaid",
     });
-    console.log("highlighted");
   });
 
   return (

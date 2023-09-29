@@ -222,8 +222,9 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const systemMessage: ChatCompletionMessageParam = {
   role: "system",
   content: [
-    "You are the world's wisest pair programmer AI with thousands of years of combined experience.",
-    "You are running on complete access to the user's computer.",
+    "You are pair programming with the user on their computer.",
+    "All your functions are executed on the user's computer with the user's permissions.",
+    "Use mermaid markdown codeblocks to make charts, graphs, or diagrams.",
   ].join("\n"),
 };
 
@@ -276,6 +277,8 @@ app.get("/chat", async (req, res) => {
 
     log("/chat callModel", trimmedMessages);
 
+    let assistantReply = "";
+
     try {
       const stream = await openai.chat.completions.create({
         model: MODEL.name,
@@ -290,6 +293,11 @@ app.get("/chat", async (req, res) => {
       let func = "";
       let args = "";
 
+      const write = (message: string) => {
+        assistantReply += message;
+        res.write(message);
+      };
+
       // Stream
       // res.setHeader("Content-Type", "text/event-stream");
       for await (const part of stream) {
@@ -301,7 +309,7 @@ app.get("/chat", async (req, res) => {
 
         if (finish_reason === "length") {
           log("finish_reason", finish_reason);
-          res.write("\n\n(...truncated due to max length)");
+          write("\n\n(...truncated due to max length)");
           break;
         }
 
@@ -320,7 +328,7 @@ app.get("/chat", async (req, res) => {
           log("finish_reason", finish_reason);
 
           const printArgs = args === "{}" ? "" : args;
-          res.write(` \`\n${func}(${printArgs})\` `);
+          write(` \`\n${func}(${printArgs})\` `);
 
           // parse args
           let argsJSon = {};
@@ -328,7 +336,7 @@ app.get("/chat", async (req, res) => {
             argsJSon = JSON.parse(args);
           } catch (error) {
             log("JSON.parse(args) Fail", error);
-            res.write(`\n\nError parsing JSON: "${error}"\n\n`);
+            write(`\n\nError parsing JSON: "${error}"\n\n`);
             // TODO: break? retry? The function will not get the correct args.
           }
 
@@ -345,10 +353,10 @@ app.get("/chat", async (req, res) => {
         //
         if (finish_reason === null) {
           if (typeof delta.content === "string") {
-            res.write(delta.content);
+            write(delta.content);
           }
         } else {
-          res.write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
+          write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
           log("unknown finish_reason", finish_reason);
         }
       }
@@ -357,6 +365,8 @@ app.get("/chat", async (req, res) => {
       res.status(500).write((error as Error).toString());
     }
 
+    messageStack.push({ role: "assistant", content: assistantReply });
+    log("/chat end", messageStack);
     res.end();
   };
 

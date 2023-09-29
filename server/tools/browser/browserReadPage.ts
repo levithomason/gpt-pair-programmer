@@ -8,7 +8,11 @@ type Args = {
 type Return = string;
 
 export const browserReadPage: ToolFunction<Args, Return> = async () => {
-  return await readPage();
+  try {
+    return await readPage();
+  } catch (err) {
+    return err.toString();
+  }
 };
 
 export default browserReadPage;

@@ -10,7 +10,11 @@ type Return = string;
 export const browserClick: ToolFunction<Args, Return> = async ({
   selector,
 }) => {
-  return await click(selector);
+  try {
+    return await click(selector);
+  } catch (err) {
+    return err.toString();
+  }
 };
 
 export default browserClick;
