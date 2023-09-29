@@ -1,5 +1,5 @@
 import { click } from "./utils";
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   selector: string;
@@ -12,8 +12,12 @@ export const browserClick: ToolFunction<Args, Return> = async ({
 }) => {
   try {
     return await click(selector);
-  } catch (err) {
-    return err.toString();
+  } catch (error) {
+    throw new ToolError({
+      tool: "browserClick",
+      message: "Failed to click",
+      error,
+    });
   }
 };
 

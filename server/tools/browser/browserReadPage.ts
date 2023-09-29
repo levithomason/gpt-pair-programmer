@@ -1,5 +1,5 @@
 import { readPage } from "./utils";
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   url: string;
@@ -10,8 +10,12 @@ type Return = string;
 export const browserReadPage: ToolFunction<Args, Return> = async () => {
   try {
     return await readPage();
-  } catch (err) {
-    return err.toString();
+  } catch (error) {
+    throw new ToolError({
+      tool: "browserReadPage",
+      message: "Failed to read page",
+      error,
+    });
   }
 };
 

@@ -1,5 +1,5 @@
 import { goTo } from "./utils";
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   url: string;
@@ -11,7 +11,11 @@ export const browserGoTo: ToolFunction<Args, Return> = async ({ url }) => {
   try {
     return await goTo(url);
   } catch (error) {
-    return error.toString();
+    throw new ToolError({
+      tool: "browserGoTo",
+      message: "Failed to go to",
+      error,
+    });
   }
 };
 

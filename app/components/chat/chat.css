@@ -21,6 +21,13 @@
   padding: 8px 16px;
   max-width: 80%;
 }
+.chat-message img {
+  margin: auto;
+  max-width: 25%;
+  max-height: 25%;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
 
 .chat-message--user {
   padding-right: 16px;

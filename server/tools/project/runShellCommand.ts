@@ -1,19 +1,24 @@
-import { run, ToolError, ToolFunction } from "../../utils";
+import { run, RunReturn, ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   command: string;
   cwd: string;
 };
 
-type Return = {
-  error: any;
-  stdout: string;
-  stderr: string;
-};
-
-const runShellCommand: ToolFunction<Args, Return> = async (args) => {
+/**
+ * @summary Execute a shell command
+ * @description
+ * Executes a background command in the project directory on the user's computer.
+ * Do not execute commands that require user input, the user cannot see the terminal.
+ * @method post
+ * @endpoint /tools/project/exec
+ */
+const runShellCommand: ToolFunction<Args, RunReturn> = async (args) => {
   if (!args.command) {
-    throw new ToolError("runShellCommand", "No command provided");
+    throw new ToolError({
+      tool: "runShellCommand",
+      message: "Command is required",
+    });
   }
 
   return await run(args.command, args.cwd);

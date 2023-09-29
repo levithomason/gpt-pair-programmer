@@ -1,4 +1,4 @@
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 import { evaluate } from "./utils";
 
 type Args = {
@@ -10,8 +10,12 @@ type Return = any;
 export const browserEvaluate: ToolFunction<Args, Return> = async ({ code }) => {
   try {
     return await evaluate(code);
-  } catch (err) {
-    return err.toString();
+  } catch (error) {
+    throw new ToolError({
+      tool: "browserEvaluate",
+      message: "Failed to evaluate",
+      error,
+    });
   }
 };
 

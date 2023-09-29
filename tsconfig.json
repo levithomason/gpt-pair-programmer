@@ -5,7 +5,14 @@
     "module": "commonjs",
     "target": "es2020",
     "outDir": "dist",
-    "jsx": "react"
+    "jsx": "react",
+    "noUnusedLocals": true,
+    "noUnusedParameters": false
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true,
+    "experimentalResolver": true
   },
   "exclude": [".archived", "node_modules"]
 }

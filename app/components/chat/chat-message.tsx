@@ -25,23 +25,36 @@ mermaid.initialize({
   startOnLoad: false,
 });
 export const ChatMessage = (props: ChatMessageProps) => {
+  const lastRenderTime = React.useRef<number>(Date.now());
+
   React.useEffect(() => {
+    if (props.role !== "assistant") {
+      return;
+    }
+
+    console.log(props.role, props.children);
+
     hljs.highlightAll();
-    mermaid.run({
-      querySelector: ".language-mermaid",
-    });
-  });
+
+    if (Date.now() - lastRenderTime.current < 1000) {
+      mermaid.run({
+        querySelector: ".language-mermaid",
+      });
+    }
+  }, [props.role, props.children]);
 
   return (
     <div
       className={`chat-message chat-message--${props.role}`}
       dangerouslySetInnerHTML={{
-        __html: removeWrappingPTag(
-          micromark(props.children, {
-            extensions: [gfm()],
-            htmlExtensions: [gfmHtml()],
-          }),
-        ),
+        __html:
+          `ROLE: ${props.role}:` +
+          removeWrappingPTag(
+            micromark(props.children, {
+              extensions: [gfm()],
+              htmlExtensions: [gfmHtml()],
+            }),
+          ),
       }}
     />
   );

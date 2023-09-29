@@ -1,6 +1,7 @@
 import debug from "debug";
 import puppeteer, { Browser, ConsoleMessage, Page } from "puppeteer";
 import * as htmlToText from "html-to-text";
+import { ToolError } from "../../utils";
 
 export const log = debug("gpp:tools:webpage");
 
@@ -20,8 +21,7 @@ let browser: Browser;
 export const getBrowser = async () => {
   if (!browser) {
     browser = await puppeteer.launch({
-      // headless: "new",
-      headless: false,
+      headless: "new",
     });
   }
   return browser;
@@ -47,11 +47,14 @@ export const getPage = async () => {
 //
 // Functions
 //
-export const goTo = async (url: string) => {
+export const goTo = async (url: string): Promise<string> => {
   const page = await getPage();
+
   clearConsole();
-  await page.goto(url, { waitUntil: "networkidle0" });
-  return await readPage();
+
+  const httpResponse = await page.goto(url, { waitUntil: "networkidle0" });
+
+  return `Successfully went to URL. Response: ${httpResponse}`;
 };
 
 export const getDom = async () => {

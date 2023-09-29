@@ -1,15 +1,26 @@
 import fs from "fs";
 import path from "path";
-import { exec } from "child_process";
+import { exec, ExecException } from "child_process";
 
 import debug from "debug";
 
-import { PROJECT_ROOT, TERMINAL_STREAM_MAX_TOKENS } from "../config";
+import { PROJECT_ROOT } from "../config";
 
 export const log = debug("gpp:server:utils");
 
-export const relPath = (p: string) => path.relative(PROJECT_ROOT, p);
-export const absPath = (p: string) => path.resolve(PROJECT_ROOT, p);
+export const relPath = (p: string) => {
+  if (p.startsWith("~")) {
+    p = path.join(process.env.HOME || "", p.slice(1));
+  }
+  return path.relative(PROJECT_ROOT, p);
+};
+
+export const absPath = (p: string) => {
+  if (p.startsWith("~")) {
+    p = path.join(process.env.HOME || "", p.slice(1));
+  }
+  return path.resolve(PROJECT_ROOT, p);
+};
 
 /**
  * Trims a string to a certain number of estimated tokens.
@@ -36,26 +47,26 @@ export const trimStringToTokens = (str: string, tokens: number) => {
  * Removes ANSI escape codes (colors) from a string and trims it.
  */
 export const cleanShellOutput = (str: string) => {
-  return trimStringToTokens(
-    str.replace(/\u001b\[.*?m/g, "").trim(),
-    TERMINAL_STREAM_MAX_TOKENS,
-  );
+  return str.replace(/\u001b\[.*?m/g, "").trim();
+};
+
+export type RunReturn = {
+  error: ExecException | null;
+  stdout: string;
+  stderr: string;
 };
 
 /**
  * Executes a shell command.
  */
-export const run = (
-  command: string,
-  cwd: string = ".",
-): Promise<{ error: any; stdout: string; stderr: string }> => {
+export const run = (command: string, cwd: string = "."): Promise<RunReturn> => {
   const options = {
     cwd: path.resolve(PROJECT_ROOT, cwd),
     shell: process.env.SHELL,
   };
   log("run()", command, options);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     exec(command, options, (error, stdout, stderr) => {
       resolve({
         error,
@@ -179,16 +190,22 @@ export type ToolFunction<ArgObj, Return = void> = (
   args: ArgObj,
 ) => Promise<Return>;
 
-export class ToolError extends Error {
-  constructor(tool: string, message: string) {
+export class BaseError extends Error {
+  constructor(message: string) {
     super(message);
-    this.name = tool + "Error";
+    this.name = "PairProgrammer";
   }
 }
 
-export class PairProgrammerError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PairProgrammerError";
+type ToolErrorArgs = {
+  tool: string;
+  message: string;
+  error?: Error;
+};
+
+export class ToolError extends BaseError {
+  constructor({ tool, message, error }: ToolErrorArgs) {
+    super(error ? `${message} - ${error}` : message);
+    this.name = `ToolError(${tool})`;
   }
 }

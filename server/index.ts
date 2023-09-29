@@ -15,19 +15,14 @@ import "./database";
 
 import { OPENAI_MODELS, PUBLIC_ROOT, SERVER_ROOT, TOOLS_ROOT } from "../config";
 import { OpenAIFunction, OpenAPIMethod, OpenAPISpec } from "./types";
-import {
-  PairProgrammerError,
-  relPath,
-  ToolError,
-  trimStringToTokens,
-} from "./utils";
+import { BaseError, relPath, ToolError, trimStringToTokens } from "./utils";
 
 debug.enable("gpp:*");
 
 const { OPENAI_API_KEY } = process.env;
 
 if (!OPENAI_API_KEY) {
-  throw new PairProgrammerError("Missing OPENAI_API_KEY environment variable.");
+  throw new BaseError("Missing OPENAI_API_KEY environment variable.");
 }
 
 const BASE_SPEC_PATH = path.join(SERVER_ROOT, "openapi.base.yaml");
@@ -58,7 +53,7 @@ app.use(
 app.use(json());
 
 // session
-const sess = {
+const sess: session.SessionOptions = {
   secret: "foo bar baz",
   cookie: { secure: false },
 };
@@ -69,6 +64,25 @@ if (app.get("env") === "production") {
 }
 
 app.use(session(sess));
+
+// errors
+const logErrors: express.ErrorRequestHandler = (err, req, res, next) => {
+  log("logErrors", err.message);
+  next(err);
+};
+
+const returnErrors: express.ErrorRequestHandler = (err, req, res, next) => {
+  const stackRelativePath = err.stack.split("\n").map((line) => {
+    const match = line.match(/\((.*):\d+:\d+\)/);
+    return match ? relPath(match[1]) : line;
+  });
+
+  log("returnErrors", err.message);
+  res.status(err.statusCode || 500).send({ error: err.message });
+};
+
+app.use(logErrors);
+app.use(returnErrors);
 
 // ============================================================================
 // Aggregate OpenAPI Tool Specs
@@ -82,12 +96,12 @@ fs.readdirSync(TOOLS_ROOT).forEach((tool) => {
 
   const specPath = path.join(toolDir, "openapi.yaml");
   if (!fs.existsSync(specPath)) {
-    throw new PairProgrammerError(
+    throw new BaseError(
       `Tool "${relPath(toolDir)}" is missing an openapi.yaml spec.`,
     );
   }
 
-  log("Aggregating:", relPath(specPath));
+  log("load:", relPath(specPath));
   const specYaml = fs.readFileSync(specPath, "utf8");
   const specJson = yaml.load(specYaml) as OpenAPISpec;
 
@@ -149,7 +163,7 @@ const parseOpenAPISpec = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
       // Dynamically add routes for each tool
       //
       app[method as OpenAPIMethod](endpoint, async (req, res) => {
-        log(method, endpoint, "args:", req.body);
+        log(method, endpoint, req.body);
 
         // pick the args from the request body based on the OpenAPI spec
         const args = Object.keys(requestBodyProperties).reduce(
@@ -168,7 +182,7 @@ const parseOpenAPISpec = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
         }
 
         try {
-          log(endpoint, { tool });
+          log(operationId, args);
           const data = await tool(args);
           log(endpoint, data);
           res.status(200).send(data);

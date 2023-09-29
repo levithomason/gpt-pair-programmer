@@ -1,5 +1,5 @@
 import { type } from "./utils";
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   selector: string;
@@ -14,8 +14,12 @@ export const browserType: ToolFunction<Args, Return> = async ({
 }) => {
   try {
     return await type(selector, value);
-  } catch (err) {
-    return err.toString();
+  } catch (error) {
+    throw new ToolError({
+      tool: "browserType",
+      message: "Failed to type",
+      error,
+    });
   }
 };
 

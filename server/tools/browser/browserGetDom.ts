@@ -1,5 +1,5 @@
 import { getDom } from "./utils";
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   url: string;
@@ -10,8 +10,12 @@ type Return = string;
 export const browserGetDom: ToolFunction<Args, Return> = async () => {
   try {
     return await getDom();
-  } catch (err) {
-    return err.toString();
+  } catch (error) {
+    throw new ToolError({
+      tool: "browserGetDom",
+      message: "Failed to get dom",
+      error,
+    });
   }
 };
 

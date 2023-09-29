@@ -489,6 +489,13 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.7.tgz#f9361f7b87fd5d8188b2c998db0a1f47e9fb391a"
   integrity sha512-FbtmBWCcSa2J4zL781Zf1p5YUBXQomPEcep9QZCfRfQgTxz3pJWiDFLebohZ9fFntX5ibzOkSsrJ0TEew8cAog==
 
+"@types/puppeteer@^7.0.4":
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-7.0.4.tgz#6eb4081323e9075c1f4c353f93ee2ed6eed99487"
+  integrity sha512-ja78vquZc8y+GM2al07GZqWDKQskQXygCDiu0e3uO0DMRKqE0MjrFBFmTulfPYzLB6WnL7Kl2tFPy0WXSpPomg==
+  dependencies:
+    puppeteer "*"
+
 "@types/qs@*":
   version "6.9.8"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.8.tgz#f2a7de3c107b89b441e071d5472e6b726b4adf45"
@@ -4596,9 +4603,9 @@ open@^8.0.9:
     is-wsl "^2.2.0"
 
 openai@^4.10.0:
-  version "4.10.0"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-4.10.0.tgz#60d8f2a469ac7109a34115c75b6d66edbac1d914"
-  integrity sha512-II4b5/7qzwYkqA9MSjgqdofCc798EW+dtF2h6qNaVLet+qO7FShAJTWnoyzb50J4ZH1rPxRFAsmDLIhY3PT6DQ==
+  version "4.11.0"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-4.11.0.tgz#8adc03e6f74e71cc501d798d81209aa06e4ca14b"
+  integrity sha512-zU/MJxZTijL0Ym6CKoQPbnmHDsGZlH9g5zorPszdc41OyLxlhnlrorBcGzmGS9qpnjGGNncJR1hfg/mXq0OONw==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -4975,7 +4982,7 @@ puppeteer-core@21.3.6:
     devtools-protocol "0.0.1179426"
     ws "8.14.2"
 
-puppeteer@^21.3.3:
+puppeteer@*, puppeteer@^21.3.3:
   version "21.3.6"
   resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-21.3.6.tgz#961a44cd532ab5344ed53d7714aa56b4602ace10"
   integrity sha512-ulK9+KLvdaVsG0EKbKyw/DCXCz88rsnrvIJg9tY8AmkGR01AxI4ZJTH9BJl1OE7cLfh2vxjBvY+xfvJod6rfgw==

@@ -2,7 +2,6 @@
   "name": "gpt-terminal-plugin",
   "version": "1.0.0",
   "description": "ChatGPT universal command line plugin",
-  "main": "src/index.js",
   "scripts": {
     "app": "nodemon --watch webpack.config.ts --exec \"webpack serve\"",
     "server": "nodemon --watch server --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
@@ -24,6 +23,7 @@
     "@types/html-to-text": "^9.0.2",
     "@types/js-yaml": "^4.0.6",
     "@types/morgan": "^1.9.4",
+    "@types/puppeteer": "^7.0.4",
     "@types/react": "^18.2.22",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.0",

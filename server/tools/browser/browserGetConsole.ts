@@ -1,5 +1,5 @@
 import { readConsole } from "./utils";
-import { ToolFunction } from "../../utils";
+import { ToolError, ToolFunction } from "../../utils";
 
 type Args = {
   url: string;
@@ -10,8 +10,12 @@ type Return = string;
 export const browserGetConsole: ToolFunction<Args, Return> = async () => {
   try {
     return readConsole();
-  } catch (err) {
-    return err.toString();
+  } catch (error) {
+    throw new ToolError({
+      tool: "browserGetConsole",
+      message: "Failed to get console",
+      error,
+    });
   }
 };
 

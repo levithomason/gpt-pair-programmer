@@ -10,21 +10,24 @@ const googleSearch: ToolFunction<Args, Return> = async ({ query }) => {
   const { GOOGLE_API_KEY, SEARCH_ENGINE_ID } = process.env;
 
   if (!GOOGLE_API_KEY) {
-    throw new ToolError(
-      "googleSearch",
-      "Missing GOOGLE_API_KEY environment variable.",
-    );
+    throw new ToolError({
+      tool: "googleSearch",
+      message: "Missing GOOGLE_API_KEY environment variable.",
+    });
   }
 
   if (!SEARCH_ENGINE_ID) {
-    throw new ToolError(
-      "googleSearch",
-      "Missing SEARCH_ENGINE_ID environment variable.",
-    );
+    throw new ToolError({
+      tool: "googleSearch",
+      message: "Missing SEARCH_ENGINE_ID environment variable.",
+    });
   }
 
   if (!query) {
-    throw new ToolError("googleSearch", "Missing query.");
+    throw new ToolError({
+      tool: "googleSearch",
+      message: "Missing query.",
+    });
   }
 
   try {

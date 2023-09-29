@@ -2,10 +2,11 @@ import * as React from "react";
 import { FormEvent } from "react";
 import debug from "debug";
 
+import { Message } from "./types";
 import { ChatMessage } from "./chat-message";
 import { ErrorBanner } from "../banner/error-banner";
 import "./chat.css";
-import { Message } from "./types";
+import { markdownKitchenSink } from "./markdown-kitchen-sink";
 
 const log = debug("gpp:app:components:chat");
 
@@ -13,13 +14,9 @@ const suggestedMessages = [
   "Read the README.md",
   "Where am I?",
   "What's my weather?",
-  `Make a plan on how you will use your functions to document the project's "tools" for me.`,
+  `Make a guide on writing new tools.`,
+  markdownKitchenSink,
 ];
-
-// reset the chat
-fetch("http://localhost:5004/chat/new", { method: "POST" }).then(() => {
-  log("Chat messages reset (POST /chat/new)");
-});
 
 export const Chat = () => {
   const [messages, setMessages] = React.useState<Message[]>([]);
@@ -40,8 +37,21 @@ export const Chat = () => {
     });
   };
 
+  // on first render
+  React.useEffect(() => {
+    // reset the chat
+    fetch("http://localhost:5004/chat/new", { method: "POST" })
+      .then(() => {
+        log("Chat messages reset (POST /chat/new)");
+      })
+      .catch((err) => {
+        log(err);
+        setError("Failed to make a new chat.");
+      });
+  }, []);
+
   const handleSend = React.useCallback(
-    (e: FormEvent) => {
+    async (e: FormEvent) => {
       e.preventDefault();
 
       if (loading) {
@@ -65,12 +75,12 @@ export const Chat = () => {
       const messageURI = encodeURIComponent(message);
       const getUrl = `${endpoint}?message=${messageURI}`;
 
-      // abortRef.current = new AbortController();
+      try {
+        // abortRef.current = new AbortController();
 
-      // https://stackoverflow.com/questions/31061838/how-to-cancel-an-http-fetch-request
-      // signal: abortRef.current.signal,
-      fetch(getUrl)
-        .then(async (res) => {
+        // https://stackoverflow.com/questions/31061838/how-to-cancel-an-http-fetch-request
+        // signal: abortRef.current.signal,
+        await fetch(getUrl).then(async (res) => {
           log("res", res);
           const reader = res.body!.getReader();
 
@@ -108,10 +118,14 @@ export const Chat = () => {
           };
 
           await read();
-        })
-        .finally(() => {
-          abortRef.current = null;
         });
+      } catch (err) {
+        log(err);
+        setError(err.toString());
+
+        setLoading(false);
+        abortRef.current = null;
+      }
     },
     [message, loading],
   );
@@ -123,6 +137,14 @@ export const Chat = () => {
   }, [reply, loading]);
 
   log("render", { messages, message, reply, loading, error });
+
+  React.useEffect(() => {
+    if (!error) return;
+
+    const timeout = setTimeout(() => setError(""), 2000);
+
+    return () => clearTimeout(timeout);
+  }, [error]);
 
   return (
     <div id="chat">
@@ -150,29 +172,34 @@ export const Chat = () => {
           bottom: "100px",
         }}
       >
-        {suggestedMessages.map((msg) => (
-          <button
-            key={msg}
-            style={{
-              maxWidth: "400px",
-              height: "auto",
-              color: "rgba(255, 255, 255, 0.6)",
-              background: "transparent",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-            }}
-            onClick={(e) => {
-              setMessage(msg);
-              setTimeout(() => {
-                const button = document.querySelector(
-                  "button[type=submit]",
-                ) as HTMLButtonElement;
-                button.click();
-              }, 100);
-            }}
-          >
-            {msg}
-          </button>
-        ))}
+        {suggestedMessages.map((msg) => {
+          const maxChars = 200 / suggestedMessages.length;
+          return (
+            <button
+              key={msg}
+              style={{
+                maxWidth: "400px",
+                height: "auto",
+                color: "rgba(255, 255, 255, 0.6)",
+                background: "transparent",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
+              }}
+              onClick={(e) => {
+                setMessage(msg);
+                setTimeout(() => {
+                  const button = document.querySelector(
+                    "button[type=submit]",
+                  ) as HTMLButtonElement;
+                  button.click();
+                }, 100);
+              }}
+            >
+              {msg.length < maxChars
+                ? msg
+                : msg.slice(0, maxChars / 2) + "..." + msg.slice(-maxChars / 2)}
+            </button>
+          );
+        })}
       </div>
       <form onSubmit={handleSend} className="chat-form">
         <input

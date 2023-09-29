@@ -40,10 +40,11 @@ paths:
                   required: true
                   type: string
                   description: The contents of the file.
-  /file/search:
+  /file/find:
     post:
-      operationId: fileSearch
-      summary: Search for files in the project
+      operationId: fileFind
+      summary: Find a file
+      description: Case insensitive, matches any part of the file name.
       requestBody:
         required: true
         content:
