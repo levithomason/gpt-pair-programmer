@@ -128,32 +128,6 @@ const parseOpenAPISpec = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
         details.requestBody?.content?.["application/json"]?.schema
           ?.properties || {};
 
-      // //
-      // // Build tools object { [endpoint]: toolFn }
-      // //
-      // const toolType = endpoint.split("/")[1];
-      // const toolFile = operationId + `.ts`;
-      // const toolPath = path.resolve(TOOLS_ROOT, toolType, toolFile);
-      //
-      // try {
-      //   tools[endpoint] = require(toolPath).default;
-      // } catch (err) {
-      //   log(`failed to require() tool: ${toolPath}`);
-      //   const toolFiles = fs.readdirSync(path.resolve(TOOLS_ROOT, toolType));
-      //   throw new PairProgrammerError(
-      //     [
-      //       `OpenAPI ${endpoint} ${operationId} doesn't match any ${toolType} tool:`,
-      //       ...toolFiles.map((file) => `  - ${file}`),
-      //     ].join("\n"),
-      //   );
-      // }
-      //
-      // if (!tools[endpoint]) {
-      //   throw new PairProgrammerError(
-      //     `Tool "${toolFile}" does not have a default export.`,
-      //   );
-      // }
-
       //
       // Dynamically add routes for each tool
       //
@@ -230,7 +204,15 @@ const systemMessage: ChatCompletionMessageParam = {
   content: [
     "You are pair programming with the user on their computer.",
     "All your functions are executed on the user's computer with the user's permissions.",
-    "Use mermaid markdown codeblocks to make charts, graphs, or diagrams.",
+    "Use markdown codeblocks in mermaid language to make charts, graphs, or diagrams to explain relationships.",
+    "",
+    "Be concise. Be informative. Get straight to the point.",
+    "",
+    "Never claim you are unable to accomplish a goal.",
+    "Make a plan to accomplish the goal using your tools.",
+    "",
+    "Always use your tools to accomplish your tasks.",
+    "Never assume you know something, check using your tools.",
   ].join("\n"),
 };
 

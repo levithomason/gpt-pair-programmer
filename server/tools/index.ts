@@ -25,20 +25,18 @@ fs.readdirSync(__dirname).forEach((entry) => {
     const toolPath = path.join(toolDir, entry);
 
     log(`Load: ${entry}`);
-    const name = path.basename(entry, ".ts");
+    const basename = path.basename(entry, ".ts");
     const { default: tool } = await import(toolPath);
 
     if (typeof tool !== "function") {
-      throw new BaseError(
-        `Imported ${toolPath} but its default export is not a function`,
-      );
+      throw new BaseError(`${entry} default export is not a function.`);
     }
 
-    tools[name] = async function toolWrapper(arg) {
-      log(`${name}(${JSON.stringify(arg, null, 2)})`);
+    tools[basename] = async function toolWrapper(arg) {
+      log(`${basename}(${JSON.stringify(arg, null, 2)})`);
 
       const result = await tool(arg);
-      log(`${name} =>`, result);
+      log(`${basename} =>`, result);
 
       return result;
     };
