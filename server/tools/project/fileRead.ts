@@ -3,13 +3,13 @@ import * as fs from "fs";
 import { absPath, ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
-  relPath: string;
+  path: string;
 };
 
 type Return = string;
 
 const fileRead: ToolFunction<Args, Return> = async (file) => {
-  const fileAbsPath = absPath(file.relPath);
+  const fileAbsPath = absPath(file.path);
 
   if (!fs.existsSync(fileAbsPath)) {
     throw new ToolError({
