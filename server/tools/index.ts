@@ -1,7 +1,10 @@
-import fs from "fs";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+
 import debug from "debug";
-import { BaseError, ToolFunction } from "../utils";
-import path from "path";
+
+import { BaseError, ToolFunction } from "../utils.js";
 
 const log = debug("gpp:tools");
 
@@ -9,11 +12,15 @@ export const tools: {
   [fileNameWithoutExt: string]: ToolFunction<object, any>;
 } = {};
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 fs.readdirSync(__dirname).forEach((entry) => {
   const toolDir = path.join(__dirname, entry);
   if (!fs.statSync(toolDir).isDirectory()) return;
 
   fs.readdirSync(toolDir).forEach(async (entry) => {
+    log("TS or JS?", entry);
     if (
       entry === "utils.ts" ||
       entry === "index.ts" ||
@@ -25,6 +32,7 @@ fs.readdirSync(__dirname).forEach((entry) => {
     const toolPath = path.join(toolDir, entry);
 
     log(`Load: ${entry}`);
+    log("TS or JS?", entry);
     const basename = path.basename(entry, ".ts");
     const { default: tool } = await import(toolPath);
 

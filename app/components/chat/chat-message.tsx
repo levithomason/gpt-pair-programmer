@@ -2,7 +2,7 @@ import * as React from "react";
 import { micromark } from "micromark";
 import { gfm, gfmHtml } from "micromark-extension-gfm";
 import mermaid from "mermaid";
-import hljs from "highlight.js";
+import hljs from "highlight.js"
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
 import { MessageRole } from "./types";

@@ -1,8 +1,10 @@
+import * as path from "path";
+
 import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
 import type { Configuration } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import { APP_ROOT, DIST_ROOT, PUBLIC_ROOT } from "./config";
-import path from "path";
+
+import { APP_ROOT, DIST_ROOT, PUBLIC_ROOT } from "./config.js";
 
 export default {
   mode: "development",
@@ -17,8 +19,12 @@ export default {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
-        exclude: /node_modules/,
+        use: {
+          loader: "ts-loader",
+          options: {
+            configFile: "tsconfig.app.json",
+          },
+        },
       },
       {
         test: /\.css?$/,

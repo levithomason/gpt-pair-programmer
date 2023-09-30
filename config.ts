@@ -1,5 +1,10 @@
-import path from "path";
-import { OpenAIModel } from "./types";
+import * as path from "path";
+import { fileURLToPath } from "url";
+
+import { OpenAIModel } from "./types.js";
+
+export const __filename = fileURLToPath(import.meta.url);
+export const __dirname = path.dirname(__filename);
 
 export const PROJECT_ROOT = __dirname;
 export const APP_ROOT = path.resolve(PROJECT_ROOT, "app");
@@ -8,7 +13,7 @@ export const PUBLIC_ROOT = path.resolve(PROJECT_ROOT, "public");
 export const DIST_ROOT = path.resolve(PROJECT_ROOT, "dist");
 export const TOOLS_ROOT = path.resolve(SERVER_ROOT, "tools");
 
-export const OPENAI_MODELS: Record<OpenAIModel['name'], OpenAIModel> = {
+export const OPENAI_MODELS: Record<OpenAIModel["name"], OpenAIModel> = {
   "gpt-3.5-turbo": {
     name: "gpt-3.5-turbo",
     description:

@@ -1,5 +1,5 @@
-import { goTo } from "./utils";
-import { ToolError, ToolFunction } from "../../utils";
+import { goTo } from "./utils.js";
+import { ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   url: string;

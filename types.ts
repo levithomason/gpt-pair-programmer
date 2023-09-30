@@ -1,4 +1,4 @@
-import { ChatCompletionCreateParamsStreaming } from "openai/src/resources/chat/completions";
+import { ChatCompletionCreateParamsStreaming } from "openai/src/resources/chat/completions.js";
 
 export type OpenAIModel = {
   name: Exclude<

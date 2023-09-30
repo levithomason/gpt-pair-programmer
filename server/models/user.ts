@@ -5,7 +5,7 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { getSequelize } from "../database";
+import { getSequelize } from "../database/index.js";
 
 const sequelize = getSequelize();
 

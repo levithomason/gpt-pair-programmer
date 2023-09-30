@@ -1,7 +1,7 @@
-import fs from "fs";
+import * as fs from "fs";
 import { globSync } from "glob";
 
-import { absPath, relPath, run, ToolError, ToolFunction } from "../../utils";
+import { absPath, relPath, run, ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   query: string;
@@ -42,7 +42,7 @@ const getIgnorePatterns = (filePath: string): string[] => {
  * Searches full file path. Case-insensitive fuzzy search. Respects .gitignore and global .gitignore patterns.
  * @example
  * fileFind({ query: "mt" })
- * => "mine/was/foundThere.ts", "My/Stuff/Is_There.ts", etc.
+ * => "mine/was/foundThere.js", "My/Stuff/Is_There.js", etc.
  */
 const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
   const localGitignore = getIgnorePatterns(absPath(".gitignore"));

@@ -1,21 +1,25 @@
-import fs from "fs";
-import path from "path";
+import * as fs from "fs";
+import * as path from "path";
 
 import express from "express";
 import session from "express-session";
-import morgan from "morgan";
+import bodyParser from "body-parser";
 import cors from "cors";
-import { json } from "body-parser";
+import morgan from "morgan";
 import debug from "debug";
-import yaml from "js-yaml";
 import { OpenAI } from "openai";
-import { ChatCompletionMessageParam } from "openai/resources/chat";
-import { tools } from "./tools";
-import "./database";
+import { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
+import * as yaml from "js-yaml";
 
-import { OPENAI_MODELS, PUBLIC_ROOT, SERVER_ROOT, TOOLS_ROOT } from "../config";
-import { OpenAIFunction, OpenAPIMethod, OpenAPISpec } from "./types";
-import { BaseError, relPath, ToolError, trimStringToTokens } from "./utils";
+import { OpenAIFunction, OpenAPIMethod, OpenAPISpec } from "./types.js";
+import {
+  OPENAI_MODELS,
+  PUBLIC_ROOT,
+  SERVER_ROOT,
+  TOOLS_ROOT,
+} from "../config.js";
+import { BaseError, relPath, ToolError, trimStringToTokens } from "./utils.js";
+import { tools } from "./tools/index.js";
 
 debug.enable("gpp:*");
 
@@ -50,7 +54,7 @@ app.use(
     ],
   }),
 );
-app.use(json());
+app.use(bodyParser.json());
 
 // session
 const sess: session.SessionOptions = {
@@ -266,6 +270,32 @@ app.get("/chat", async (req, res) => {
     log("/chat callModel", trimmedMessages);
 
     let assistantReply = "";
+
+    // Determine next best step
+    const nextBestStep = await openai.chat.completions.create({
+      model: MODEL.name,
+      messages: [
+        {
+          role: "system",
+          content: [
+            "Determine the best next step:",
+            "1: Get more information",
+            "2: Make a plan",
+            "3: Take action",
+            "",
+            "Respond with this schema:",
+            "<number>",
+          ].join("\n"),
+        },
+        ...trimmedMessages,
+      ],
+      stream: false,
+      n: 1,
+      functions: openAIFunctions,
+      function_call: "none",
+    });
+
+    res.write(nextBestStep.choices[0].message);
 
     try {
       const stream = await openai.chat.completions.create({

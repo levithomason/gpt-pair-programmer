@@ -2,10 +2,10 @@ import * as React from "react";
 import { FormEvent } from "react";
 import debug from "debug";
 
+import "./chat.css";
 import { Message } from "./types";
 import { ChatMessage } from "./chat-message";
 import { ErrorBanner } from "../banner/error-banner";
-import "./chat.css";
 import { markdownKitchenSink } from "./markdown-kitchen-sink";
 
 const log = debug("gpp:app:components:chat");

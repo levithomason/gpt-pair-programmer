@@ -1,5 +1,5 @@
-import { getDom } from "./utils";
-import { ToolError, ToolFunction } from "../../utils";
+import { getDom } from "./utils.js";
+import { ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   url: string;

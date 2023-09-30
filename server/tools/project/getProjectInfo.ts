@@ -1,8 +1,8 @@
-import fs from "fs";
-import path from "path";
+import * as fs from "fs";
+import * as path from "path";
 
-import { ToolFunction } from "../../utils";
-import { PROJECT_ROOT } from "../../../config";
+import { ToolFunction } from "../../utils.js";
+import { PROJECT_ROOT } from "../../../config.js";
 
 type Return = {
   readme: string;

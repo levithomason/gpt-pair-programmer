@@ -1,7 +1,7 @@
-import { PROJECT_ROOT } from "../../../config";
-import { ToolFunction } from "../../utils";
-import fs from "fs";
-import path from "path";
+import { PROJECT_ROOT } from "../../../config.js";
+import { ToolFunction } from "../../utils.js";
+import * as fs from "fs";
+import * as path from "path";
 
 type Todo = {
   line: number;

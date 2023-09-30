@@ -1,10 +1,10 @@
-import fs from "fs";
-import path from "path";
+import * as fs from "fs";
+import * as path from "path";
 import { exec, ExecException } from "child_process";
 
 import debug from "debug";
 
-import { PROJECT_ROOT } from "../config";
+import { PROJECT_ROOT } from "../config.js";
 
 export const log = debug("gpp:server:utils");
 

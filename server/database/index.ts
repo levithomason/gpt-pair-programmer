@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 import debug from "debug";
 
-import { BaseError } from "../utils";
+import { BaseError } from "../utils.js";
 
 export const log = debug("db");
 

@@ -2,7 +2,7 @@ import os from "os";
 
 import axios from "axios";
 
-import { run } from "../../utils";
+import { run } from "../../utils.js";
 
 export type Location = {
   ip: string; // "24.160.42.101";

@@ -6,4 +6,12 @@ dist/
 *.generated.*
 *.sqlite
 
-# comment
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+# no Zero-Installs which requries committing dependencies
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

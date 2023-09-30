@@ -1,5 +1,5 @@
-import { getInfo } from "./utils";
-import { ToolFunction } from "../../utils";
+import { getInfo } from "./utils.js";
+import { ToolFunction } from "../../utils.js";
 
 type Args = {
   url: string;

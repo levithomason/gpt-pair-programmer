@@ -1,5 +1,5 @@
-import { type } from "./utils";
-import { ToolError, ToolFunction } from "../../utils";
+import { type } from "./utils.js";
+import { ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   selector: string;

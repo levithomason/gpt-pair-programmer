@@ -1,6 +1,6 @@
-import fs from "fs";
+import * as fs from "fs";
 
-import { absPath, ToolError, ToolFunction } from "../../utils";
+import { absPath, ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   relPath: string;

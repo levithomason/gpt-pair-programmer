@@ -1,5 +1,5 @@
-import { ToolError, ToolFunction } from "../../utils";
-import { evaluate } from "./utils";
+import { ToolError, ToolFunction } from "../../utils.js";
+import { evaluate } from "./utils.js";
 
 type Args = {
   code: string;

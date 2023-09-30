@@ -1,5 +1,5 @@
-import { readConsole } from "./utils";
-import { ToolError, ToolFunction } from "../../utils";
+import { readConsole } from "./utils.js";
+import { ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   url: string;

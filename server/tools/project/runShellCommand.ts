@@ -1,4 +1,4 @@
-import { run, RunReturn, ToolError, ToolFunction } from "../../utils";
+import { run, RunReturn, ToolError, ToolFunction } from "../../utils.js";
 
 type Args = {
   command: string;
