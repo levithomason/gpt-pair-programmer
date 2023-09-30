@@ -158,7 +158,7 @@ const parseOpenAPISpec = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
           res.status(200).send(data);
         } catch (error) {
           if (error instanceof ToolError) {
-            res.status(400).json({ error: error.toString() });
+            res.status(400).json({ error: error.message });
           } else {
             res.status(500).json({ error: (error as Error).toString() });
           }
