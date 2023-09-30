@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { ToolFunction } from "../../utils.js";
+import { ToolError, ToolFunction } from "../../utils.js";
 import { PROJECT_ROOT } from "../../../config.js";
 
 type Return = {
@@ -10,11 +10,25 @@ type Return = {
 };
 
 const getProjectInfo: ToolFunction<never, Return> = async () => {
-  // TODO: assemble useful project info
-  return {
-    readme: fs.readFileSync(path.join(PROJECT_ROOT, "README.md"), "utf-8"),
-    packageJson: require(path.join(PROJECT_ROOT, "package.json")),
-  };
+  // TODO: assemble more useful project info
+  const readme = fs.readFileSync(path.join(PROJECT_ROOT, "README.md"), "utf-8");
+  const pkgString = fs.readFileSync(
+    path.join(PROJECT_ROOT, "package.json"),
+    "utf-8",
+  );
+
+  let packageJson: JSON;
+  try {
+    packageJson = JSON.parse(pkgString);
+  } catch (error) {
+    throw new ToolError({
+      tool: "getProjectInfo",
+      message: "Failed to parse package.json",
+      error,
+    });
+  }
+
+  return { readme, packageJson };
 };
 
 export default getProjectInfo;
