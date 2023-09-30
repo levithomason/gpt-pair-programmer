@@ -6,6 +6,9 @@ import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
 import { MessageRole } from "./types";
+import { makeLogger } from "../../utils";
+
+const log = makeLogger("components:chat-message");
 
 export type ChatMessageProps = {
   children: string;
@@ -37,9 +40,13 @@ export const ChatMessage = (props: ChatMessageProps) => {
     hljs.highlightAll();
 
     if (Date.now() - lastRenderTime.current < 1000) {
-      mermaid.run({
-        querySelector: ".language-mermaid",
-      });
+      mermaid
+        .run({
+          querySelector: ".language-mermaid",
+        })
+        .catch((error) => {
+          log(error);
+        });
     }
   }, [props.role, props.children]);
 
@@ -47,14 +54,12 @@ export const ChatMessage = (props: ChatMessageProps) => {
     <div
       className={`chat-message chat-message--${props.role}`}
       dangerouslySetInnerHTML={{
-        __html:
-          `ROLE: ${props.role}:` +
-          removeWrappingPTag(
-            micromark(props.children, {
-              extensions: [gfm()],
-              htmlExtensions: [gfmHtml()],
-            }),
-          ),
+        __html: removeWrappingPTag(
+          micromark(props.children, {
+            extensions: [gfm()],
+            htmlExtensions: [gfmHtml()],
+          }),
+        ),
       }}
     />
   );

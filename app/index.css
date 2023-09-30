@@ -20,13 +20,17 @@ body {
   line-height: 1.5;
   background: var(--body-bg);
   color: var(--body-color);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
 }
 
 code {
   font-family: "Roboto Mono", monospace;
-  text-shadow: none;
 }
 code.language-mermaid {
   display: block;

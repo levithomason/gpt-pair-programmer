@@ -8,8 +8,11 @@ import { App } from "./components/app";
 
 debug.enable("gpp:*");
 
-const root = createRoot(document.body);
-root.render(
+const rootElement = document.createElement("div");
+rootElement.id = "root";
+document.body.appendChild(rootElement);
+
+createRoot(rootElement).render(
   <ErrorBoundary fallback={<div>Something went wrong</div>}>
     <App />
   </ErrorBoundary>,
