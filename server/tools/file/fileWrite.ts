@@ -16,10 +16,11 @@ const fileWrite: ToolFunction<Args, Return> = async (file) => {
     fs.writeFileSync(absFilePath, file.contents, "utf8");
     return "File written successfully.";
   } catch (err) {
-    return new ToolError(
-      "fileWrite",
-      `Error writing file: ${err.message}`,
-    ).toString();
+    throw new ToolError({
+      tool: "fileWrite",
+      message: `Failed to write file ${file.relPath}`,
+      error: err,
+    });
   }
 };
 

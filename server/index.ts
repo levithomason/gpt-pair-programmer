@@ -72,11 +72,6 @@ const logErrors: express.ErrorRequestHandler = (err, req, res, next) => {
 };
 
 const returnErrors: express.ErrorRequestHandler = (err, req, res, next) => {
-  const stackRelativePath = err.stack.split("\n").map((line) => {
-    const match = line.match(/\((.*):\d+:\d+\)/);
-    return match ? relPath(match[1]) : line;
-  });
-
   log("returnErrors", err.message);
   res.status(err.statusCode || 500).send({ error: err.message });
 };
@@ -166,13 +161,10 @@ const parseOpenAPISpec = (openAPISpec: OpenAPISpec): OpenAIFunction[] => {
         log(method, endpoint, req.body);
 
         // pick the args from the request body based on the OpenAPI spec
-        const args = Object.keys(requestBodyProperties).reduce(
-          (acc, next) => {
-            acc[next] = req.body[next];
-            return acc;
-          },
-          {} as Record<string, any>,
-        );
+        const args = Object.keys(requestBodyProperties).reduce((acc, next) => {
+          acc[next] = req.body[next];
+          return acc;
+        }, {});
 
         const tool = tools[operationId];
 
@@ -246,7 +238,7 @@ let messageStack: ChatCompletionMessageParam[] = [systemMessage];
 
 const MODEL = OPENAI_MODELS["gpt-3.5-turbo"];
 
-app.post("/chat/new", async (req, res) => {
+app.post("/chat/new", (req, res) => {
   messageStack = [systemMessage];
   res.json(messageStack);
 });
@@ -415,12 +407,12 @@ app.get("/chat", async (req, res) => {
 // OpenAI Plugin Routes
 // ============================================================================
 
-app.get("/logo.png", async (_, res) => {
+app.get("/logo.png", (_, res) => {
   const filename = "logo-white-bg.png";
   res.sendFile(filename, { root: PUBLIC_ROOT });
 });
 
-app.get("/.well-known/ai-plugin.json", async (_, res) => {
+app.get("/.well-known/ai-plugin.json", (_, res) => {
   fs.readFile(
     path.resolve(SERVER_ROOT, ".well-known", "ai-plugin.json"),
     "utf8",
@@ -436,7 +428,7 @@ app.get("/.well-known/ai-plugin.json", async (_, res) => {
   );
 });
 
-app.get("/openapi.yaml", async (_, res) => {
+app.get("/openapi.yaml", (_, res) => {
   fs.readFile(GENERATED_SPEC_PATH, "utf8", (error, data) => {
     if (error) {
       log(error);
