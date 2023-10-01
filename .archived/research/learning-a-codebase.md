@@ -1,6 +1,6 @@
 # Learning a Codebase
 
-## Summary
+## Overview
 
 In order for Pair Programmer to be exceptionally useful, it needs to learn the codebase. This knowledge needs to be dynamic and updated as the code base evolves.
 
@@ -10,7 +10,7 @@ When Pair Programmer is making plans or executing actions, it must also rely on 
 
 The seed idea for how to go about testing hypothesis for developing such a system was to imagine ChatGPT attempting to learn a codebase for the purpose of documenting it. In order to document a code base well for end-users, you need to have a full understanding of the project.
 
-**Priming Context**
+### Priming Context
 
 The following primer conversation was had to get ChatGPT into the head-space of learning a codebase:
 - [Great Documentation Content](#great-documentation-content)
@@ -18,19 +18,43 @@ The following primer conversation was had to get ChatGPT into the head-space of 
 Then it was explained how ChatGPT would have to use a algorithmic approach to understanding a codebase:
 - [Documentation Algorithm](#documentation-algorithm)
 
-**Priming Context**
+### Knowledge Graph
 
 This line of thinking culminated in the discussion on the iterative creation of a knowledge graph to capture codebase understanding:
-- [Knowledge Graph: Construction](#knowledge-graph-construction)
-- [Knowledge Graph: ASTs](#knowledge-graph-asts)
-- [Knowledge Graph: Webpack](#knowledge-graph-webpack)
-- [Knowledge Graph: Chat Messages](#knowledge-graph-chat-messages)
-- [Knowledge Graph: Git Commits](#knowledge-graph-git-commits)
+- [Knowledge Graph - Construction](#knowledge-graph-construction)
+- [Knowledge Graph - ASTs](#knowledge-graph-asts)
+- [Knowledge Graph - Webpack](#knowledge-graph-webpack)
+- [Knowledge Graph - Chat Messages](#knowledge-graph-chat-messages)
+- [Knowledge Graph - Git Commits](#knowledge-graph-git-commits)
+
+### Understanding "Why" & Intent
 
 While a knowledge graph can capture empirical and factual data, there is also the need to capture "why" and intent. This section was not as productive as the prior, but included for reference any way:
 
 - [Understanding "Why" vs "What"](#understanding-why-vs-what)
 - [Understanding Intent](#understanding-intent)
+
+### Parallel Tree
+
+The above concepts inspired the idea of a parallel tree as a way to store the "why" information alongside the "what" information. These data are symmetrical in that both are organized in a hierarchy where the root node is the highest layer and conceptually the most broad, while the deepest leaf node is the most detailed and narrow. The highest layer has the fewest nodes, while the deeper layers have the most nodes. Every layer in the descent from top to bottom is purposed according to its alignment with the upper layers.
+
+Example, a UI framework project can be thought of as a root node (top layer), while the folder structure may be the next set of nodes (layer), the files next, the modules comprising the files, the syntax in the modules, etc. Each of these layers of nodes has a set of problem-solution statements that caused them to be as they are, this is the "why". 
+
+You can point to part of any project and provide an answer to "why". "Why is this using a ternary?", regarding a deep detailed node. "Why are modules organized this way", regarding a middle layer node. "Why is this package public?", regarding a upper middle layer node. "Why does this framework exist?", regarding a top layer node.
+
+Each "thing" in a project has a "reason" for its existence. These things and their reasons are ordered in a hierarchy of ever higher-value concepts. In this way, the "what" and the "why" are parallel hierarchies or trees. Each reason has to serve the reason above it in order for it to be a good reason.
+
+- [Parallel Tree](#parallel-tree)
+
+#### Parallel Tree - Narrative Material
+
+Narrative material comprises the "why". Examples are documentation, issue tickets, pull requests, RFCs, git commits, and discussions over these things.
+
+Codebase nodes have a "location" in the knowledge graph defined by their relation to other nodes. This information is structured based on specificity, forming a hierarchy. Crude example: Project > Systems > Technologies, Folders > Modules > Files > Syntax elements.  
+
+Narrative material could be classified and related to entities (nodes) that they are discussing. If this was this were done at every level of analysis in the hierarchy, using all project narrative material available, and updated with constants chats, then this could create a parallel tree of understanding (the "why") to explain and orient one's self in the code (the "what").
+
+- [Parallel Tree - Storing Chats](#parallel-tree-storing-chats)
 
 ## Great Documentation Content
 
@@ -209,7 +233,7 @@ Place the algorithm in a loop that is primarily triggered by:
 
 By adhering to this algorithm, you'll be in a continuous loop of generating, refining, and updating documentation for the open-source project.
 
-## Knowledge Graph: Iterative Construction
+## Knowledge Graph - Iterative Construction
 
 I also want you to build a knowledge graph of the project as you recursively iterate through it. Later, chat threads will have their messages parsed for entities and relationships and this will be added to your context before you reply to the user.
 
@@ -268,7 +292,7 @@ Regularly update the knowledge graph as:
 
 With this setup, you'll not only have a dynamic documentation system but also a knowledge graph that evolves with user interactions and project changes. This can greatly enhance the user experience, as responses will be context-aware and more pertinent to user queries.
 
-## Knowledge Graph: ASTs
+## Knowledge Graph - ASTs
 
 How can AST parsers help with this? You will be operating primarily on typescript projects.
 
@@ -310,7 +334,7 @@ While the main code provides structural data, comments, and annotations (like de
 
 In summary, AST parsers provide a detailed, tree-based representation of the code which, when traversed, can provide rich insights into the structure and semantics of a project. For a TypeScript project, leveraging the TypeScript Compiler API or similar tools can greatly enhance the depth and accuracy of the knowledge graph.
 
-## Knowledge Graph: Webpack
+## Knowledge Graph - Webpack
 
 How can webpack assist with this task as well?
 
@@ -358,7 +382,7 @@ Webpack's tree shaking process removes unused code, giving insights into:
 
 These insights can be represented in the knowledge graph, showing the active versus inactive parts of the codebase.
 
-### Integration with the Knowledge Graph:
+### Integration with the Knowledge Graph -
 
 1. Configure Webpack to bundle the TypeScript project.
 2. Use appropriate loaders to handle TypeScript and other relevant files.
@@ -367,7 +391,7 @@ These insights can be represented in the knowledge graph, showing the active ver
 
 In essence, while Webpack's primary role isn't to aid in creating knowledge graphs, its deep understanding of a project's module structure and extensibility through loaders and plugins make it a valuable tool to extract insights and data for the purpose. Combining Webpack's output with AST parsing, as previously discussed, can result in a rich, comprehensive knowledge graph.
 
-## Knowledge Graph: Chat Messages
+## Knowledge Graph - Chat Messages
 
 As messages come in, they can be parsed for entities and relationships. These can all be stored to the graph db. This will create an somewhat random set of data, with duplicate names and relationships.
 
@@ -423,7 +447,7 @@ Regularly revisit the knowledge graph to refine and update it.
 
 In essence, this approach to building and refining a knowledge graph mirrors neural learning processes, where information is first broadly captured, then refined and organized for better accessibility and understanding. With iterative refinement and feedback, the graph can be a powerful tool for codebase understanding, documentation, and evolution.
 
-## Knowledge Graph: Git Commits
+## Knowledge Graph - Git Commits
 
 This could be done for an existing codebase by iterating through recent commits and operating on the diffs.
 
@@ -588,3 +612,227 @@ Understanding the intent of a project and its maintainers involves a combination
     - Update derived insights regularly based on new data and feedback.
 
 By aggregating insights from these channels and iteratively refining the understanding, one can capture a holistic view of the intent of the project and its maintainers.
+
+## Parallel Tree
+
+What pros and cons is there to storing the chat messages themselves in the knowledge graph. Pros I could see:
+
+- Link message to the node for the user
+- Link messages to codebase knowledge, so the topic of conversation is directly linked to the codebase knowledge
+- Querying for "who" has talked about "what"
+- Could possibly give context on intent and "why" by having conversational data linked to structured codebase data
+
+---
+
+Storing chat messages in the knowledge graph indeed offers a range of benefits, but it also introduces some challenges. Let's explore the pros and cons in detail:
+
+### Pros:
+
+1. **Contextual Understanding**:
+    - Storing chat messages alongside structured data about the codebase can provide context, helping bridge the gap between the "what" (structural knowledge) and the "why" (intent and reasoning).
+
+2. **User Profiling**:
+    - Linking messages to user nodes allows tracking of individual user queries, feedback, or contributions over time. This can help identify power users, frequent contributors, or areas of expertise.
+
+3. **Topic Correlation**:
+    - By linking messages to specific parts of the codebase, you can see what parts of the codebase are being discussed most often, helping identify potential areas of confusion, interest, or contention.
+
+4. **Querying Capabilities**:
+    - As you mentioned, the ability to query who discussed what can be a powerful tool for understanding user engagement, feedback patterns, and recurring issues or queries.
+
+5. **Sentiment Analysis**:
+    - With the chat data stored, you can apply sentiment analysis to gauge user sentiment towards specific parts of the codebase, features, or the project as a whole.
+
+6. **Temporal Insights**:
+    - Storing chat messages chronologically can provide insights into the evolution of user feedback, queries, or sentiment over time.
+
+### Cons:
+
+1. **Data Volume**:
+    - Storing every chat message can quickly lead to a vast amount of data. This can introduce performance challenges in querying and updating the knowledge graph.
+
+2. **Data Privacy**:
+    - Storing personal chat messages might raise privacy concerns. You'd need to ensure GDPR compliance and other relevant data protection regulations, and users should be informed that their messages are being stored.
+
+3. **Noise**:
+    - Not all chat messages will be relevant or provide valuable insights. Storing too much irrelevant data can introduce noise, making it harder to derive meaningful insights from the graph.
+
+4. **Complexity**:
+    - Linking chat messages to relevant parts of the codebase or other nodes in the knowledge graph can be complex. Ensuring that these links are accurate and meaningful requires sophisticated parsing and linking algorithms.
+
+5. **Maintenance**:
+    - The graph will need regular pruning and maintenance to ensure relevance and accuracy. Stale or outdated chat messages might need removal or archiving.
+
+6. **Ambiguity**:
+    - Chat messages can often be ambiguous or context-dependent. Without the full context, a stored message might be misinterpreted or might not make sense when revisited later.
+
+In conclusion, while there are evident advantages to storing chat messages in the knowledge graph, it's essential to approach the process thoughtfully. It might be worth considering a hybrid approach, where selected, relevant, or tagged messages are stored, while transient or irrelevant chats are filtered out. This can maximize the benefits while mitigating many of the cons.
+
+---
+
+The current plan was to use SQL for storing chats.
+
+---
+
+Using SQL databases for storing chat messages is a common and robust approach. Structured databases like SQL are particularly effective for structured data, and chat messages, along with associated metadata, can be modeled in a structured manner.
+
+Here's how you can structure chat messages in an SQL database and then integrate it with the knowledge graph:
+
+### Structuring Chats in SQL:
+
+1. **Tables**:
+
+    - **Users**:
+        - UserID (Primary Key)
+        - UserName
+        - UserEmail
+        - ... (any other user-specific attributes)
+
+    - **Messages**:
+        - MessageID (Primary Key)
+        - UserID (Foreign Key)
+        - Timestamp
+        - Content
+        - ... (any other message-specific attributes, e.g., a reference to a codebase section if directly mentioned)
+
+    - **Threads or Channels** (if relevant):
+        - ThreadID (Primary Key)
+        - ThreadName
+        - ... (any other thread-specific attributes)
+
+    - **MessageThreads** (if using threads or channels):
+        - MessageID (Foreign Key)
+        - ThreadID (Foreign Key)
+
+2. **Indexes**: To speed up common queries, consider indexing frequently accessed columns, such as the Timestamp in Messages or UserName in Users.
+
+### Integration with the Knowledge Graph:
+
+1. **Node Creation**:
+    - Each chat message can be represented as a node in the knowledge graph. When storing a new message in the SQL database, simultaneously create a corresponding node in the knowledge graph.
+
+2. **Relationship Mapping**:
+    - Link user nodes to their respective messages.
+    - Link messages to specific parts of the codebase if they contain relevant mentions or discussions.
+    - Use chat threads or channels to create additional relationships, linking related messages or discussions about specific topics.
+
+3. **Querying and Analysis**:
+    - Run SQL queries to retrieve specific chat sequences or user interactions.
+    - Once fetched, traverse the knowledge graph to gain insights into the context of the chat – such as associated code parts, previous related discussions, or involved entities.
+
+4. **Sentiment Analysis and NLP**:
+    - Extract chat content from the SQL database.
+    - Apply NLP techniques to infer sentiment, extract entities, or identify themes.
+    - Update the knowledge graph with these insights, linking them to the relevant chat nodes.
+
+### Pros of Using SQL for Chats:
+
+1. **Performance**: SQL databases are optimized for performance. Fetching or storing structured data like chat messages is quick.
+2. **ACID Properties**: Ensures data reliability due to its inherent properties – Atomicity, Consistency, Isolation, and Durability.
+3. **Mature Ecosystem**: There are numerous tools, libraries, and utilities available for SQL databases, simplifying operations, backups, migrations, etc.
+4. **Complex Queries**: SQL's querying capabilities can be utilized for complex data retrieval or analytics on chat data.
+
+### Cons:
+
+1. **Schema Rigidity**: Altering the schema in SQL databases can be challenging, especially as the amount of stored data grows.
+2. **Scalability**: While SQL databases can handle a large volume of data, they might face scalability challenges in extremely high-volume, high-velocity chat environments.
+3. **Integration Overhead**: Creating a seamless integration between an SQL database and a knowledge graph might require some development overhead.
+
+In conclusion, using SQL to store chat messages while simultaneously integrating with a knowledge graph for deeper contextual insights is a practical and effective strategy. The structured nature of chat data fits well with SQL's capabilities, while the knowledge graph provides the contextual depth and inter-relational understanding.
+
+## Parallel Tree - Storing Chats
+
+What is a good method for storing hierarchical data? I'm imaging a codebase as a tree of parallel information types. The "what" and the associated "why" scale together in depth and breadth.
+
+At the very end leaf node, you might be looking at a one line TS if statement as the "what" and the "why" knowledge associated with this would be detail knowledge like "ESLint disallows ternaries" "Jane prefers minimal syntax" "One line is easier to scan than multiple" etc.
+
+At the very root node the "what" would be the project itself. The associated "why" information here is about the goals, the reason for its existence, what it enables, etc.
+
+Everything in between would be varying levels of detail from build system, main components, modules, files, units, syntax, etc. Each of these levels is a tree (previously discussed as the "location") and each of these levels has "why" information nested within the greater narrative.
+
+How could we store both of these types of data and relate them?
+
+---
+
+Storing hierarchical data, especially when it's intermingled with various levels of narrative ("why" information), can be approached in multiple ways. Let's explore a few methods suitable for this purpose:
+
+### 1. **Adjacency List in Relational Databases**:
+
+- In this model, every record in a table (e.g., in an SQL database) has a foreign key that points to its parent record.
+- This is a simple and commonly-used method. You can have a separate table or column for the "why" information associated with each node.
+
+### Pros:
+- Simple and straightforward.
+- Easy to implement in most relational databases.
+
+### Cons:
+- Traversing the hierarchy can be inefficient, especially for deep trees, as it might require multiple queries.
+
+### 2. **Path Enumeration**:
+
+- Each record has a column storing the full path from the root to that record, often delimited (e.g., `1.2.3.4`).
+- This path can represent the "what" hierarchy, while a related table or column can store the "why" information.
+
+### Pros:
+- Efficient for reading and understanding the hierarchy.
+
+### Cons:
+- Writing or restructuring the hierarchy can be complex.
+
+### 3. **Nested Set Model**:
+
+- Each node in the tree has a left and right value. All descendants of a node fall between its left and right values.
+- Again, you can have a separate table or column for the "why" details.
+
+### Pros:
+- Efficient for reading the tree or extracting sub-trees.
+
+### Cons:
+- Inserts, updates, and deletions can be complicated due to the need to recompute left and right values.
+
+### 4. **Materialized Path**:
+
+- Similar to path enumeration but leverages database-specific features like arrays or JSON fields to store the path.
+
+### Pros:
+- Makes use of native database features for handling hierarchical data.
+
+### Cons:
+- Database-specific; might not be portable across different database systems.
+
+### 5. **Graph Databases**:
+
+- Tools like Neo4j naturally support hierarchical data by linking nodes through relationships.
+- You can have a "WHAT" relationship connecting the hierarchy and a "WHY" relationship providing the reasons or narratives.
+
+### Pros:
+- Naturally suitable for interconnected, hierarchical data.
+- Efficient traversal of deep hierarchies.
+
+### Cons:
+- Might be an overkill for simple hierarchies.
+- Requires learning and managing a separate type of database.
+
+### 6. **Document-Oriented Databases**:
+
+- Databases like MongoDB allow you to store hierarchical data as nested documents.
+- The "what" can be the document structure itself, while the "why" can be fields or sub-documents within.
+
+### Pros:
+- Flexible schema.
+- Can efficiently represent deep hierarchies.
+
+### Cons:
+- Not as relationally structured as SQL databases.
+
+### Implementation:
+
+Given the described requirement – a blend of hierarchical codebase data and narrative "why" information – a combination of methods might be best.
+
+- **Graph Database for Hierarchy**: Use a graph database to represent the codebase's hierarchical structure. Every node (from the root project to the leaf one-liner) is a node in the graph. Relationships represent the hierarchical structure. This allows for efficient traversal and querying of the hierarchy.
+
+- **Document Store for Narratives**: For each node in the graph database, store the associated "why" information in a document-oriented database. Each document provides the detailed narratives, reasons, and context for a node. Using a document store allows for flexibility in capturing various forms of narratives without a rigid schema.
+
+Linking the two is as simple as using a unique identifier for each node in the graph database and using the same identifier as the document key in the document store.
+
+This hybrid approach leverages the strengths of both graph databases (for hierarchical relationships) and document-oriented databases (for flexible, rich narratives), offering an efficient and comprehensive solution.
