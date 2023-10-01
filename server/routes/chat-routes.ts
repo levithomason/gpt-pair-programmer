@@ -29,18 +29,6 @@ const ChatMessageToOpenAIMessage = (
   return result;
 };
 
-const OpenAIMessageToChatMessage = (
-  openAIMessage: ChatCompletionMessageParam,
-): ChatMessage => {
-  const { role, content, name, function_call } = openAIMessage;
-  return ChatMessage.build({
-    role,
-    content,
-    name,
-    functionCall: function_call,
-  });
-};
-
 // TODO: add an env solution to handle env vars and validation
 const { OPENAI_API_KEY } = process.env;
 if (!OPENAI_API_KEY) {
