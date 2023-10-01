@@ -1,6 +1,6 @@
 @import url("https://unpkg.com/normalize.css/normalize.css");
 @import url("https://fonts.googleapis.com/css?family=Roboto:100,400,700");
-@import url("https://fonts.googleapis.com/css?family=Roboto+Mono:400");
+@import url("https://fonts.googleapis.com/css?family=Fira+Code:400,700");
 
 * {
   box-sizing: border-box;
@@ -9,6 +9,7 @@
 html {
   --body-bg: hsl(0, 0%, 20%);
   --body-color: #eeeeeedd;
+  --font-family-mono: "Fira Code", monospace;
 }
 
 body {
@@ -30,14 +31,14 @@ body {
 }
 
 code {
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-family-mono);
 }
 code.language-mermaid {
   display: block;
   background: white;
 }
 code:not(pre code) {
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-family-mono);
   padding: 2px 6px 1px 6px;
   margin: 0 0.25rem;
   font-size: 14px;
@@ -54,7 +55,7 @@ pre {
   max-width: 100%;
   max-height: 60vh;
   font-size: 14px;
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-family-mono);
   /*mix-blend-mode: screen;*/
   filter: contrast(1.1) brightness(1.2);
   border-top: 1px solid #00000088;
@@ -83,7 +84,15 @@ button {
 }
 
 button {
+  padding: 0.5rem 1rem;
+  color: var(--body-color);
+  background: rgba(194, 0, 32, 0.6);
+  line-height: 1;
+  border: none;
   cursor: pointer;
+}
+button:hover {
+  background: rgba(194, 0, 32, 0.8);
 }
 
 input:focus,

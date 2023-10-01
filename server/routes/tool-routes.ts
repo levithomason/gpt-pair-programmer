@@ -1,7 +1,7 @@
 import express from "express";
 import debug from "debug";
 
-import { OpenAPIMethod, OpenAPISpec } from "../types.js";
+import type { OpenAPIMethod, OpenAPISpec } from "../types.js";
 import { tools } from "../tools/index.js";
 import { ToolError } from "../utils/errors.js";
 

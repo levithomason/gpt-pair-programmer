@@ -1,9 +1,9 @@
+import type { FormEvent } from "react";
 import * as React from "react";
-import { FormEvent } from "react";
 import debug from "debug";
 
 import "./chat.css";
-import { Message } from "./types";
+import type { Message } from "./types";
 import { ChatMessage } from "./chat-message";
 import { ErrorBanner } from "../banner/error-banner";
 import { markdownKitchenSink } from "./markdown-kitchen-sink";
@@ -22,13 +22,34 @@ export const Chat = () => {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [message, setMessage] = React.useState<string>("");
   const [reply, setReply] = React.useState<string>("");
+  const isFirstRender = React.useRef<boolean>(true);
 
-  const [loading, setLoading] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string>("");
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
+
+  // on first render, fetch messages from the server
+  React.useEffect(() => {
+    if (!isFirstRender.current) return;
+    isFirstRender.current = false;
+
+    fetch(`http://localhost:5004/chat/messages`)
+      .then((res) => res.json())
+      .then((res) => {
+        log("fetched chat messages", res);
+        setMessages(res);
+        setLoading(false);
+        scrollToBottom();
+      })
+      .catch((err) => {
+        log(err);
+        setError(err.toString());
+        setLoading(false);
+      });
+  });
 
   const scrollToBottom = () => {
     chatMessagesRef.current?.scrollTo({
@@ -36,19 +57,6 @@ export const Chat = () => {
       behavior: "smooth",
     });
   };
-
-  // on first render
-  React.useEffect(() => {
-    // reset the chat
-    fetch("http://localhost:5004/chat/new", { method: "POST" })
-      .then(() => {
-        log("Chat messages reset (POST /chat/new)");
-      })
-      .catch((err) => {
-        log(err);
-        setError("Failed to make a new chat.");
-      });
-  }, []);
 
   const handleSend = React.useCallback(
     async (e: FormEvent) => {
@@ -130,6 +138,7 @@ export const Chat = () => {
     [message, loading],
   );
 
+  // Focus ref after reply is set
   React.useEffect(() => {
     if (!reply && !loading) {
       inputRef.current?.focus();

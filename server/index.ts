@@ -13,6 +13,8 @@ import { pluginRoutes } from "./routes/plugin-routes.js";
 import { chatRoutes } from "./routes/chat-routes.js";
 import { toolRoutes } from "./routes/tool-routes.js";
 
+import { getDB, setupDB } from "./database/index.js";
+
 debug.enable("gpp:*");
 
 const log = debug("gpp:server:main");
@@ -21,6 +23,8 @@ const app = express();
 // ============================================================================
 // Init
 // ============================================================================
+const db = await getDB();
+await setupDB(db);
 
 // ============================================================================
 // Middleware

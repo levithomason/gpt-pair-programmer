@@ -1,5 +1,6 @@
 import type { ToolFunction } from "../../types.js";
-import { run, RunReturn, ToolError } from "../../utils/index.js";
+import type { RunReturn } from "../../utils/index.js";
+import { run, ToolError } from "../../utils/index.js";
 
 type Args = {
   command: string;

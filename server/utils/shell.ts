@@ -1,5 +1,6 @@
 import * as path from "path";
-import { exec, ExecException } from "child_process";
+import type { ExecException } from "child_process";
+import { exec } from "child_process";
 
 import debug from "debug";
 import { PROJECT_ROOT } from "../../config.js";

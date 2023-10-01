@@ -1,5 +1,6 @@
 import debug from "debug";
-import puppeteer, { Browser, ConsoleMessage, Page } from "puppeteer";
+import type { Browser, ConsoleMessage, Page } from "puppeteer";
+import puppeteer from "puppeteer";
 import * as htmlToText from "html-to-text";
 
 export const log = debug("gpp:tools:webpage");

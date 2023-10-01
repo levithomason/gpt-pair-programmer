@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "es2020",
     "outDir": "dist",
     "jsx": "react",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },

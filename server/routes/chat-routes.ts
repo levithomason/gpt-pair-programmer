@@ -6,13 +6,29 @@ import debug from "debug";
 import { OPENAI_MODELS } from "../../config.js";
 import {
   BaseError,
-  openApiJson,
+  openAIFunctions,
   ToolError,
   trimStringToTokens,
 } from "../utils/index.js";
 import { tools } from "../tools/index.js";
 
+import { ChatMessage } from "../models/index.js";
+
 const log = debug("gpp:server:routes:chat");
+
+const ChatMessageToOpenAIMessage = (
+  chatMessage: ChatMessage,
+): ChatCompletionMessageParam => {
+  const { role, content } = chatMessage;
+  return { role, content };
+};
+
+const OpenAIMessageToChatMessage = (
+  openAIMessage: ChatCompletionMessageParam,
+): ChatMessage => {
+  const { role, content } = openAIMessage;
+  return ChatMessage.build({ role, content });
+};
 
 // TODO: add an env solution to handle env vars and validation
 const { OPENAI_API_KEY } = process.env;
@@ -22,49 +38,55 @@ if (!OPENAI_API_KEY) {
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-// TODO: better system message, possibly expose setting to end user
-const systemMessage: ChatCompletionMessageParam = {
-  role: "system",
-  content: [
-    "You are pair programming with the user on their computer.",
-    "All your functions are executed on the user's computer with the user's permissions.",
-    "Use markdown codeblocks in mermaid language to make charts, graphs, or diagrams to explain relationships.",
-    "",
-    "Be concise. Be informative. Get straight to the point.",
-    "",
-    "Never claim you are unable to accomplish a goal.",
-    "Make a plan to accomplish the goal using your tools.",
-    "",
-    "Always use your tools to accomplish your tasks.",
-    "Never assume you know something, check using your tools.",
-  ].join("\n"),
-};
-
-let messageStack: ChatCompletionMessageParam[] = [systemMessage];
-
 // TODO: this should be moved to state and selectable by the user
 const MODEL = OPENAI_MODELS["gpt-3.5-turbo"];
 
 export const chatRoutes = express.Router();
 
-chatRoutes.post("/chat/new", (req, res) => {
-  messageStack = [systemMessage];
-  res.json(messageStack);
+chatRoutes.post("/chat/new", async (req, res) => {
+  await ChatMessage.sync({ force: true });
+
+  // TODO: better system message, possibly expose setting to end user
+  await ChatMessage.create({
+    role: "system",
+    content: [
+      "You are pair programming with the user on their computer.",
+      "All your functions are executed on the user's computer with the user's permissions.",
+      "Use markdown codeblocks in mermaid language to make charts, graphs, or diagrams to explain relationships.",
+      "",
+      "Be concise. Be informative. Get straight to the point.",
+      "",
+      "Never claim you are unable to accomplish a goal.",
+      "Make a plan to accomplish the goal using your tools.",
+      "",
+      "Always use your tools to accomplish your tasks.",
+      "Never assume you know something, check using your tools.",
+    ].join("\n"),
+  });
+
+  res.json(await ChatMessage.findAll());
+});
+
+chatRoutes.get("/chat/messages", async (req, res) => {
+  const dbMessages = await ChatMessage.findAll();
+  const messages = dbMessages.map(ChatMessageToOpenAIMessage);
+
+  res.send(messages);
 });
 
 chatRoutes.get("/chat", async (req, res) => {
-  const { getOpenAIFunctions } = await import("../utils/index.js");
-  const openAIFunctions = getOpenAIFunctions(openApiJson);
-
-  const message = req.query.message as string;
-  log("/chat", message);
-
-  const userMessage: ChatCompletionMessageParam = {
+  const userMessage = ChatMessage.build({
     role: "user",
-    content: message,
-  };
+    content: req.query.message as string,
+  });
+  log(userMessage.toJSON());
 
-  messageStack.push(userMessage);
+  // create user message
+  await userMessage.save();
+
+  // get all messages
+  const dbMessages = await ChatMessage.findAll();
+  const messages = dbMessages.map(ChatMessageToOpenAIMessage);
 
   // TODO: count tokens & cost:
   //       - https://github.com/niieani/gpt-tokenizer
@@ -98,30 +120,32 @@ chatRoutes.get("/chat", async (req, res) => {
     let assistantReply = "";
 
     // Determine next best step
-    const nextBestStep = await openai.chat.completions.create({
-      model: MODEL.name,
-      messages: [
-        {
-          role: "system",
-          content: [
-            "Determine the best next step:",
-            "1: Get more information",
-            "2: Make a plan",
-            "3: Take action",
-            "",
-            "Respond with this schema:",
-            "<number>",
-          ].join("\n"),
-        },
-        ...trimmedMessages,
-      ],
-      stream: false,
-      n: 1,
-      functions: openAIFunctions,
-      function_call: "none",
-    });
-
-    res.write(nextBestStep.choices[0].message);
+    // const nextBestStep = await openai.chat.completions.create({
+    //   model: MODEL.name,
+    //   messages: [
+    //     {
+    //       role: "system",
+    //       content: [
+    //         "Determine the best next step:",
+    //         "1: Get more information",
+    //         "2: Make a plan",
+    //         "3: Take action",
+    //         "",
+    //         "Respond with this schema:",
+    //         "<number>",
+    //       ].join("\n"),
+    //     },
+    //     ...trimmedMessages,
+    //   ],
+    //   stream: false,
+    //   n: 1,
+    //   functions: openAIFunctions,
+    //   function_call: "none",
+    // });
+    //
+    // log("nextBestStep", nextBestStep);
+    //
+    // res.write(nextBestStep.choices[0].message.content);
 
     try {
       const stream = await openai.chat.completions.create({
@@ -187,9 +211,9 @@ chatRoutes.get("/chat", async (req, res) => {
           // call function
           const result = await callFunction(func, argsJSon);
           const content = JSON.stringify(result);
-          messageStack.push({ role: "function", name: func, content });
+          await ChatMessage.create({ role: "function", name: func, content });
 
-          return await callModel(messageStack);
+          return await callModel(messages);
         }
 
         //
@@ -209,8 +233,8 @@ chatRoutes.get("/chat", async (req, res) => {
       res.status(500).write((error as Error).toString());
     }
 
-    messageStack.push({ role: "assistant", content: assistantReply });
-    log("/chat end", messageStack);
+    await ChatMessage.create({ role: "assistant", content: assistantReply });
+    log("/chat end", messages);
     res.end();
   };
 
@@ -238,5 +262,5 @@ chatRoutes.get("/chat", async (req, res) => {
     }
   };
 
-  await callModel(messageStack);
+  await callModel(messages);
 });

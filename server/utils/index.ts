@@ -1,5 +1,5 @@
 export * from "./errors.js";
-export * from "./get-openai-functions.js";
+export * from "./openai-functions.js";
 export * from "./log.js";
 export * from "./openapi-loader.js";
 export * from "./paths.js";
