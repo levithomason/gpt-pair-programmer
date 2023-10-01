@@ -19,15 +19,26 @@ const log = debug("gpp:server:routes:chat");
 const ChatMessageToOpenAIMessage = (
   chatMessage: ChatMessage,
 ): ChatCompletionMessageParam => {
-  const { role, content } = chatMessage;
-  return { role, content };
+  const { role, content, name, functionCall } = chatMessage;
+
+  const result: ChatCompletionMessageParam = { role, content };
+
+  if (name) result.name = name;
+  if (functionCall) result.function_call = functionCall;
+
+  return result;
 };
 
 const OpenAIMessageToChatMessage = (
   openAIMessage: ChatCompletionMessageParam,
 ): ChatMessage => {
-  const { role, content } = openAIMessage;
-  return ChatMessage.build({ role, content });
+  const { role, content, name, function_call } = openAIMessage;
+  return ChatMessage.build({
+    role,
+    content,
+    name,
+    functionCall: function_call,
+  });
 };
 
 // TODO: add an env solution to handle env vars and validation
@@ -68,8 +79,7 @@ chatRoutes.post("/chat/new", async (req, res) => {
 });
 
 chatRoutes.get("/chat/messages", async (req, res) => {
-  const dbMessages = await ChatMessage.findAll();
-  const messages = dbMessages.map(ChatMessageToOpenAIMessage);
+  const messages = await ChatMessage.findAll();
 
   res.send(messages);
 });
@@ -84,17 +94,17 @@ chatRoutes.get("/chat", async (req, res) => {
   // create user message
   await userMessage.save();
 
-  // get all messages
-  const dbMessages = await ChatMessage.findAll();
-  const messages = dbMessages.map(ChatMessageToOpenAIMessage);
-
   // TODO: count tokens & cost:
   //       - https://github.com/niieani/gpt-tokenizer
   //       - https://github.com/dqbd/tiktoken
   //   NOTE: OpenAPI responses include token "usage" if not streaming
   //   https://platform.openai.com/docs/api-reference/chat/object
 
-  const callModel = async (messages: ChatCompletionMessageParam[]) => {
+  const callModel = async () => {
+    // get all messages
+    const dbMessages = await ChatMessage.findAll();
+    const messages = dbMessages.map(ChatMessageToOpenAIMessage);
+
     // TODO: crude measure of function call cost
     let lenOfAllMessages = JSON.stringify(openAIFunctions).length;
 
@@ -166,18 +176,27 @@ chatRoutes.get("/chat", async (req, res) => {
         res.write(message);
       };
 
+      const saveAssistantReply = async () => {
+        await ChatMessage.create({
+          role: "assistant",
+          content: assistantReply,
+        });
+      };
+
       // Stream
       // res.setHeader("Content-Type", "text/event-stream");
       for await (const part of stream) {
         const { delta, finish_reason } = part.choices[0];
         if (finish_reason === "stop") {
           log("finish_reason", finish_reason);
+          await saveAssistantReply();
           break;
         }
 
         if (finish_reason === "length") {
           log("finish_reason", finish_reason);
           write("\n\n(...truncated due to max length)");
+          await saveAssistantReply();
           break;
         }
 
@@ -208,12 +227,16 @@ chatRoutes.get("/chat", async (req, res) => {
             // TODO: break? retry? The function will not get the correct args.
           }
 
-          // call function
-          const result = await callFunction(func, argsJSon);
-          const content = JSON.stringify(result);
-          await ChatMessage.create({ role: "function", name: func, content });
+          await ChatMessage.create({
+            role: "assistant",
+            content: `\`${func}(${printArgs})\``,
+            functionCall: { name: func, arguments: args },
+          });
 
-          return await callModel(messages);
+          // call function
+          await callFunction(func, argsJSon);
+
+          return await callModel();
         }
 
         //
@@ -233,7 +256,6 @@ chatRoutes.get("/chat", async (req, res) => {
       res.status(500).write((error as Error).toString());
     }
 
-    await ChatMessage.create({ role: "assistant", content: assistantReply });
     log("/chat end", messages);
     res.end();
   };
@@ -252,7 +274,15 @@ chatRoutes.get("/chat", async (req, res) => {
     //       const remembered = mind.memory.query(<context>)
     //       have a thinking process to evaluate this decision and adjust if needed
     try {
-      return await tool(args);
+      const result = await tool(args);
+
+      await ChatMessage.create({
+        role: "function",
+        name: func,
+        content: JSON.stringify(result),
+      });
+
+      return result;
     } catch (err) {
       if (err instanceof ToolError) {
         res.write('\n\nToolError: "' + err + '"' + "\n\n");
@@ -262,5 +292,5 @@ chatRoutes.get("/chat", async (req, res) => {
     }
   };
 
-  await callModel(messages);
+  await callModel();
 });

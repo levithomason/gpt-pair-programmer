@@ -52,7 +52,7 @@ export const goTo = async (url: string): Promise<string> => {
 
   clearConsole();
 
-  const httpResponse = await page.goto(url, { waitUntil: "networkidle0" });
+  const httpResponse = await page.goto(url, { waitUntil: "networkidle2" });
 
   return `Navigation completed with status: ${httpResponse.status()}`;
 };

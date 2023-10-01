@@ -59,6 +59,10 @@ app.use(pluginRoutes);
 app.use(chatRoutes);
 app.use(toolRoutes(openApiJson));
 
+app.get("/status", (req, res) => {
+  res.json({ status: "ok" });
+});
+
 // ============================================================================
 // Server
 // ============================================================================

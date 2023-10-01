@@ -7,13 +7,14 @@ import { BaseError } from "../utils/index.js";
 import { SERVER_ROOT } from "../../config.js";
 import * as models from "../models/index.js";
 
-export const log = debug("gpp:db");
+const log = debug("gpp:db");
+const sequelLogger = debug("gpp:sequelize");
 
 export const getSequelize = (): Sequelize => {
   return new Sequelize({
     dialect: "sqlite",
     storage: path.resolve(SERVER_ROOT, "database", "db.sqlite"),
-    logging: (sql, timing) => log(sql, timing),
+    logging: (sql, timing) => sequelLogger(sql),
     models: [...Object.values(models)],
   });
 };

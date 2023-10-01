@@ -1,7 +1,11 @@
-export type MessageRole = "user" | "assistant";
+export type MessageRole = "system" | "user" | "assistant" | "function";
 
-export type Message = {
+export type ChatMessageType = {
   role: MessageRole;
+  name?: string;
   content: string;
-  timestamp: number;
+  functionCall?: {
+    name: string;
+    arguments: string[];
+  };
 };

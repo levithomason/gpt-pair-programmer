@@ -5,15 +5,12 @@ import mermaid from "mermaid";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
-import type { MessageRole } from "./types";
+import type { ChatMessageType } from "./types";
 import { makeLogger } from "../../utils";
 
 const log = makeLogger("components:chat-message");
 
-export type ChatMessageProps = {
-  children: string;
-  role: MessageRole;
-};
+export type ChatMessageProps = ChatMessageType;
 
 const removeWrappingPTag = (html: string) => {
   if (html.startsWith("<p>") && html.endsWith("</p>")) {
@@ -27,15 +24,27 @@ mermaid.initialize({
   securityLevel: "loose",
   startOnLoad: false,
 });
+
 export const ChatMessage = (props: ChatMessageProps) => {
   const lastRenderTime = React.useRef<number>(Date.now());
+
+  let parsedContent = props.content;
+
+  if (props.role === "function") {
+    try {
+      parsedContent = JSON.stringify(JSON.parse(props.content), null, 2);
+    } catch (error) {
+      log(
+        "Could not format JSON function content, using original value.",
+        props.content,
+      );
+    }
+  }
 
   React.useEffect(() => {
     if (props.role !== "assistant") {
       return;
     }
-
-    console.log(props.role, props.children);
 
     hljs.highlightAll();
 
@@ -48,19 +57,34 @@ export const ChatMessage = (props: ChatMessageProps) => {
           log(error);
         });
     }
-  }, [props.role, props.children]);
+  }, [props.content]);
 
+  const className = `chat-message chat-message--${props.role}`;
+
+  if (props.role === "user" || props.role === "assistant") {
+    return (
+      <div
+        className={className}
+        dangerouslySetInnerHTML={{
+          __html: removeWrappingPTag(
+            micromark(parsedContent, {
+              extensions: [gfm()],
+              htmlExtensions: [gfmHtml()],
+            }),
+          ),
+        }}
+      />
+    );
+  }
+
+  // system or function message
   return (
-    <div
-      className={`chat-message chat-message--${props.role}`}
-      dangerouslySetInnerHTML={{
-        __html: removeWrappingPTag(
-          micromark(props.children, {
-            extensions: [gfm()],
-            htmlExtensions: [gfmHtml()],
-          }),
-        ),
-      }}
-    />
+    <div className={className}>
+      <span style={{ fontWeight: "bold", mixBlendMode: "overlay" }}>
+        {props.name || props.role.toUpperCase()}
+        {" => "}
+      </span>
+      {parsedContent}
+    </div>
   );
 };

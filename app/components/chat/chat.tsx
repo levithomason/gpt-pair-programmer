@@ -3,10 +3,10 @@ import * as React from "react";
 import debug from "debug";
 
 import "./chat.css";
-import type { Message } from "./types";
+import type { ChatMessageType } from "./types";
 import { ChatMessage } from "./chat-message";
 import { ErrorBanner } from "../banner/error-banner";
-import { markdownKitchenSink } from "./markdown-kitchen-sink";
+// import { markdownKitchenSink } from "./markdown-kitchen-sink";
 
 const log = debug("gpp:app:components:chat");
 
@@ -15,11 +15,11 @@ const suggestedMessages = [
   "Where am I?",
   "What's my weather?",
   `Make a guide on writing new tools.`,
-  markdownKitchenSink,
+  // markdownKitchenSink,
 ];
 
 export const Chat = () => {
-  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [messages, setMessages] = React.useState<ChatMessageType[]>([]);
   const [message, setMessage] = React.useState<string>("");
   const [reply, setReply] = React.useState<string>("");
   const isFirstRender = React.useRef<boolean>(true);
@@ -72,10 +72,7 @@ export const Chat = () => {
       }
 
       setLoading(true);
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: message, timestamp: Date.now() },
-      ]);
+      setMessages((prev) => [...prev, { role: "user", content: message }]);
       setMessage("");
       scrollToBottom();
 
@@ -113,11 +110,7 @@ export const Chat = () => {
             setReply((prevReply) => {
               setMessages((prevMessages) => [
                 ...prevMessages,
-                {
-                  role: "assistant",
-                  content: prevReply,
-                  timestamp: Date.now(),
-                },
+                { role: "assistant", content: prevReply },
               ]);
               return "";
             });
@@ -160,11 +153,9 @@ export const Chat = () => {
       <ErrorBanner error={error} />
       <div ref={chatMessagesRef} className="chat-messages">
         {messages.map((msg, index) => (
-          <ChatMessage key={index} role={msg.role}>
-            {msg.content}
-          </ChatMessage>
+          <ChatMessage key={index} {...msg} />
         ))}
-        {reply && <ChatMessage role="assistant">{reply}</ChatMessage>}
+        {reply && <ChatMessage role="assistant" content={reply} />}
       </div>
       <div
         style={{
