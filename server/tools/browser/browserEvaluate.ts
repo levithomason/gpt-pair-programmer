@@ -1,4 +1,5 @@
-import { ToolError, ToolFunction } from "../../utils.js";
+import type { ToolFunction } from "../../types.js";
+import { ToolError } from "../../utils/index.js";
 import { evaluate } from "./utils.js";
 
 type Args = {
@@ -9,6 +10,7 @@ type Return = any;
 
 export const browserEvaluate: ToolFunction<Args, Return> = async ({ code }) => {
   try {
+    // TODO: I don't think this works...
     return await evaluate(code);
   } catch (error) {
     throw new ToolError({

@@ -1,6 +1,8 @@
 import * as fs from "fs";
 
-import { absPath, ToolError, ToolFunction } from "../../utils.js";
+import type { ToolFunction } from "../../types.js";
+import { absPath } from "../../../config.js";
+import { ToolError } from "../../utils/index.js";
 
 type Args = {
   path: string;

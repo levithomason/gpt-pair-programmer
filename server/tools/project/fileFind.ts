@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import { globSync } from "glob";
 
-import { absPath, relPath, run, ToolError, ToolFunction } from "../../utils.js";
+import type { ToolFunction } from "../../types.js";
+import { absPath, relPath } from "../../../config.js";
+import { run, ToolError } from "../../utils/index.js";
 
 type Args = {
   query: string;

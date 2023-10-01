@@ -1,5 +1,7 @@
 import axios from "axios";
-import { ToolError, ToolFunction } from "../../utils.js";
+
+import type { ToolFunction } from "../../types.js";
+import { ToolError } from "../../utils/index.js";
 import { formatSearchResult, FormattedSearchResult } from "./utils.js";
 
 type Args = { query: string };

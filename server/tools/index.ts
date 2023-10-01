@@ -4,7 +4,8 @@ import { fileURLToPath } from "url";
 
 import debug from "debug";
 
-import { BaseError, ToolFunction } from "../utils.js";
+import type { ToolFunction } from "../types.js";
+import { BaseError } from "../utils/index.js";
 
 const log = debug("gpp:tools");
 

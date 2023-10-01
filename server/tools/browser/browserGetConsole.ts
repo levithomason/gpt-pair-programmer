@@ -1,5 +1,6 @@
+import type { ToolFunction } from "../../types.js";
 import { readConsole } from "./utils.js";
-import { ToolError, ToolFunction } from "../../utils.js";
+import { ToolError } from "../../utils/index.js";
 
 type Args = {
   url: string;

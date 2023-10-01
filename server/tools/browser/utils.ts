@@ -53,7 +53,7 @@ export const goTo = async (url: string): Promise<string> => {
 
   const httpResponse = await page.goto(url, { waitUntil: "networkidle0" });
 
-  return `Successfully went to URL. Response: ${httpResponse}`;
+  return `Navigation completed with status: ${httpResponse.status()}`;
 };
 
 export const getDom = async () => {

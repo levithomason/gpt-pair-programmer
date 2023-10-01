@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import os from "os";
 
-import { run } from "../../utils.js";
+import { run } from "../../utils/index.js";
 
 /**
  * Returns information about the operating system and environment.
