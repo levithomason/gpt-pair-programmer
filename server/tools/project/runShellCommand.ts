@@ -5,6 +5,7 @@ type Args = {
   cwd: string;
 };
 
+// TODO: consider using a docblock to define the OpenAPI spec
 /**
  * @summary Execute a shell command
  * @description
