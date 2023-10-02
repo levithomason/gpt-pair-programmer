@@ -99,12 +99,11 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--function`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <i className="fa fa-microchip"></i>
+            <i className="fa fa-code"></i>
           </span>
           <span className="chat-message__content">
             <strong>{props.name}</strong>
-            {" => "}
-            {parsedContent}
+            {` => ${parsedContent}`}
           </span>
         </div>
       </div>
@@ -115,9 +114,11 @@ export const ChatMessage = (props: ChatMessageProps) => {
     return (
       <div className={`chat-message chat-message--system`}>
         <div className="chat-message__container">
-          <span className="chat-message__content">
+          <span className="chat-message__avatar">
             <i className="fa fa-gear"></i>
-            <strong> System Message </strong>
+          </span>
+          <span className="chat-message__content">
+            <strong>System &mdash; </strong>
             {props.content}
           </span>
         </div>

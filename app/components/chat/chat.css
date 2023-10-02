@@ -4,7 +4,6 @@
   overflow-y: auto;
   /*border: 2px solid magenta;*/
   height: 100%;
-  line-height: 1.875;
 }
 
 .chat-messages {
@@ -21,6 +20,7 @@
   padding: 16px;
 }
 .chat-message__container {
+  position: relative;
   display: flex;
   gap: 16px;
   width: 100%;

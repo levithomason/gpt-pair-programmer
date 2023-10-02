@@ -33,19 +33,29 @@ export const Chat = () => {
   const abortRef = React.useRef<AbortController | null>(null);
   const scrollTimerRef = React.useRef(null);
 
-  const scrollToBottom = React.useCallback(() => {
-    chatMessagesRef.current?.scrollTo({
-      top: chatMessagesRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, []);
+  const scrollToBottom = () => {
+    const scroll = () => {
+      chatMessagesRef.current?.scrollTo({
+        top: chatMessagesRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    };
+
+    // immediate first scroll
+    if (scrollTimerRef.current === null) {
+      scroll();
+      return;
+    }
+
+    // debounce future scrolls
+    clearTimeout(scrollTimerRef.current);
+
+    scrollTimerRef.current = setTimeout(scroll, 1000);
+  };
 
   // scroll to bottom after activity stops
   React.useEffect(() => {
-    scrollTimerRef.current = setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-    return () => clearTimeout(scrollTimerRef.current);
+    scrollToBottom();
   });
 
   React.useEffect(() => {
