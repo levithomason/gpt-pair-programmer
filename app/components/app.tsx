@@ -37,7 +37,10 @@ const ServerStatus = () => {
   }[status];
 
   return (
-    <div id="server-status" style={{ color }}>
+    <div
+      id="server-status"
+      style={{ color, fontFamily: "var(--font-family-mono)", fontSize: 12 }}
+    >
       Server: {status}
     </div>
   );

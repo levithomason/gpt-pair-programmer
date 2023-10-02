@@ -11,10 +11,11 @@ import { ErrorBanner } from "../banner/error-banner";
 const log = debug("gpp:app:components:chat");
 
 const suggestedMessages = [
-  "Read the README.md",
+  "Who am I?",
   "Where am I?",
+  "What's the current project?",
   "What's my weather?",
-  `Make a guide on writing new tools.`,
+  // `Make a guide on writing new tools.`,
   // markdownKitchenSink,
 ];
 
@@ -30,9 +31,25 @@ export const Chat = () => {
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
+  const scrollTimerRef = React.useRef(null);
 
-  // on first render, fetch messages from the server
+  const scrollToBottom = React.useCallback(() => {
+    chatMessagesRef.current?.scrollTo({
+      top: chatMessagesRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, []);
+
+  // scroll to bottom after activity stops
   React.useEffect(() => {
+    scrollTimerRef.current = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(scrollTimerRef.current);
+  });
+
+  React.useEffect(() => {
+    // on first render, fetch messages from the server
     if (!isFirstRender.current) return;
     isFirstRender.current = false;
 
@@ -42,7 +59,6 @@ export const Chat = () => {
         log("fetched chat messages", res);
         setMessages(res);
         setLoading(false);
-        scrollToBottom();
       })
       .catch((err) => {
         log(err);
@@ -50,13 +66,6 @@ export const Chat = () => {
         setLoading(false);
       });
   });
-
-  const scrollToBottom = () => {
-    chatMessagesRef.current?.scrollTo({
-      top: chatMessagesRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  };
 
   const handleSend = React.useCallback(
     async (e: FormEvent) => {

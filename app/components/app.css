@@ -42,7 +42,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  mix-blend-mode: soft-light;
+  /*mix-blend-mode: soft-light;*/
   opacity: 0.1;
   pointer-events: none;
 }

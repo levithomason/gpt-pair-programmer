@@ -19,10 +19,11 @@ export type Location = {
 
 export type UserProfile = {
   fullName: string;
-  email: string;
-  username: string;
   linkedIn: string;
   github: string;
+  username: string;
+  email: string;
+  avatar: string;
   time: string;
   timezone: string;
 };
@@ -39,13 +40,17 @@ export const getLocation = async (): Promise<Location> => {
  * Returns information about the operating system and environment.
  */
 export const getInfo = async (): Promise<UserProfile> => {
+  // TODO: get profile info from user in a settings page
   return {
     fullName: await run("id -F").then(({ stdout }) => stdout.trim()),
     linkedIn: "https://linkedin.com/in/levithomason",
-    github: "https://github.com/levithomason/",
+    github: `https://github.com/levithomason/`,
     username: os.userInfo().username,
     email: await run("git config user.email").then(({ stdout }) =>
       stdout.trim(),
+    ),
+    avatar: await run(`curl https://api.github.com/users/levithomason`).then(
+      ({ stdout }) => JSON.parse(stdout).avatar_url,
     ),
     time: new Date().toLocaleString(),
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
