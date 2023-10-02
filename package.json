@@ -1,7 +1,7 @@
 {
-  "name": "gpt-terminal-plugin",
+  "name": "gpt-pair-programmer",
   "version": "1.0.0",
-  "description": "ChatGPT universal command line plugin",
+  "description": "Pair Program with OpenAI locally or with ChatGPT.",
   "type": "module",
   "scripts": {
     "app": "nodemon -w package.json -w tsconfig.json -w tsconfig.app.json -w webpack.config.ts --exec \"yarn app:start\"",

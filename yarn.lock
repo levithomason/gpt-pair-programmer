@@ -3858,9 +3858,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gpt-terminal-plugin@workspace:.":
+"gpt-pair-programmer@workspace:.":
   version: 0.0.0-use.local
-  resolution: "gpt-terminal-plugin@workspace:."
+  resolution: "gpt-pair-programmer@workspace:."
   dependencies:
     "@types/cors": ^2.8.13
     "@types/debug": ^4.1.8
