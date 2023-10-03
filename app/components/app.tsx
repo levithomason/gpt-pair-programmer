@@ -12,15 +12,15 @@ const log = makeLogger("components:app");
 
 const ServerStatus = () => {
   const INTERVAL = 2000;
-  const [status, setStatus] = React.useState("...");
+  const [status, setStatus] = React.useState("(pending)");
 
   const updateStatus = () => {
     fetch(`http://localhost:5004/status`)
       .then((res) => {
-        setStatus("online");
+        setStatus("Online");
       })
       .catch((err) => {
-        setStatus("offline");
+        setStatus("Offline");
       });
   };
 
@@ -32,14 +32,15 @@ const ServerStatus = () => {
   updateStatus();
 
   const color = {
-    online: "rgba(107,179,107,0.8)",
-    offline: "rgb(255,115,102)",
-    "...": "rgba(150, 150, 150, 0.8)",
+    Online: "rgba(107,179,107,0.8)",
+    Offline: "rgb(255,115,102)",
+    "(pending)": "rgba(150, 150, 150, 0.8)",
   }[status];
 
   return (
     <div
       id="server-status"
+      title={`Server is ${status}`}
       style={{
         color,
         fontFamily: "var(--font-family-mono)",
@@ -47,7 +48,7 @@ const ServerStatus = () => {
         fontSize: 12,
       }}
     >
-      <i className="fa fa-server" /> Status
+      <i className="fa fa-server" /> {status}
     </div>
   );
 };
@@ -68,7 +69,7 @@ export const App = () => {
       <div id="header">
         <Logo />
         <ServerStatus />
-        <button onClick={resetChat}>New</button>
+        <button onClick={resetChat}>Reset</button>
       </div>
       <div id="main">
         <Chat />

@@ -23,6 +23,7 @@ const removeWrappingPTag = (html: string) => {
 mermaid.initialize({
   securityLevel: "loose",
   startOnLoad: false,
+  theme: "dark",
 });
 
 export const ChatMessage = (props: ChatMessageProps) => {

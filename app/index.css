@@ -13,6 +13,9 @@ html {
   --body-color-assistant: var(--body-color);
   --font-family-mono: "Fira Code", monospace;
   --font-family-body: "Roboto", sans-serif;
+
+  --app-right-bar-width: 300px;
+  --app-header-height: 48px;
 }
 
 body {
@@ -48,7 +51,15 @@ code:not(pre code) {
 }
 code.language-mermaid {
   display: block;
-  background: white;
+  background: #00000022;
+  mix-blend-mode: color-burn;
+}
+pre code[class*="language-"]:not(.language-mermaid) {
+  /*mix-blend-mode: screen;*/
+  filter: sepia(0.1) hue-rotate(-10deg) brightness(1.05) contrast(1.03)
+    saturate(0.9);
+  border-bottom: 1px solid #00000044;
+  border-top: 1px solid #ffffff14;
 }
 
 pre {
@@ -56,17 +67,7 @@ pre {
   max-width: 100%;
   font-size: 14px;
   font-family: var(--font-family-mono);
-  /*mix-blend-mode: screen;*/
-  filter: contrast(1.05) brightness(1.1);
-  border-bottom: 1px solid #00000044;
-  border-top: 1px solid #ffffff08;
   border-radius: 4px;
-}
-pre code {
-  overflow: auto;
-  max-width: inherit;
-  max-height: inherit;
-  border-radius: inherit;
 }
 
 /* make form elements match in height */

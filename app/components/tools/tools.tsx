@@ -34,7 +34,7 @@ export const Tools = () => {
   return (
     <div id="tools">
       <h3 className="tools_header">
-        <i className="fa fa-microchip"></i> Tools
+        <i className="fa fa-microchip"></i>&nbsp;Tools
       </h3>
       <div className="tool-list">
         {tools.map((tool: OpenAIFunction, index) => (
@@ -61,12 +61,12 @@ export const Tools = () => {
                           {required && (
                             <div className="tool__arg-required">*</div>
                           )}
+                          {argDetails.description && (
+                            <div className="tool__arg-description">
+                              {argDetails.description}
+                            </div>
+                          )}
                         </div>
-                        {argDetails.description && (
-                          <div className="tool__arg-description">
-                            {argDetails.description}
-                          </div>
-                        )}
                       </div>
                     );
                   },

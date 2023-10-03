@@ -31,32 +31,33 @@ export const Chat = () => {
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
-  const scrollTimerRef = React.useRef(null);
 
-  const scrollToBottom = () => {
-    const scroll = () => {
-      chatMessagesRef.current?.scrollTo({
-        top: chatMessagesRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    };
+  // const scrollTimerRef = React.useRef(null);
 
-    // immediate first scroll
-    if (scrollTimerRef.current === null) {
-      scroll();
-      return;
-    }
-
-    // debounce future scrolls
-    clearTimeout(scrollTimerRef.current);
-
-    scrollTimerRef.current = setTimeout(scroll, 1000);
-  };
+  // const scrollToBottom = () => {
+  //   const scroll = () => {
+  //     // chatMessagesRef.current?.scrollTo({
+  //     //   top: chatMessagesRef.current.scrollHeight,
+  //     //   behavior: "smooth",
+  //     // });
+  //   };
+  //
+  //   // immediate first scroll
+  //   if (scrollTimerRef.current === null) {
+  //     scroll();
+  //     return;
+  //   }
+  //
+  //   // debounce future scrolls
+  //   clearTimeout(scrollTimerRef.current);
+  //
+  //   scrollTimerRef.current = setTimeout(scroll, 1000);
+  // };
 
   // scroll to bottom after activity stops
-  React.useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // React.useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
   React.useEffect(() => {
     // on first render, fetch messages from the server
@@ -93,7 +94,7 @@ export const Chat = () => {
       setLoading(true);
       setMessages((prev) => [...prev, { role: "user", content: message }]);
       setMessage("");
-      scrollToBottom();
+      // scrollToBottom();
 
       const endpoint = `http://localhost:5004/chat`;
       const messageURI = encodeURIComponent(message);
@@ -118,7 +119,7 @@ export const Chat = () => {
 
             if (!done) {
               setReply((prevReply) => {
-                scrollToBottom();
+                // scrollToBottom();
                 return prevReply + decoded;
               });
               await read();
@@ -134,7 +135,7 @@ export const Chat = () => {
               return "";
             });
             setLoading(false);
-            scrollToBottom();
+            // scrollToBottom();
           };
 
           await read();
@@ -170,7 +171,7 @@ export const Chat = () => {
   return (
     <div id="chat">
       <ErrorBanner error={error} />
-      <div ref={chatMessagesRef} className="chat-messages">
+      <div /* ref={chatMessagesRef} */ className="chat-messages">
         {messages.map((msg, index) => (
           <ChatMessage key={index} {...msg} />
         ))}

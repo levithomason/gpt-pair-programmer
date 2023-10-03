@@ -7,9 +7,12 @@
   position: sticky;
   top: 0;
   margin: 0;
-  padding: 4px 8px;
-  text-align: center;
-  background: #373c40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--app-header-height);
+  background: #303134;
   z-index: 1;
   box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.1);
 }
@@ -25,7 +28,7 @@
   position: relative;
   font-size: 14px;
   background: #ffffff08;
-  padding: 8px 16px;
+  padding: 8px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   cursor: default;
@@ -41,14 +44,21 @@
   transition: opacity 0.15s ease-in-out;
   position: absolute;
   top: 4px;
-  right: 4px;
-  padding: 8px;
+  right: 8px;
+  padding: 4px 8px;
   height: fit-content;
+  border-radius: 4px;
   font-size: inherit;
   background: rgb(37, 83, 107);
   opacity: 0;
 }
 .tool__button:hover {
+  background: rgb(46, 102, 133);
+}
+.tool__button:focus {
+  box-shadow:
+    0 0 0 1px #ccc,
+    0 0 0 3px #111;
   background: rgb(46, 102, 133);
 }
 .tool:hover .tool__button,
@@ -96,12 +106,12 @@
 }
 
 .tool__arg-description {
-  transition: height 0.15s ease-in-out;
+  transition: opacity 0.15s ease-in-out;
   margin-left: 4px;
   font-size: 12px;
-  height: 0;
-  overflow: hidden;
+  color: #ffffff88;
+  opacity: 0;
 }
-.tool__arg-field:focus-within + .tool__arg-description {
-  height: 16px;
+.tool__arg:focus-within .tool__arg-description {
+  opacity: 1;
 }
