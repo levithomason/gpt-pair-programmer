@@ -100,6 +100,19 @@
   left: 0;
   right: 0;
   margin: 0 auto var(--input-margin) auto;
+  border-radius: 4px;
+  z-index: 2;
+  /*border: 2px solid yellow;*/
+}
+.chat-form-glass {
+  position: absolute;
+  width: calc(100% - var(--input-margin) * 2);
+  max-width: 800px;
+  height: var(--input-height);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto var(--input-margin) auto;
   background-image: linear-gradient(
     90deg,
     #2a3333,
@@ -108,19 +121,22 @@
     #382c36,
     #332934
   );
-  border-radius: 4px;
   backdrop-filter: blur(8px);
-  box-shadow: 0 0 0 4px hsl(240, 2%, 17%);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 4px hsl(240, 2%, 17%),
+    0 0 32px 4px #31313388,
+    0 0 16px 2px #313133;
+
+  mix-blend-mode: color;
+  filter: contrast(1.05) saturate(0.5) brightness(1.2);
   z-index: 1;
-  mix-blend-mode: lighten;
-  filter: contrast(1.05) saturate(1.2) brightness(1.2);
-  /*border: 2px solid yellow;*/
 }
 
 .chat-form:focus-within {
   box-shadow:
     0 0 0 4px hsl(280, 4%, 13%),
-    -16px 16px 48px hsla(314, 37%, 39%, 0.1);
+    -16px 16px 48px hsla(314, 27%, 39%, 0.25);
 }
 .chat-form input {
   flex: 1;
@@ -185,19 +201,29 @@
   bottom: 0;
   left: 0;
   right: 0;
-  /*bottom: var(--input-margin);*/
-  /*max-width: 800px;*/
-  /*height: var(--input-height);*/
-  /*margin: 0 auto;*/
+  /*OPTION 1: fade full width */
   height: calc(var(--input-margin) + var(--input-height) + var(--input-margin));
   background-image: linear-gradient(
     0deg,
-    #313233 var(--input-margin),
-    #313233ee calc(var(--input-margin) + 1px),
-    #313233aa calc(var(--input-margin) + var(--input-height)),
-    #31323366 calc(var(--input-margin) + var(--input-height) + 4px),
-    #31323300 100% /*#313233dd,*/ /*#313233aa 100%*/
+    #313133 var(--input-margin),
+    #313133ee calc(var(--input-margin) + 1px),
+    #313133aa calc(var(--input-margin) + var(--input-height)),
+    #31313366 calc(var(--input-margin) + var(--input-height) + 4px),
+    #31313300 100% /*#313233dd,*/ /*#313233aa 100%*/
   );
+  /* OPTION 1 END */
+  /* OPTION 2: only fade under the input*/
+  bottom: var(--input-margin);
+  width: calc(100% - var(--input-margin) * 2);
+  max-width: 800px;
+  height: var(--input-height);
+  margin: 0 auto;
+  background-image: linear-gradient(
+    0deg,
+    #313133ee,
+    #313133aa 100% /*#313233dd,*/ /*#313233aa 100%*/
+  );
+  /* OPTION 2 END */
   background-size: 100%;
   background-position: bottom center;
   background-repeat: no-repeat;

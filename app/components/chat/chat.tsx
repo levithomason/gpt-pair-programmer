@@ -201,6 +201,7 @@ export const Chat = () => {
         })}
       </div>
       <div id="chat-messages-fade"></div>
+      <div className="chat-form-glass"></div>
       <form onSubmit={handleSend} className="chat-form">
         <input
           ref={inputRef}

@@ -7,6 +7,7 @@
   position: sticky;
   top: 0;
   margin: 0;
+  padding: 4px 8px;
   text-align: center;
   background: #373c40;
   z-index: 1;
@@ -29,8 +30,8 @@
   border-radius: 4px;
   cursor: default;
 }
-.tool:hover .tool__button {
-  opacity: 1;
+.tool:focus-within {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 .tool__name {
   font-weight: bold;
@@ -41,7 +42,7 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  padding: 4px 8px;
+  padding: 8px;
   height: fit-content;
   font-size: inherit;
   background: rgb(37, 83, 107);
@@ -49,6 +50,10 @@
 }
 .tool__button:hover {
   background: rgb(46, 102, 133);
+}
+.tool:hover .tool__button,
+.tool:focus-within .tool__button {
+  opacity: 1;
 }
 .tool__description {
   opacity: 0.7;
@@ -67,20 +72,17 @@
   position: relative;
 }
 .tool__arg-required {
-  transition: opacity 0.3s ease-in-out;
   position: absolute;
   top: 4px;
   right: 8px;
+  font-size: 12px;
   color: rgba(245, 85, 64, 0.7);
   user-select: none;
   pointer-events: none;
 }
-.tool__arg-input:focus ~ .tool__arg-required {
-  opacity: 0;
-}
 
 .tool__arg-input {
-  padding: 4px 8px;
+  padding: 4px 21px 4px 8px;
   width: 100%;
   height: 24px;
   font-size: inherit;
