@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../../types.js";
 import type { RunReturn } from "../../utils/index.js";
 import { run, ToolError } from "../../utils/index.js";
 

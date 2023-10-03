@@ -56,7 +56,7 @@ export const Chat = () => {
   // scroll to bottom after activity stops
   React.useEffect(() => {
     scrollToBottom();
-  });
+  }, [messages]);
 
   React.useEffect(() => {
     // on first render, fetch messages from the server
@@ -176,33 +176,13 @@ export const Chat = () => {
         ))}
         {reply && <ChatMessage role="assistant" content={reply} />}
       </div>
-      <div
-        style={{
-          display: "flex",
-          maxWidth: "80%",
-          left: 0,
-          right: 0,
-          margin: "0 auto",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "1rem",
-          position: "absolute",
-          zIndex: 1,
-          bottom: "100px",
-        }}
-      >
+      <div className="suggested-messages">
         {suggestedMessages.map((msg) => {
           const maxChars = 200 / suggestedMessages.length;
           return (
             <button
               key={msg}
-              style={{
-                maxWidth: "400px",
-                height: "auto",
-                color: "rgba(255, 255, 255, 0.6)",
-                background: "transparent",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
-              }}
+              className="suggested-message"
               onClick={(e) => {
                 setMessage(msg);
                 setTimeout(() => {
@@ -220,6 +200,7 @@ export const Chat = () => {
           );
         })}
       </div>
+      <div id="chat-messages-fade"></div>
       <form onSubmit={handleSend} className="chat-form">
         <input
           ref={inputRef}

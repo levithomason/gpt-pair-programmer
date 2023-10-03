@@ -6,6 +6,7 @@ import { Logo } from "./logo/logo";
 
 import background from "../../public/dark-gradient-background-with-copy-space.avif";
 import { makeLogger } from "../utils";
+import { Tools } from "./tools/tools";
 
 const log = makeLogger("components:app");
 
@@ -31,17 +32,22 @@ const ServerStatus = () => {
   updateStatus();
 
   const color = {
-    online: "rgba(36, 150, 36, 0.8)",
-    offline: "rgba(150, 36, 36, 0.8)",
+    online: "rgba(107,179,107,0.8)",
+    offline: "rgb(255,115,102)",
     "...": "rgba(150, 150, 150, 0.8)",
   }[status];
 
   return (
     <div
       id="server-status"
-      style={{ color, fontFamily: "var(--font-family-mono)", fontSize: 12 }}
+      style={{
+        color,
+        fontFamily: "var(--font-family-mono)",
+        fontWeight: status === "offline" ? "bold" : "normal",
+        fontSize: 12,
+      }}
     >
-      Server: {status}
+      <i className="fa fa-server" /> Status
     </div>
   );
 };
@@ -66,6 +72,9 @@ export const App = () => {
       </div>
       <div id="main">
         <Chat />
+      </div>
+      <div id="right">
+        <Tools />
       </div>
       <img id="background" src={background} alt="Background" />
     </div>

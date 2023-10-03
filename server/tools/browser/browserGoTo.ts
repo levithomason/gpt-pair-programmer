@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../../types.js";
 import { goTo } from "./utils.js";
 import { ToolError } from "../../utils/index.js";
 

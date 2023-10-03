@@ -1,15 +1,32 @@
 import express from "express";
 import debug from "debug";
 
-import type { OpenAPIMethod, OpenAPISpec } from "../types.js";
+import type { OpenAPIMethod, OpenAPISpec } from "../../types.js";
 import { tools } from "../tools/index.js";
 import { ToolError } from "../utils/errors.js";
+import { openAIFunctions } from "../utils/index.js";
 
 const log = debug("gpp:routes:tool");
 
 export const toolRoutes = (openAPISpec: OpenAPISpec) => {
   const router = express.Router();
 
+  router.get("/tools", (req, res) => {
+    // const tools = Object.values(openAPISpec.paths).map((methods) =>
+    //   Object.values(methods).map((method) => ({
+    //     name: method.operationId,
+    //     description: method.description,
+    //   })),
+    // );
+
+    // res.json(tools.flat());
+
+    res.json(openAIFunctions);
+  });
+
+  /**
+   * Dynamically add routes for each tool.
+   */
   for (const [endpoint, methods] of Object.entries(openAPISpec.paths)) {
     for (const [method, details] of Object.entries(methods)) {
       const { operationId } = details;

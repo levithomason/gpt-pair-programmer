@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { globSync } from "glob";
 
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../../types.js";
 import { absPath, relPath } from "../../../config.js";
 import { run, ToolError } from "../../utils/index.js";
 

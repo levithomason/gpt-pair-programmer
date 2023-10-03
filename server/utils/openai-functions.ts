@@ -1,4 +1,4 @@
-import type { OpenAIFunction } from "../types.js";
+import type { OpenAIFunction } from "../../types.js";
 import { openApiJson } from "./openapi-loader.js";
 
 export const openAIFunctions: OpenAIFunction[] = [];

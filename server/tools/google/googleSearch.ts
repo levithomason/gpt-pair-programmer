@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../../types.js";
 import { ToolError } from "../../utils/index.js";
 import type { FormattedSearchResult } from "./utils.js";
 import { formatSearchResult } from "./utils.js";

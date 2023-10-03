@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../../types.js";
 import { getInfo } from "./utils.js";
 
 type Args = {

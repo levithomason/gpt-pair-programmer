@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../../types.js";
 import { PROJECT_ROOT } from "../../../config.js";
 import { generateTree } from "../../utils/index.js";
 
