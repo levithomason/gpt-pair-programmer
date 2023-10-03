@@ -1,9 +1,7 @@
-import { OpenAI } from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 import express from "express";
 import debug from "debug";
 
-import { OPENAI_MODELS } from "../../config.js";
 import {
   BaseError,
   openAIFunctions,
@@ -13,6 +11,7 @@ import {
 import { tools } from "../tools/index.js";
 
 import { ChatMessage } from "../models/index.js";
+import { MODEL, openai } from "../ai/utils.js";
 
 const log = debug("gpp:server:routes:chat");
 
@@ -28,17 +27,6 @@ const ChatMessageToOpenAIMessage = (
 
   return result;
 };
-
-// TODO: add an env solution to handle env vars and validation
-const { OPENAI_API_KEY } = process.env;
-if (!OPENAI_API_KEY) {
-  throw new BaseError("Missing OPENAI_API_KEY environment variable.");
-}
-
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-// TODO: this should be moved to state and selectable by the user
-const MODEL = OPENAI_MODELS["gpt-3.5-turbo"];
 
 export const chatRoutes = express.Router();
 
@@ -116,34 +104,6 @@ chatRoutes.get("/chat", async (req, res) => {
     log("/chat callModel", trimmedMessages);
 
     let assistantReply = "";
-
-    // Determine next best step
-    // const nextBestStep = await openai.chat.completions.create({
-    //   model: MODEL.name,
-    //   messages: [
-    //     {
-    //       role: "system",
-    //       content: [
-    //         "Determine the best next step:",
-    //         "1: Get more information",
-    //         "2: Make a plan",
-    //         "3: Take action",
-    //         "",
-    //         "Respond with this schema:",
-    //         "<number>",
-    //       ].join("\n"),
-    //     },
-    //     ...trimmedMessages,
-    //   ],
-    //   stream: false,
-    //   n: 1,
-    //   functions: openAIFunctions,
-    //   function_call: "none",
-    // });
-    //
-    // log("nextBestStep", nextBestStep);
-    //
-    // res.write(nextBestStep.choices[0].message.content);
 
     try {
       const stream = await openai.chat.completions.create({
