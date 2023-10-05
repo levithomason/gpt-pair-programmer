@@ -1,7 +1,7 @@
 import * as path from "path";
 import { fileURLToPath } from "url";
 
-import { OpenAIModel } from "./types.js";
+import type { OpenAIModel } from "./types.js";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);

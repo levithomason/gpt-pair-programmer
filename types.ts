@@ -26,7 +26,6 @@ export type OpenAPISpec = {
   info: {
     title: string;
     description?: string;
-    termsOfService?: string;
     version: string;
   };
   servers?: { url: string }[];
@@ -45,20 +44,21 @@ export type OpenAPIMethodDetails = {
   requestBody?: {
     content?: {
       "application/json"?: {
-        schema?: {
-          type: "object";
-          properties?: OpenAPISchemaProperties;
-        };
+        schema?: OpenAPISchema;
       };
     };
   };
+};
+export type OpenAPISchema = {
+  type: "object";
+  required?: string[];
+  properties: OpenAPISchemaProperties;
 };
 
 export type OpenAPISchemaProperties = {
   [name: string]: {
     type: string;
     description: string;
-    required?: boolean;
   };
 };
 
@@ -68,11 +68,7 @@ export type OpenAPISchemaProperties = {
 export type OpenAIFunction = {
   name: string;
   description?: string;
-  parameters: {
-    type: "object";
-    properties: Omit<OpenAPISchemaProperties, "required">;
-    required?: string[];
-  };
+  parameters: OpenAPISchema;
 };
 
 // =============================================================================

@@ -9,9 +9,9 @@ import { openApiYaml } from "../utils/index.js";
 
 const log = debug("gpp:server:routes:plugin");
 
-export const pluginRoutes = express.Router();
+export const chatGptPluginRoutes = express.Router();
 
-pluginRoutes
+chatGptPluginRoutes
   .get("/logo.png", (_, res) => {
     const filename = "logo-white-bg.png";
     res.sendFile(filename, { root: PUBLIC_ROOT });

@@ -4,12 +4,13 @@ import * as React from "react";
 import "./chat.css";
 
 import { makeDebug } from "../../utils";
+import { socket } from "../../socket.io-client";
 import { ErrorBanner } from "../banner/error-banner";
 
-import type { ChatMessageType } from "./types";
 import { ChatMessage } from "./chat-message";
-import { socket } from "../../socket.io-client";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
+import type { ChatMessageType } from "./types";
+import { useIsFirstRender } from "../../hooks/use-first-render";
 
 const log = makeDebug("components:chat");
 
@@ -26,12 +27,12 @@ export const Chat = () => {
   const [messages, setMessages] = React.useState<ChatMessageType[]>([]);
   const [message, setMessage] = React.useState<string>("");
   const [reply, setReply] = React.useState<string>("");
-  const isFirstRender = React.useRef<boolean>(true);
+  const isFirstRender = useIsFirstRender();
 
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string>("");
 
-  const chatMessagesRef = React.useRef<HTMLDivElement>(null);
+  // const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const abortRef = React.useRef<AbortController | null>(null);
 
@@ -64,10 +65,9 @@ export const Chat = () => {
 
   React.useEffect(() => {
     // on first render, fetch messages from the server
-    if (!isFirstRender.current) return;
-    isFirstRender.current = false;
+    if (!isFirstRender) return;
 
-    // get initial messages
+    // Get initial messages
     fetch(`http://localhost:5004/chat/messages`)
       .then((res) => res.json())
       .then((res) => {
@@ -81,11 +81,17 @@ export const Chat = () => {
         setLoading(false);
       });
 
-    // listen for new messages
-    socket.on("newChatMessage", ({ message }) => {
+    // Listen for new messages
+    const handleNewChatMessage = ({ message }) => {
       log("newChatMessage", message);
       setMessages((prev) => [...prev, message]);
-    });
+    };
+
+    socket.on("newChatMessage", handleNewChatMessage);
+
+    return () => {
+      socket.off("newChatMessage", handleNewChatMessage);
+    };
   });
 
   const handleSend = React.useCallback(

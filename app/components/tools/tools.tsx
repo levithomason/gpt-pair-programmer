@@ -2,30 +2,41 @@ import * as React from "react";
 
 import "./tools.css";
 
-import type { OpenAIFunction } from "../../../types";
-import { classNames, makeDebug } from "../../utils";
+import type {
+  OpenAIFunction,
+  OpenAPIMethod,
+  OpenAPISchema,
+  OpenAPISpec,
+} from "../../../types";
+import { makeDebug } from "../../utils";
 import { useIsFirstRender } from "../../hooks/use-first-render";
+import { forEachOpenAPIPath } from "../../../shared/openapi";
 
 const log = makeDebug("gpp:app:components:tools");
 
+type ToolExecuter = {
+  operationId: string;
+  description: string;
+  endpoint: string;
+  method: OpenAPIMethod;
+  schema: OpenAPISchema;
+};
+
 export const Tools = () => {
   const [tools, setTools] = React.useState<OpenAIFunction[]>([]);
-  const [error, setError] = React.useState<string>("");
 
   const isFirstRender = useIsFirstRender();
 
   React.useEffect(() => {
     if (!isFirstRender) return;
 
-    fetch(`http://localhost:5004/tools`)
+    fetch(`http://localhost:5004/openapi.json`)
       .then((res) => res.json())
-      .then((res) => {
-        log("fetched tools", res);
-        setTools(res);
-      })
-      .catch((err) => {
-        log(err);
-        setError(err.toString());
+      .then((openApiJson: OpenAPISpec) => {
+        forEachOpenAPIPath(openApiJson, (tool: ToolExecuter) => {
+          setTools(tools);
+        });
+        log("fetched openapi JSON", openApiJson);
       });
   });
 
@@ -48,7 +59,7 @@ export const Tools = () => {
               <div className="tool__args">
                 {Object.entries(tool.parameters.properties).map(
                   ([arg, argDetails]) => {
-                    const required = tool.parameters.required.includes(arg);
+                    const required = tool.parameters.required?.includes(arg);
 
                     return (
                       <div key={arg} className="tool__arg">

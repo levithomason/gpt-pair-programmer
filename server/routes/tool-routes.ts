@@ -4,45 +4,34 @@ import debug from "debug";
 import type { OpenAPIMethod, OpenAPISpec } from "../../types.js";
 import { tools } from "../tools/index.js";
 import { ToolError } from "../utils/errors.js";
+import { forEachOpenAPIPath } from "../../shared/openapi.js";
 import { openAIFunctions } from "../utils/index.js";
 
 const log = debug("gpp:routes:tool");
 
-export const toolRoutes = (openAPISpec: OpenAPISpec) => {
+export const toolRoutes = (openApiJson: OpenAPISpec) => {
   const router = express.Router();
 
+  router.get("/openapi.json", (_, res) => {
+    res.json(openApiJson);
+  });
+
   router.get("/tools", (req, res) => {
-    // const tools = Object.values(openAPISpec.paths).map((methods) =>
-    //   Object.values(methods).map((method) => ({
-    //     name: method.operationId,
-    //     description: method.description,
-    //   })),
-    // );
-
-    // res.json(tools.flat());
-
     res.json(openAIFunctions);
   });
 
   /**
    * Dynamically add routes for each tool.
    */
-  for (const [endpoint, methods] of Object.entries(openAPISpec.paths)) {
-    for (const [method, details] of Object.entries(methods)) {
-      const { operationId } = details;
-      const requestBodyProperties =
-        details.requestBody?.content?.["application/json"]?.schema
-          ?.properties || {};
-
-      //
-      // Dynamically add routes for each tool
-      //
+  forEachOpenAPIPath(
+    openApiJson,
+    ({ endpoint, method, operationId, schema }) => {
       router[method as OpenAPIMethod](endpoint, async (req, res) => {
         log(method, endpoint, req.body);
 
         // pick the args from the request body based on the OpenAPI spec
         const args = {};
-        Object.keys(requestBodyProperties).forEach((key) => {
+        Object.keys(schema.properties).forEach((key) => {
           args[key] = req.body[key];
         });
 
@@ -66,8 +55,8 @@ export const toolRoutes = (openAPISpec: OpenAPISpec) => {
           }
         }
       });
-    }
-  }
+    },
+  );
 
   return router;
 };

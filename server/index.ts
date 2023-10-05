@@ -10,7 +10,7 @@ import bodyParser from "body-parser";
 import { logErrors, returnErrors } from "./middleware/errors.js";
 import { openApiJson } from "./utils/index.js";
 
-import { pluginRoutes } from "./routes/plugin-routes.js";
+import { chatGptPluginRoutes } from "./routes/chat-gpt-plugin-routes.js";
 import { chatRoutes } from "./routes/chat-routes.js";
 import { toolRoutes } from "./routes/tool-routes.js";
 
@@ -60,7 +60,7 @@ app.use(returnErrors);
 // ============================================================================
 // Routes
 // ============================================================================
-app.use(pluginRoutes);
+app.use(chatGptPluginRoutes);
 app.use(chatRoutes);
 app.use(toolRoutes(openApiJson));
 

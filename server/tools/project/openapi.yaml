@@ -24,7 +24,8 @@ paths:
       operationId: fileWrite
       summary: Write a project file
       description: |
-        This endpoint allows you to perform a Google search by providing a search query in the request body.
+        Write a file to the project. If the file already exists, it will be overwritten.
+        If the file does not exist, it will be created along with any required directories.
       requestBody:
         required: true
         content:
