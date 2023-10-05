@@ -15,9 +15,9 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - query
               properties:
                 query:
-                  required: true
                   type: string
                   description: The search query.
-                  example: "What's the weather like today?"

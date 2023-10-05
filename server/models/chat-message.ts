@@ -3,7 +3,17 @@ import { DataTypes } from "sequelize";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 import { Column, Model, Table } from "sequelize-typescript";
 
-@Table
+import { getSocketIO } from "../socket.io-server.js";
+
+@Table({
+  hooks: {
+    afterCreate: (instance: ChatMessage) => {
+      const io = getSocketIO();
+      io.emit("new-chat-message", instance.toJSON());
+    },
+    // TODO: handle afterUpdate, afterDestroy
+  },
+})
 export class ChatMessage extends Model<
   InferAttributes<ChatMessage>,
   InferCreationAttributes<ChatMessage>

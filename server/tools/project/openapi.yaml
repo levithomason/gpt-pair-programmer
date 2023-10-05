@@ -13,12 +13,12 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - path
               properties:
                 path:
-                  required: true
                   type: string
                   description: Relative path to the file from the root of the project.
-                  example: server/tools/file/openapi.yaml
   /project/file/write:
     post:
       operationId: fileWrite
@@ -31,14 +31,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - path
+                - contents
               properties:
                 path:
-                  required: true
                   type: string
                   description: Relative path to the file from the root of the project.
-                  example: server/tools/file/openapi.yaml
                 contents:
-                  required: true
                   type: string
                   description: The contents of the file.
   /project/file/delete:
@@ -51,12 +51,49 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - path
               properties:
                 path:
-                  required: true
                   type: string
                   description: Relative path to the file from the root of the project.
-                  example: server/tools/file/file-to-delete.ts
+  /project/file/edit:
+    post:
+      operationId: fileEdit
+      summary: Edit a file
+      description: Edit the contents of a file using an array of edits. An edit specifies a start, end, and content.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - path
+                - edits
+              properties:
+                path:
+                  type: string
+                  description: Relative path to the file from the root of the project.
+                edits:
+                  type: array
+                  description: An array of edits to apply to the file.
+                  items:
+                    type: object
+                    required:
+                      - start
+                      - end
+                      - content
+                    properties:
+                      start:
+                        type: string
+                        description: A string to match the start of the content to be replaced.
+                      end:
+                        type: string
+                        description: A string to match the end of the content to be replaced.
+                      content:
+                        type: string
+                        description: The content to replace the edit with.
   /project/file/find:
     post:
       operationId: fileFind
@@ -68,16 +105,16 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - query
               properties:
                 query:
-                  required: true
                   type: string
                   description: The search query.
-                  example: openapi
   /project/exec:
     post:
-      operationId: runShellCommand
-      summary: Run a shell command
+      operationId: projectExec
+      summary: Execute a command
       description: |
         Executes a background command in the project directory on the user's computer.
         Do not execute commands that require user input, the user cannot see the shell.
@@ -87,17 +124,15 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - command
               properties:
                 command:
-                  required: true
                   type: string
                   description: The shell command to execute
-                  example: "echo 'export default 42' >> answer.js"
                 cwd:
-                  required: true
                   type: string
                   description: The path of the directory to execute the command in
-                  example: "/path/to/directory"
   /project/info:
     get:
       operationId: getProjectInfo

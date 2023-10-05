@@ -1,12 +1,12 @@
 import * as React from "react";
-import debug from "debug";
-
-import { useIsFirstRender } from "../../hooks/use-first-render";
-import type { OpenAIFunction } from "../../../types";
 
 import "./tools.css";
 
-const log = debug("gpp:app:components:tools");
+import type { OpenAIFunction } from "../../../types";
+import { classNames, makeDebug } from "../../utils";
+import { useIsFirstRender } from "../../hooks/use-first-render";
+
+const log = makeDebug("gpp:app:components:tools");
 
 export const Tools = () => {
   const [tools, setTools] = React.useState<OpenAIFunction[]>([]);

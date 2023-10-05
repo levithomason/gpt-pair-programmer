@@ -1,9 +1,7 @@
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 import express from "express";
 import debug from "debug";
-
 import {
-  BaseError,
   openAIFunctions,
   ToolError,
   trimStringToTokens,
@@ -200,8 +198,7 @@ chatRoutes.get("/chat", async (req, res) => {
         }
       }
     } catch (error) {
-      res.write('\n\n500 Error: "' + error + '"' + "\n\n");
-      res.status(500).write((error as Error).toString());
+      res.status(500).write(`\n\n500 Error: ${error}`);
     }
 
     log("/chat end", messages);

@@ -17,13 +17,13 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - url
               properties:
                 url:
-                  required: true
                   type: string
                   format: uri
                   description: The URL of the webpage to open
-                  example: https://example.com
   /browser/dom:
     get:
       operationId: browserGetDom
@@ -56,7 +56,6 @@ paths:
                 code:
                   type: string
                   description: The JavaScript string to evaluate.
-                  example: "document.querySelector('#sendButton').click();"
   /browser/click:
     post:
       operationId: browserClick
@@ -69,11 +68,12 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - selector
               properties:
                 selector:
                   type: string
                   description: The CSS selector to target
-                  example: "#sendButton"
   /browser/type:
     post:
       operationId: browserType
@@ -86,12 +86,13 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - selector
+                - value
               properties:
                 selector:
                   type: string
                   description: The CSS selector to target
-                  example: "#sendButton"
                 value:
                   type: string
                   description: The text to type
-                  example: "Hello, world!"

@@ -7,7 +7,7 @@ import { BaseError } from "../utils/index.js";
 import { SERVER_ROOT } from "../../config.js";
 import * as models from "../models/index.js";
 
-const log = debug("gpp:db");
+const log = debug("gpp:database");
 const sequelLogger = debug("gpp:sequelize");
 
 export const getSequelize = (): Sequelize => {

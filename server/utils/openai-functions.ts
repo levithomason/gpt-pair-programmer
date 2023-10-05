@@ -21,6 +21,7 @@ for (const [endpoint, methods] of Object.entries(openApiJson.paths)) {
         delete property.required;
         required.push(name);
       }
+      console.log(property);
       properties[name] = property;
     });
 

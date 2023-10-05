@@ -16,6 +16,8 @@ html {
 
   --app-right-bar-width: 300px;
   --app-header-height: 48px;
+
+  --form-element-height: 2rem;
 }
 
 body {
@@ -75,7 +77,8 @@ pre {
 input,
 select,
 button {
-  height: 2rem;
+  display: flex;
+  height: var(--form-element-height);
   padding: 0.2rem 0.5rem;
   font-size: 1rem;
   border: 2px solid #ffffff11;
@@ -83,15 +86,30 @@ button {
 }
 
 button {
-  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 16px;
   color: var(--body-color);
-  background: rgba(194, 0, 32, 0.6);
-  line-height: 1;
+  background: rgba(0, 149, 194, 0.6);
   border: none;
   cursor: pointer;
 }
 button:hover {
-  background: rgba(194, 0, 32, 0.8);
+  background: rgba(0, 149, 194, 0.8);
+}
+
+/* buttons */
+.button--icon {
+  padding: 0.5rem;
+  width: var(--form-element-height);
+  line-height: 1;
+  background: rgba(0, 149, 194, 0.6);
+}
+.button--transparent {
+  background: transparent;
+  color: var(--body-color);
 }
 
 input:focus,

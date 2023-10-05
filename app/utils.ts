@@ -4,4 +4,4 @@ export const classNames = (...args: any[]) => {
   return args.filter(Boolean).join(" ");
 };
 
-export const makeLogger = (name: string) => debug(`gpp:app:${name}`);
+export const makeDebug = (name: string) => debug(`gpp:app:${name}`);

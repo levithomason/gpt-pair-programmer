@@ -16,10 +16,10 @@ type Args = {
  * @method post
  * @endpoint /tools/project/exec
  */
-const runShellCommand: ToolFunction<Args, RunReturn> = async (args) => {
+const projectExec: ToolFunction<Args, RunReturn> = async (args) => {
   if (!args.command) {
     throw new ToolError({
-      tool: "runShellCommand",
+      tool: "projectExec",
       message: "Command is required",
     });
   }
@@ -27,4 +27,4 @@ const runShellCommand: ToolFunction<Args, RunReturn> = async (args) => {
   return await run(args.command, args.cwd);
 };
 
-export default runShellCommand;
+export default projectExec;

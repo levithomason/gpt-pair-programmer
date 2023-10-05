@@ -1,4 +1,11 @@
-.logo {
-  width: 48px;
-  height: 48px;
+.logo__image {
+  vertical-align: middle;
+  width: 32px;
+  height: 32px;
+  margin-right: 4px;
+}
+
+.logo__text {
+  color: #eee;
+  font-weight: bold;
 }

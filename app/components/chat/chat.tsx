@@ -1,14 +1,17 @@
 import type { FormEvent } from "react";
 import * as React from "react";
-import debug from "debug";
 
 import "./chat.css";
+
+import { makeDebug } from "../../utils";
+import { ErrorBanner } from "../banner/error-banner";
+
 import type { ChatMessageType } from "./types";
 import { ChatMessage } from "./chat-message";
-import { ErrorBanner } from "../banner/error-banner";
+import { socket } from "../../socket.io-client";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
 
-const log = debug("gpp:app:components:chat");
+const log = makeDebug("components:chat");
 
 const suggestedMessages = [
   "Who am I?",
@@ -64,6 +67,7 @@ export const Chat = () => {
     if (!isFirstRender.current) return;
     isFirstRender.current = false;
 
+    // get initial messages
     fetch(`http://localhost:5004/chat/messages`)
       .then((res) => res.json())
       .then((res) => {
@@ -76,6 +80,12 @@ export const Chat = () => {
         setError(err.toString());
         setLoading(false);
       });
+
+    // listen for new messages
+    socket.on("newChatMessage", ({ message }) => {
+      log("newChatMessage", message);
+      setMessages((prev) => [...prev, message]);
+    });
   });
 
   const handleSend = React.useCallback(

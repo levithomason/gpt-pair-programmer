@@ -1,9 +1,5 @@
 #app {
-  display: grid;
-  grid-template:
-    "header right" var(--app-header-height)
-    "main right" 1fr
-    / 1fr var(--app-right-bar-width);
+  display: flex;
   position: relative;
   overflow: hidden;
   width: 100vw;
@@ -12,13 +8,12 @@
 }
 
 #header {
-  grid-area: header;
-  position: fixed;
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  width: calc(100% - var(--app-right-bar-width));
+  width: 100%;
   height: var(--app-header-height);
   top: 0;
   left: 0;
@@ -36,12 +31,18 @@
 }
 
 #main {
-  grid-area: main;
+  flex: 1;
+  position: relative;
   overflow-y: auto;
+  padding-top: var(--app-header-height);
 }
 
 #right {
-  grid-area: right;
+  display: flex;
+  gap: 16px;
+  flex: 0 0 auto;
+  min-width: 32px;
+  max-width: 300px;
   overflow-y: auto;
 }
 

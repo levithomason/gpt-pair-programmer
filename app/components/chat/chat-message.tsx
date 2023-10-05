@@ -6,9 +6,9 @@ import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
 import type { ChatMessageType } from "./types";
-import { makeLogger } from "../../utils";
+import { makeDebug } from "../../utils";
 
-const log = makeLogger("components:chat-message");
+const log = makeDebug("components:chat-message");
 
 export type ChatMessageProps = ChatMessageType;
 

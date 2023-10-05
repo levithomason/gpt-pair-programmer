@@ -1,4 +1,5 @@
 import type { ChatCompletionCreateParamsStreaming } from "openai/src/resources/chat/completions.js";
+import type { ChatMessageType } from "./app/components/chat/types";
 
 export type OpenAIModel = {
   name: Exclude<
@@ -82,3 +83,24 @@ export type OpenAIFunction = {
 export type ToolFunction<ArgObj, Return = void> = (
   args: ArgObj,
 ) => Promise<Return>;
+
+// =============================================================================
+// Socket.io
+// =============================================================================
+export interface ServerToClientEvents {
+  newChatMessage: (data: { message: ChatMessageType }) => void;
+}
+
+export interface ClientToServerEvents {
+  /** Get the current status of the socket.io server */
+  status: () => void;
+}
+
+export interface InterServerEvents {
+  //
+}
+
+export interface SocketData {
+  name: string;
+  age: number;
+}
