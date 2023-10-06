@@ -64,22 +64,21 @@ export const Chat = () => {
   // }, [messages]);
 
   React.useEffect(() => {
-    // on first render, fetch messages from the server
-    if (!isFirstRender) return;
-
     // Get initial messages
-    fetch(`http://localhost:5004/chat/messages`)
-      .then((res) => res.json())
-      .then((res) => {
-        log("fetched chat messages", res);
-        setMessages(res);
-        setLoading(false);
-      })
-      .catch((err) => {
-        log(err);
-        setError(err.toString());
-        setLoading(false);
-      });
+    if (isFirstRender) {
+      fetch(`http://localhost:5004/chat/messages`)
+        .then((res) => res.json())
+        .then((res) => {
+          log("fetched chat messages", res);
+          setMessages(res);
+          setLoading(false);
+        })
+        .catch((err) => {
+          log(err);
+          setError(err.toString());
+          setLoading(false);
+        });
+    }
 
     // Listen for new messages
     const handleNewChatMessage = ({ message }) => {
@@ -92,7 +91,7 @@ export const Chat = () => {
     return () => {
       socket.off("newChatMessage", handleNewChatMessage);
     };
-  });
+  }, []);
 
   const handleSend = React.useCallback(
     async (e: FormEvent) => {
@@ -108,7 +107,6 @@ export const Chat = () => {
       }
 
       setLoading(true);
-      setMessages((prev) => [...prev, { role: "user", content: message }]);
       setMessage("");
       // scrollToBottom();
 
@@ -143,13 +141,7 @@ export const Chat = () => {
             }
 
             log("done");
-            setReply((prevReply) => {
-              setMessages((prevMessages) => [
-                ...prevMessages,
-                { role: "assistant", content: prevReply },
-              ]);
-              return "";
-            });
+            setReply("");
             setLoading(false);
             // scrollToBottom();
           };

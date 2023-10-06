@@ -3,6 +3,11 @@
   overflow-y: auto;
   max-height: 100%;
   min-width: 48px;
+
+  --tool-padding-x: 8px;
+  --tool-padding-y: 8px;
+  --tool-top-row-height: 24px;
+  --tool-controls-width: 48px;
 }
 
 .tools_header {
@@ -22,15 +27,15 @@
 .tool-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 4px;
+  gap: var(--tool-padding-y);
+  padding: 8px 8px 64px 8px;
   line-height: 1.5;
 }
 .tool {
   position: relative;
   font-size: 14px;
   background: #ffffff08;
-  padding: 8px;
+  padding: var(--tool-padding-y) var(--tool-padding-x);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   cursor: default;
@@ -41,14 +46,26 @@
 .tool__name {
   font-weight: bold;
   font-family: var(--font-family-mono);
+  padding-right: var(--tool-controls-width);
+  height: var(--tool-top-row-height);
+  line-height: var(--tool-top-row-height);
+}
+.tool__controls {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: var(--tool-padding-y);
+  right: var(--tool-padding-x);
+  width: var(--tool-controls-width);
+  height: var(--tool-top-row-height);
 }
 .tool__button {
-  transition: opacity 0.15s ease-in-out;
-  position: absolute;
-  top: 4px;
-  right: 8px;
-  padding: 4px 8px;
-  height: fit-content;
+  transition: opacity 0.2s ease-out;
+  padding: 0;
+  width: var(--tool-controls-width);
+  justify-self: flex-end;
+  height: var(--tool-top-row-height);
   border-radius: 4px;
   font-size: inherit;
   background: rgb(37, 83, 107);
@@ -57,18 +74,17 @@
 .tool__button:hover {
   background: rgb(46, 102, 133);
 }
-.tool__button:focus {
-  box-shadow:
-    0 0 0 1px #ccc,
-    0 0 0 3px #111;
-  background: rgb(46, 102, 133);
-}
 .tool:hover .tool__button,
 .tool:focus-within .tool__button {
   opacity: 1;
 }
+.tool__loading-icon {
+  --fa-animation-duration: 0.3s;
+  color: var(--body-color-system-message);
+}
 .tool__description {
   opacity: 0.7;
+  font-size: 14px;
 }
 .tool__args {
   grid-area: args;
@@ -108,12 +124,24 @@
 }
 
 .tool__arg-description {
-  transition: opacity 0.15s ease-in-out;
-  margin-left: 4px;
-  font-size: 12px;
-  color: #ffffff88;
+  transition: opacity 0.2s ease-out;
+  transition-delay: 0ms;
+  position: absolute;
+  top: 100%;
+  margin-top: 4px;
+  left: 0;
+  padding: 8px;
+  font-size: 14px;
+  color: #ddd;
+  background: #222;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
   opacity: 0;
+  z-index: 1;
 }
-.tool__arg:focus-within .tool__arg-description {
+.tool__arg-field:focus-within .tool__arg-description {
+  transition-delay: 800ms;
   opacity: 1;
 }

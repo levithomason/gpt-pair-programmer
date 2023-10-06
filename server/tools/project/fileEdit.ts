@@ -2,7 +2,7 @@ import * as fs from "fs";
 
 import type { ToolFunction } from "../../../types.js";
 import { ToolError } from "../../utils/index.js";
-import { absPath } from "../../../config.js";
+import { absPath } from "../../config.js";
 
 type Edit = {
   start: string;

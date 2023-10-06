@@ -4,7 +4,7 @@ import * as yaml from "js-yaml";
 import debug from "debug";
 
 import type { OpenAPISpec } from "../../types.js";
-import { BASE_SPEC_PATH, TOOLS_ROOT, relPath } from "../../config.js";
+import { BASE_SPEC_PATH, relPath, TOOLS_ROOT } from "../config.js";
 import { BaseError } from "../utils/index.js";
 
 const log = debug("gpp:server:openapi-loader");

@@ -3,7 +3,7 @@ import type { ExecException } from "child_process";
 import { exec } from "child_process";
 
 import debug from "debug";
-import { PROJECT_ROOT } from "../../config.js";
+import { PROJECT_ROOT } from "../config.js";
 
 const log = debug("gpp:server:utils:shell");
 

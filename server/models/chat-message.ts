@@ -1,3 +1,4 @@
+import debug from "debug";
 import type { InferAttributes, InferCreationAttributes } from "sequelize";
 import { DataTypes } from "sequelize";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
@@ -5,11 +6,15 @@ import { Column, Model, Table } from "sequelize-typescript";
 
 import { getSocketIO } from "../socket.io-server.js";
 
+const log = debug("gpp:server:models:chat-message");
+
 @Table({
   hooks: {
     afterCreate: (instance: ChatMessage) => {
+      log("afterCreate", instance.toJSON());
+
       const io = getSocketIO();
-      io.emit("new-chat-message", instance.toJSON());
+      io.emit("newChatMessage", { message: instance.toJSON() });
     },
     // TODO: handle afterUpdate, afterDestroy
   },

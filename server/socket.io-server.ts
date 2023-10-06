@@ -8,6 +8,7 @@ import type {
   ServerToClientEvents,
   SocketData,
 } from "../types.js";
+import { SERVER_STATUS_HEARTBEAT_INTERVAL } from "../shared/config.js";
 
 const log = debug("gpp:server:socket.io-server");
 
@@ -38,21 +39,23 @@ export const setupSocketIO = (httpServer: any) => {
 
   io.on("connection", (socket) => {
     log("Socket connected: ", socket.id);
-    io.emit("status", { status: "connected" });
   });
 
   io.on("disconnect", (socket) => {
     log("Socket disconnected: ", socket.id);
-    io.emit("status", { status: "disconnected" });
   });
 
-  io.on("status", (socket) => {
-    log("Socket status: ", socket.id);
-    io.emit("status", { status: "ok" });
-  });
+  setInterval(() => {
+    io.emit("serverHeartbeat");
+  }, SERVER_STATUS_HEARTBEAT_INTERVAL);
 };
 
-export const getSocketIO = (): Server => {
+export const getSocketIO = (): Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+> => {
   if (!io)
     throw new BaseError(
       "Socket.io server not setup yet. Call setupSocketIO() first.",

@@ -17,8 +17,6 @@ import { toolRoutes } from "./routes/tool-routes.js";
 import { getDB, setupDB } from "./database/index.js";
 import { setupSocketIO } from "./socket.io-server.js";
 
-debug.enable("gpp:*");
-
 const log = debug("gpp:server:main");
 
 // ============================================================================

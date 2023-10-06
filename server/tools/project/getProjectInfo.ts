@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import type { ToolFunction } from "../../../types.js";
-import { PROJECT_ROOT } from "../../../config.js";
+import { PROJECT_ROOT } from "../../config.js";
 import { ToolError } from "../../utils/index.js";
 
 type Return = {

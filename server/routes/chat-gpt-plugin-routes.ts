@@ -4,7 +4,7 @@ import path from "path";
 import express from "express";
 import debug from "debug";
 
-import { PUBLIC_ROOT, SERVER_ROOT } from "../../config.js";
+import { PUBLIC_ROOT, SERVER_ROOT } from "../config.js";
 import { openApiYaml } from "../utils/index.js";
 
 const log = debug("gpp:server:routes:plugin");

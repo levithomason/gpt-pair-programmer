@@ -1,7 +1,7 @@
 import { OpenAI } from "openai";
 import debug from "debug";
 
-import { OPENAI_MODELS } from "../../config.js";
+import { OPENAI_MODELS } from "../../shared/config.js";
 import { BaseError, retryUntil } from "../utils/index.js";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 

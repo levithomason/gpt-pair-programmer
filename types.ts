@@ -80,23 +80,31 @@ export type ToolFunction<ArgObj, Return = void> = (
   args: ArgObj,
 ) => Promise<Return>;
 
+export type ToolAttributes = {
+  operationId: OpenAPIMethodDetails["operationId"];
+  description: OpenAPIMethodDetails["description"];
+  endpoint: OpenAPIPath;
+  method: OpenAPIMethod;
+  schema: OpenAPISchema;
+};
+
 // =============================================================================
 // Socket.io
 // =============================================================================
 export interface ServerToClientEvents {
+  /** Tell clients a new chat message has been created */
   newChatMessage: (data: { message: ChatMessageType }) => void;
+
+  /** Tell clients we're online */
+  serverHeartbeat: () => void;
 }
 
-export interface ClientToServerEvents {
-  /** Get the current status of the socket.io server */
-  status: () => void;
-}
+export interface ClientToServerEvents {}
 
 export interface InterServerEvents {
   //
 }
 
 export interface SocketData {
-  name: string;
-  age: number;
+  //
 }

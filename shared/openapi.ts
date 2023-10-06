@@ -1,22 +1,13 @@
-import debug from "debug";
-
-import type { OpenAPIMethod, OpenAPISchema, OpenAPISpec } from "../types.js";
-
-const log = debug("gpp:shared");
+import type {
+  OpenAPIMethod,
+  OpenAPISchema,
+  OpenAPISpec,
+  ToolAttributes,
+} from "../types.js";
 
 export const forEachOpenAPIPath = (
   openApiJson: OpenAPISpec,
-  callback: ({
-    endpoint,
-    method,
-    schema,
-  }: {
-    operationId: string;
-    description?: string;
-    endpoint: string;
-    method: OpenAPIMethod;
-    schema: OpenAPISchema;
-  }) => void,
+  callback: (tool: ToolAttributes) => void,
 ) => {
   for (const [endpoint, methods] of Object.entries(openApiJson.paths)) {
     for (const [methodKey, details] of Object.entries(methods)) {

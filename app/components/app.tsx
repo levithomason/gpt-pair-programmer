@@ -13,7 +13,7 @@ import { ServerStatus } from "./server-status/server-status";
 const log = makeDebug("components:app");
 
 export const App = () => {
-  const [showRight, setShowRight] = React.useState<boolean>(false);
+  const [showRight, setShowRight] = React.useState<boolean>(true);
 
   const resetChat = () => {
     if (!confirm("RESET the db?")) {
@@ -39,6 +39,7 @@ export const App = () => {
             <button
               onClick={() => setShowRight(!showRight)}
               className="button--transparent"
+              title='Show "Tools"'
             >
               <i
                 className={classNames(

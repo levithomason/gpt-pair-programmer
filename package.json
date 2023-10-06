@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "app": "nodemon -w package.json -w tsconfig.json -w tsconfig.app.json -w webpack.config.ts --exec \"yarn app:start\"",
-    "app:start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./node_modules/.bin/webpack serve",
+    "app:start": "DEBUG=\"gpp:*\" node --no-warnings=ExperimentalWarning --loader ts-node/esm ./node_modules/.bin/webpack serve",
     "server": "nodemon -w package.json -w tsconfig.json -w server --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
-    "server:start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm server/index.ts",
+    "server:start": "DEBUG=\"gpp:*\" node --no-warnings=ExperimentalWarning --loader ts-node/esm server/index.ts",
     "server:build": "tsc --project tsconfig.json",
     "fix-deps": "node scripts/fix-deps.js"
   },
@@ -16,7 +16,8 @@
   "license": "MIT",
   "engines": {
     "npm": "Use yarn only.",
-    "yarn": ">=1.22.0"
+    "yarn": ">=1.22.0",
+    "node": ">=18.0.0"
   },
   "packageManager": "yarn@3.6.3",
   "devDependencies": {

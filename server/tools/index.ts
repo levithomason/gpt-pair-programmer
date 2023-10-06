@@ -21,7 +21,6 @@ fs.readdirSync(__dirname).forEach((entry) => {
   if (!fs.statSync(toolDir).isDirectory()) return;
 
   fs.readdirSync(toolDir).forEach(async (entry) => {
-    log("TS or JS?", entry);
     if (
       entry === "utils.ts" ||
       entry === "index.ts" ||
@@ -32,8 +31,7 @@ fs.readdirSync(__dirname).forEach((entry) => {
 
     const toolPath = path.join(toolDir, entry);
 
-    log(`Load: ${entry}`);
-    log("TS or JS?", entry);
+    log(`loading ${entry}`);
     const basename = path.basename(entry, ".ts");
     const { default: tool } = await import(toolPath);
 

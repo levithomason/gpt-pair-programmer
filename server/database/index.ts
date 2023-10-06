@@ -4,7 +4,7 @@ import { Sequelize } from "sequelize-typescript";
 import debug from "debug";
 
 import { BaseError } from "../utils/index.js";
-import { SERVER_ROOT } from "../../config.js";
+import { SERVER_ROOT } from "../config.js";
 import * as models from "../models/index.js";
 
 const log = debug("gpp:store");

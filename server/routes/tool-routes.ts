@@ -6,6 +6,7 @@ import { tools } from "../tools/index.js";
 import { ToolError } from "../utils/errors.js";
 import { forEachOpenAPIPath } from "../../shared/openapi.js";
 import { openAIFunctions } from "../utils/index.js";
+import { ChatMessage } from "../models/index.js";
 
 const log = debug("gpp:routes:tool");
 
@@ -31,7 +32,7 @@ export const toolRoutes = (openApiJson: OpenAPISpec) => {
 
         // pick the args from the request body based on the OpenAPI spec
         const args = {};
-        Object.keys(schema.properties).forEach((key) => {
+        Object.keys(schema?.properties || {}).forEach((key) => {
           args[key] = req.body[key];
         });
 
@@ -43,9 +44,18 @@ export const toolRoutes = (openApiJson: OpenAPISpec) => {
         }
 
         try {
-          log(operationId, args);
+          log("calling", operationId, args);
           const data = await tool(args);
-          log(endpoint, data);
+          // log(endpoint, data);
+
+          await ChatMessage.create({
+            // TODO: when the user calls a function: role='user', name='<username>'
+            //       otherwise, the model thinks it called the function
+            role: "function",
+            content: JSON.stringify(data),
+            name: operationId,
+          });
+
           res.status(200).send(data);
         } catch (error) {
           if (error instanceof ToolError) {

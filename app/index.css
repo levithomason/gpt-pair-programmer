@@ -18,6 +18,8 @@ html {
   --app-header-height: 48px;
 
   --form-element-height: 2rem;
+
+  --body-color-system-message: hsla(41, 80%, 80%, 0.8);
 }
 
 body {
@@ -99,6 +101,11 @@ button {
 button:hover {
   background: rgba(0, 149, 194, 0.8);
 }
+button:focus {
+  box-shadow:
+    inset 0 0 0 1px #ccc,
+    0 0 0 1px #111;
+}
 
 /* buttons */
 .button--icon {
@@ -116,6 +123,10 @@ input:focus,
 select:focus,
 button:focus {
   outline: none;
+}
+button[disabled] {
+  opacity: 0.2;
+  cursor: default;
 }
 
 /* table */

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { globSync } from "glob";
 
 import type { ToolFunction } from "../../../types.js";
-import { absPath, relPath } from "../../../config.js";
+import { absPath, relPath } from "../../config.js";
 import { run, ToolError } from "../../utils/index.js";
 
 type Args = {
@@ -49,6 +49,13 @@ const getIgnorePatterns = (filePath: string): string[] => {
 const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
   const localGitignore = getIgnorePatterns(absPath(".gitignore"));
   const globalGitignore = [];
+
+  if (!query) {
+    throw new ToolError({
+      tool: "fileFind",
+      message: "No query provided",
+    });
+  }
 
   try {
     const { stdout } = await run("git config --get core.excludesfile");
