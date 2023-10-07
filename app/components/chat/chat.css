@@ -44,6 +44,9 @@
   flex: 0 0 var(--avatar-column-width);
   text-align: center;
 }
+.chat-message__content {
+  overflow-x: auto;
+}
 .chat-message__content img {
   display: block;
   max-width: 60vw;
