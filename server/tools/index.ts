@@ -6,6 +6,7 @@ import debug from "debug";
 
 import type { ToolFunction } from "../../types.js";
 import { BaseError } from "../utils/index.js";
+import { ChatMessage } from "../models/index.js";
 
 const log = debug("gpp:tools");
 
@@ -42,10 +43,30 @@ fs.readdirSync(__dirname).forEach((entry) => {
     tools[basename] = async function toolWrapper(arg) {
       log(`${basename}(${JSON.stringify(arg, null, 2)})`);
 
-      const result = await tool(arg);
-      log(`${basename} =>`, result);
+      try {
+        const result = await tool(arg);
+        log(`${basename} =>`, result);
 
-      return result;
+        await ChatMessage.create({
+          // TODO: when the user calls a function: role='user', name='<username>'
+          //       otherwise, the model thinks it called the function
+          role: "function",
+          content: JSON.stringify(result),
+          name: basename,
+        });
+
+        return result;
+      } catch (error) {
+        await ChatMessage.create({
+          // TODO: when the user calls a function: role='user', name='<username>'
+          //       otherwise, the model thinks it called the function
+          role: "function",
+          content: JSON.stringify(error.message),
+          name: basename,
+        });
+
+        throw error;
+      }
     };
   });
 });

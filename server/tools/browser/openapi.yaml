@@ -39,7 +39,7 @@ paths:
     get:
       operationId: browserReadPage
       summary: Read browser page
-      description: Get a human readable version of the current browser page
+      description: Get a human-readable version of the current browser page
   /browser/evaluate:
     post:
       operationId: browserEvaluate

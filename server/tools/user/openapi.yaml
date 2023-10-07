@@ -9,7 +9,7 @@ paths:
       summary: Get User Profile
       description: >
         Get user information such as fullName, email, username, linkedIn, github, time, and timezone.
-        This is the user you are pair programming wii
+        This is the user you are pair programming with.
   /user/location:
     get:
       operationId: getUserLocation

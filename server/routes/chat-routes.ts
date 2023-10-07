@@ -219,15 +219,7 @@ chatRoutes.get("/chat", async (req, res) => {
     //       const remembered = mind.memory.query(<context>)
     //       have a thinking process to evaluate this decision and adjust if needed
     try {
-      const result = await tool(args);
-
-      await ChatMessage.create({
-        role: "function",
-        name: func,
-        content: JSON.stringify(result),
-      });
-
-      return result;
+      return await tool(args);
     } catch (err) {
       if (err instanceof ToolError) {
         res.write('\n\nToolError: "' + err + '"' + "\n\n");
