@@ -20,7 +20,7 @@ I encountered a lint rule for "no-magic-numbers" when checking `e.button === 2` 
 ```ts
 const handleClick = React.useCallback(
   (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button === MOUSE_RIGHT_CLICK_BUTTON) {
+    if (e.button === 2) {
       e.preventDefault();
       setIsContextMenuOpen(true);
     }
