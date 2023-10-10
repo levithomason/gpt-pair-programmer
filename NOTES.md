@@ -7,12 +7,35 @@ Freeform notes about the project as they come to mind.
 ### First-nail
 
 - Document a project
-
 - Work on itself
 
-- Solve a github issue
+#### Solve a GitHub issue
 
-- Fix nvm slow start issue: https://github.com/nvm-sh/nvm/issues/2724 
+Fix nvm slow start issue: https://github.com/nvm-sh/nvm/issues/2724
+
+#### Real world needs encountered
+
+I encountered a lint rule for "no-magic-numbers" when checking `e.button === 2` for right click:
+
+```ts
+const handleClick = React.useCallback(
+  (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button === MOUSE_RIGHT_CLICK_BUTTON) {
+      e.preventDefault();
+      setIsContextMenuOpen(true);
+    }
+  },
+  [setIsContextMenuOpen]
+);
+```
+
+Potential question for Pair Programmer:
+1. "How is this normally handled? <code snippet>"
+2. "How does this repo handle checking for right click?"
+
+This could have been handled with the local vector store indexing the codebase and the LLM querying it for the answer.
+
+In the case of `2`, the Understanding/Planning loop should result in generating a query for the vector store. It should first be tested to see what tool-based solution the LLM comes up with on its own. If not sufficient, a more tailored flow could be set up to get the LLM to generate good vector store queries.
 
 ### Project
 
