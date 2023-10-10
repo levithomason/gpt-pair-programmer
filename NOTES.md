@@ -37,6 +37,8 @@ This could have been handled with the local vector store indexing the codebase a
 
 In the case of `2`, the Understanding/Planning loop should result in generating a query for the vector store. It should first be tested to see what tool-based solution the LLM comes up with on its own. If not sufficient, a more tailored flow could be set up to get the LLM to generate good vector store queries.
 
+Human solution, I ended up searching the codebase for `MOUSE` (too many results) and `MOUSE_BUTTON` which found the constants I was looking for in a package in the monorepo. The answer was, install that constants package and import the constant.
+
 ### Project
 
 Should include name, purpose, goals, etc. which capture the intent of the project. Any other info needed to form a vision for the project's future and guide decision-making should be included. Decisions are not based on the tech or the current state, they are based on the project's purpose and goals.
