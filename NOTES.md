@@ -12,6 +12,8 @@ Freeform notes about the project as they come to mind.
 
 - Solve a github issue
 
+- Fix nvm slow start issue: https://github.com/nvm-sh/nvm/issues/2724 
+
 ### Project
 
 Should include name, purpose, goals, etc. which capture the intent of the project. Any other info needed to form a vision for the project's future and guide decision-making should be included. Decisions are not based on the tech or the current state, they are based on the project's purpose and goals.
