@@ -4,7 +4,7 @@ dist/
 .env
 *.log
 *.generated.*
-*.sqlite
+*.sqlite*
 
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 # no Zero-Installs which requries committing dependencies
