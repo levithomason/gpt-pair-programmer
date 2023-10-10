@@ -43,7 +43,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
           log(error);
         })
         .finally(() => {});
-    }, 500);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, [props.content]);
