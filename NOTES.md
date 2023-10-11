@@ -2,28 +2,26 @@
 
 Freeform notes about the project as they come to mind.
 
-## Ideas
+## First-nails
 
-### First-nails
-
-#### Document a project
+### Document a project
 
 Crawl a project (may this one) and document it.
 
-#### Work on itself
+### Work on itself
 
 Write a new tool and use it to accomplish a goal.
 
-#### Get Your PR to Pass Gates
+### Get Your PR to Pass Gates
 
 After creating a PR, there are often gates that run on CI and provide feedback to the PR.
 This is a prime place to collect specific feedback from logs and tools, provide it to Pair Programmer, and let it push updates.
 
-#### Solve a GitHub issue
+### Solve a GitHub issue
 
 Fix nvm slow start issue: https://github.com/nvm-sh/nvm/issues/2724
 
-#### Real world needs encountered
+### Real world needs encountered
 
 I encountered a lint rule for "no-magic-numbers" when checking `e.button === 2` for right click:
 
@@ -50,19 +48,19 @@ In the case of `2`, the Understanding/Planning loop should result in generating 
 
 Human solution, I ended up searching the codebase for `MOUSE` (too many results) and `MOUSE_BUTTON` which found the constants I was looking for in a package in the monorepo. The answer was, install that constants package and import the constant.
 
-### Project
+## Project
 
 Should include name, purpose, goals, etc. which capture the intent of the project. Any other info needed to form a vision for the project's future and guide decision-making should be included. Decisions are not based on the tech or the current state, they are based on the project's purpose and goals.
 
-### Context
+## Context
 
-#### Tracking with the user
+### Tracking with the user
 
 When pair programming with a colleague, the colleague is aware of every action the other is taking since they can observe the user's actions.
 
 This information could be useful to GPT as well for tracking with the user. Events could be generated each time the user interacts with their IDE, browser, or terminal. This list of events could then be fed to GPT so it is aware of what the user has been up to and can better assist.
 
-#### Contextualizing
+### Contextualizing
 
 Agents get off track easily, due to making incorrect assumptions or ill-informed decisions which lack context. The missing context is the actual state of the codebase, which they should _always_ first prove to themselves before continuing.
 
@@ -72,7 +70,7 @@ Many ideas explored so far deal with trying to pre-emptively design mechanisms t
 
 The AIs could be split into several agents. Each with a narrow task, which can then collaborate.
 
-##### Hypothetical Agents
+#### Hypothetical Agents
 
 These two could run in loop to strengthen and supplement any decision process by contextualizing them in ground truth:
 
@@ -96,7 +94,7 @@ These agents could be called to make decisions:
 - `Pragmatist` - Identifies ways to get things done.
 - `Executive` - Concerned with moving forward, making decisions, and taking action.
 
-#### Understanding & Planning
+### Understanding & Planning
 
 ```mermaid
 graph TB
@@ -187,17 +185,17 @@ graph TB
 - **LLM Call**: Execute the selected decision or action.
 - **Output**: Tangible results, such as changes in the codebase, data alterations, or any other definitive outcomes.
 
-#### Mind/Memories
+### Mind/Memories
 
 On topic/context switch, query memories and feed these to GPT.
 
 Have a flow where GPT saves summarized memories at appropriate times. Documents in a vector store or similar. This could be a tool where GPT decides when and what to remember, or hard-coded into the chat pipeline where each message has an opportunity to be saved. A lightweight/cheap/fast LLM classifier could decide if this should be remembered.
 
-### Picking up where you left off
+## Picking up where you left off
 
 Building context, "ramping up"
 
-### Terminal Tool
+## Terminal Tool
 
 **long-running**
 Current tool is ephemeral.
@@ -212,7 +210,7 @@ Can we derive useful info from reading shell history files? Shows what CLIs have
 **user's terminal**  
 It would be helpful if the user's terminal were viewable by GPT. In one case, I have a server log error which if seen by GPT it could have debugged. Perhaps this could be a server log thing instead...
 
-### UI & GPTs "IDE"
+## UI & GPTs "IDE"
 
 GPT interacts with tools (terminal, browser, etc.).
 The GUI could show the user what GPT "sees" by showing the tools GPT has open and what data is displayed in them.
