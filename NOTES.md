@@ -9,6 +9,11 @@ Freeform notes about the project as they come to mind.
 - Document a project
 - Work on itself
 
+#### Get Your PR to Pass Gates
+
+After creating a PR, there are often gates that run on CI and provide feedback to the PR.
+This is a prime place to collect specific feedback from logs and tools, provide it to Pair Programmer, and let it push updates.
+
 #### Solve a GitHub issue
 
 Fix nvm slow start issue: https://github.com/nvm-sh/nvm/issues/2724
@@ -25,11 +30,12 @@ const handleClick = React.useCallback(
       setIsContextMenuOpen(true);
     }
   },
-  [setIsContextMenuOpen]
+  [setIsContextMenuOpen],
 );
 ```
 
 Potential question for Pair Programmer:
+
 1. "How is this normally handled? <code snippet>"
 2. "How does this repo handle checking for right click?"
 
@@ -64,20 +70,24 @@ The AIs could be split into several agents. Each with a narrow task, which can t
 **Hypothetical Agents**
 
 TThese two could run in loop to strengthen and supplement any decision process by contextualizing them in ground truth:
+
 - `Socratic` - Socratic questioning agent, prompting learning in other agents by asking them questions.
-- `Empirical` - Answers questions strictly with empirical data from the  codebase intelligence, project knowledge, or from humans only. No predictions allowed.
+- `Empirical` - Answers questions strictly with empirical data from the codebase intelligence, project knowledge, or from humans only. No predictions allowed.
 
 These agents could be called to create ideas:
+
 - `Creative` - Identifies novel ideas and possibilities.
 - `Idealist` - Identifies ways to improve things.
 - `Theorist` - Identifies tried and true, hypothetical, solutions.
 
 These agents could be called for analyzing ideas:
+
 - `Skeptic` - Identifies ways in which things will go wrong.
 - `Optimist` - Identifies ways in which things will go right.
 - `Realist` - Identifies how things will actually go.
 
 These agents could be called to make decisions:
+
 - `Pragmatist` - Identifies ways to get things done.
 - `Executive` - Concerned with moving forward, making decisions, and taking action.
 
@@ -107,7 +117,7 @@ graph TB
     PlanWriting --> ConfirmPlan{Is plan\napproved?}
     AnalyzePlanFeedback
   end
-  
+
   ConfirmPlan -- Yes --> Action
 
   ConfirmPlan -- No --> AnalyzePlanFeedback
@@ -117,48 +127,57 @@ graph TB
 ```
 
 **1. Input**
+
 - This stage captures the very first interaction with the system.
 - **Source**: User input, another LLM's output, or a function's return value.
 - **Action**: Obtain and preprocess the given input, marking the starting point of the entire decision-making process.
 
 **2. Context Retrieval**
+
 - In this stage, the LLM queries various data sources to gather context.
 - **LLM Call**: Query different persistence solutions to fetch relevant data.
 - **Data Sources**: SQL databases of past messages, knowledge graph DB, vector store of project code and docs, GitHub interactions, project management systems, and more.
 - **Output**: A cohesive set of data and context pulled from various sources related to the current input.
 
 **3. Information Integration & Attention Allocation**
+
 - After retrieving context, the LLM integrates this with the current stimulus.
 - **LLM Call**: Combine the fetched context with the current input, ensuring alignment and coherence.
 - **Output**: A consolidated set of information, filtered for the most relevant details.
 
 **4. Problem Definition**
+
 - The LLM tries to understand the nature of the task based on the integrated information.
 - **LLM Call**: Identify whether the task is a problem to be solved or a decision to be made.
 - **Output**: A well-defined representation of the task.
 - **Feedback Loop 1**: The system then checks with the user if it has understood the problem correctly. Depending on the user's response, it might refine its understanding or proceed to the next stage.
 
 **5. Option Generation**
+
 - Here, the LLM proposes possible tools or approaches to tackle the task.
 - **LLM Call**: Generate a list of potential tools, methods, or solutions.
 - **Output**: A range of possible options to address the defined task.
 
 **6. Evaluation and Comparison**
+
 - The LLM evaluates the generated options based on various criteria.
 - **LLM Call**: Assess the pros, cons, risks, and benefits of each option.
 - **Output**: A detailed evaluation of each proposed option.
 
 **7. Choice Selection**
+
 - Based on evaluation and comparisons, the LLM selects the best-suited option.
 - **LLM Call**: Choose the optimal tool, method, or solution.
 - **Output**: The final selection that's ready to be put into action.
 
 **7. Plan Writing**
+
 - The LLM creates a plan for the chosen option.
 - **LLM Call**: Write a plan of action for the selected option.
 - **Feedback Loop 2** The system presents its plan to the user and seeks approval. If the user doesn't approve, the LLM analyzes the feedback and either revises its plan, restates the problem, or fetches more context.
 
 **8. Action**
+
 - The LLM initiates the chosen action.
 - **LLM Call**: Execute the selected decision or action.
 - **Output**: Tangible results, such as changes in the codebase, data alterations, or any other definitive outcomes.
@@ -178,9 +197,9 @@ Building context, "ramping up"
 **long-running**
 Current tool is ephemeral.
 Could add /terminal/open|close type behavior to allow for long-running tasks.
-Capture output and allow 
+Capture output and allow
 
-Have a POST/GET for "/terminal" to run/read commands. Capture input/output, show GPT's terminal in the UI. 
+Have a POST/GET for "/terminal" to run/read commands. Capture input/output, show GPT's terminal in the UI.
 
 **history**
 Can we derive useful info from reading shell history files? Shows what CLIs have been used recently.
@@ -203,6 +222,6 @@ $ cd ..  |  Google  |  README.md
 $ ls     |  Google  |  NOTES.md
 ```
 
-
+```
 
 ```
