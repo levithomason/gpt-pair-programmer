@@ -36,7 +36,7 @@ const handleClick = React.useCallback(
 
 Potential question for Pair Programmer:
 
-1. "How is this normally handled? <code snippet>"
+1. "How is this normally handled? \<code snippet\>"
 2. "How does this repo handle checking for right click?"
 
 This could have been handled with the local vector store indexing the codebase and the LLM querying it for the answer.
@@ -67,9 +67,9 @@ Many ideas explored so far deal with trying to pre-emptively design mechanisms t
 
 The AIs could be split into several agents. Each with a narrow task, which can then collaborate.
 
-**Hypothetical Agents**
+##### Hypothetical Agents
 
-TThese two could run in loop to strengthen and supplement any decision process by contextualizing them in ground truth:
+These two could run in loop to strengthen and supplement any decision process by contextualizing them in ground truth:
 
 - `Socratic` - Socratic questioning agent, prompting learning in other agents by asking them questions.
 - `Empirical` - Answers questions strictly with empirical data from the codebase intelligence, project knowledge, or from humans only. No predictions allowed.
@@ -91,7 +91,7 @@ These agents could be called to make decisions:
 - `Pragmatist` - Identifies ways to get things done.
 - `Executive` - Concerned with moving forward, making decisions, and taking action.
 
-**Understanding & Planning**
+#### Understanding & Planning
 
 ```mermaid
 graph TB
