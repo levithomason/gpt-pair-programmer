@@ -4,10 +4,15 @@ Freeform notes about the project as they come to mind.
 
 ## Ideas
 
-### First-nail
+### First-nails
 
-- Document a project
-- Work on itself
+#### Document a project
+
+Crawl a project (may this one) and document it.
+
+#### Work on itself
+
+Write a new tool and use it to accomplish a goal.
 
 #### Get Your PR to Pass Gates
 
