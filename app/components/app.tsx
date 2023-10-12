@@ -13,7 +13,7 @@ import { ServerStatus } from "./server-status/server-status";
 const log = makeDebug("components:app");
 
 export const App = () => {
-  const [showRight, setShowRight] = React.useState<boolean>(true);
+  const [showRight, setShowRight] = React.useState<boolean>(false);
 
   const resetChat = () => {
     if (!confirm("RESET the db?")) {
