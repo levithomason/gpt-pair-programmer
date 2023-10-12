@@ -3,6 +3,7 @@ import * as React from "react";
 
 import "./chat.css";
 
+import type { ChatMessageAttributes } from "../../../types";
 import { makeDebug } from "../../utils";
 import { socket } from "../../socket.io-client";
 import { ErrorBanner } from "../banner/error-banner";

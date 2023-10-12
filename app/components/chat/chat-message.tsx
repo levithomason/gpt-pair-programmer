@@ -5,12 +5,12 @@ import mermaid from "mermaid";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
-import type { ChatMessageType } from "./types";
+import type { ChatMessageAttributes } from "../../../server/models";
 import { makeDebug } from "../../utils";
 
 const log = makeDebug("components:chat-message");
 
-export type ChatMessageProps = ChatMessageType;
+export type ChatMessageProps = ChatMessageAttributes;
 
 const removeWrappingPTag = (html: string) => {
   if (html.startsWith("<p>") && html.endsWith("</p>")) {

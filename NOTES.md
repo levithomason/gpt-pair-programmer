@@ -52,6 +52,14 @@ Human solution, I ended up searching the codebase for `MOUSE` (too many results)
 
 Should include name, purpose, goals, etc. which capture the intent of the project. Any other info needed to form a vision for the project's future and guide decision-making should be included. Decisions are not based on the tech or the current state, they are based on the project's purpose and goals.
 
+### Static Files
+
+The LLM will post markdown links to static files in the repo. These files should be served by the server.
+
+We need to avoid collisions between local repo relative paths and existing endpoints (e.g. /chat and a /chat folder in the repo).
+This could be done by prefixing the repo relative path with something like `/repo/`, `/local/`, `/project/local`, etc.
+The markdown parser just needs to prefix these paths in the chat message.
+
 ## Context
 
 ### Tracking with the user
@@ -223,8 +231,4 @@ Terminal  |  Browser |  File
 $ ls     |  Google  |  index.html
 $ cd ..  |  Google  |  README.md
 $ ls     |  Google  |  NOTES.md
-```
-
-```
-
 ```
