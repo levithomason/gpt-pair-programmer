@@ -1,12 +1,9 @@
 import { OpenAI } from "openai";
 import debug from "debug";
 
-import { OPENAI_MODELS } from "../../shared/config.js";
+import { MODEL } from "../../shared/config.js";
 import { BaseError, retryUntil } from "../utils/index.js";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
-
-// TODO: this should be moved to state and selectable by the user
-export const MODEL = OPENAI_MODELS["gpt-3.5-turbo-0613"];
 
 const log = debug("gpp:server:ai:utils");
 

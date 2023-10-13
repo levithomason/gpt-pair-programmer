@@ -9,9 +9,9 @@ export const mistralLLM = new Ollama({
   temperature: 1,
 });
 
-export const mistralInstructLLM = new Ollama({
+export const mistralTextLLM = new Ollama({
   baseUrl: "http://localhost:11434",
-  model: "mistral:7b-instruct",
+  model: "mistral:text",
   temperature: 1,
 });
 

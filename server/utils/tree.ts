@@ -38,7 +38,7 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       }
     });
 
-    return [`IGNORE`, dirs && `${dirs} folders`, files && `${files} files`]
+    return [`IGNORED`, dirs && `${dirs} folders`, files && `${files} files`]
       .filter(Boolean)
       .join(" ");
   };
@@ -55,7 +55,7 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       }
     });
 
-    return [`MAX`, dirs && `${dirs} folders`, files && `${files} files`]
+    return [`...`, dirs && `${dirs} folders`, files && `${files} files`]
       .filter(Boolean)
       .join(" ");
   };

@@ -10,7 +10,8 @@
     "server:start": "DEBUG=\"gpp:*\" node --no-warnings=ExperimentalWarning --loader ts-node/esm server/index.ts",
     "server:build": "tsc --project tsconfig.json",
     "fix-deps": "node scripts/fix-deps.js",
-    "langchain": "nodemon -w server/ai/llms/index.ts --exec \"AZURE_OPENAI_API_KEY= node --no-warnings=ExperimentalWarning --loader ts-node/esm server/ai/llms/index.ts\""
+    "langchain": "nodemon -w server/ai/llms/index.ts --exec \"node --no-warnings=ExperimentalWarning --loader ts-node/esm server/ai/llms/index.ts\"",
+    "llamaindex": "nodemon -w server/ai/llamaindex/index.ts --exec \"node --no-warnings=ExperimentalWarning --loader ts-node/esm server/ai/llamaindex/index.ts\""
   },
   "keywords": [],
   "author": "me@levithomason.com",
@@ -58,7 +59,9 @@
     "glob": "^10.3.10",
     "highlight.js": "^11.8.0",
     "html-to-text": "^9.0.5",
+    "js-tiktoken": "^1.0.7",
     "langchain": "^0.0.160",
+    "llamaindex": "^0.0.30",
     "mermaid": "^10.5.0",
     "micromark": "^4.0.0",
     "micromark-extension-gfm": "^3.0.0",

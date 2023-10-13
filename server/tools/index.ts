@@ -8,7 +8,7 @@ import type { ToolFunction } from "../../types.js";
 import { BaseError } from "../utils/index.js";
 import { ChatMessage } from "../models/index.js";
 
-const log = debug("gpp:tools");
+const log = debug("gpp:tools:index");
 
 export const tools: {
   [fileNameWithoutExt: string]: ToolFunction<object, any>;
@@ -32,7 +32,7 @@ fs.readdirSync(__dirname).forEach((entry) => {
 
     const toolPath = path.join(toolDir, entry);
 
-    log(`loading ${entry}`);
+    log(`load ${entry}`);
     const basename = path.basename(entry, ".ts");
     const { default: tool } = await import(toolPath);
 

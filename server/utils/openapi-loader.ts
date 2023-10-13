@@ -32,7 +32,7 @@ fs.readdirSync(TOOLS_ROOT).forEach((tool) => {
     );
   }
 
-  log("load:", relPath(specPath));
+  log("load", relPath(specPath));
   const specYaml = fs.readFileSync(specPath, "utf8");
   const specJson = yaml.load(specYaml) as OpenAPISpec;
 

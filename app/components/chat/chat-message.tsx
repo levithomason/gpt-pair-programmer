@@ -10,7 +10,12 @@ import { makeDebug } from "../../utils";
 
 const log = makeDebug("components:chat-message");
 
-export type ChatMessageProps = ChatMessageAttributes;
+export type ChatMessageProps = {
+  message: ChatMessageAttributes;
+  runningInputTokens: number;
+  runningOutputTokens: number;
+  cost: number;
+};
 
 const removeWrappingPTag = (html: string) => {
   if (html.startsWith("<p>") && html.endsWith("</p>")) {
@@ -27,8 +32,9 @@ mermaid.initialize({
 });
 
 export const ChatMessage = (props: ChatMessageProps) => {
+  const { message, runningInputTokens, runningOutputTokens, cost } = props;
   React.useEffect(() => {
-    if (props.role !== "assistant") {
+    if (message.role !== "assistant") {
       return;
     }
 
@@ -46,24 +52,48 @@ export const ChatMessage = (props: ChatMessageProps) => {
     }, 1000);
 
     return () => clearTimeout(timeout);
-  }, [props.content]);
+  }, [message.content]);
 
-  if (props.role === "user") {
+  const details = (
+    <div className="chat-message-details">
+      <span className="chat-message-details__item">
+        {runningInputTokens}
+        <i className="fa fa-arrow-right-to-bracket"></i>
+      </span>
+      <span className="chat-message-details__item">
+        {runningOutputTokens}
+        <i className="fa fa-arrow-right-from-bracket"></i>
+      </span>
+      <span className="chat-message-details__item">
+        <i className="fa fa-equals"></i>
+        {runningInputTokens + runningOutputTokens}
+      </span>
+      <span className="chat-message-details__item">
+        {cost.toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+        })}
+      </span>
+    </div>
+  );
+
+  if (message.role === "user") {
     return (
       <div className={`chat-message chat-message--user`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
             <i className="fa-regular fa-user"></i>
           </span>
-          <span className="chat-message__content">{props.content}</span>
+          <span className="chat-message__content">{message.content}</span>
+          {details}
         </div>
       </div>
     );
   }
 
-  if (props.role === "assistant") {
+  if (message.role === "assistant") {
     const content = removeWrappingPTag(
-      micromark(props.content, {
+      micromark(message.content, {
         extensions: [gfm()],
         htmlExtensions: [gfmHtml()],
       }),
@@ -79,20 +109,21 @@ export const ChatMessage = (props: ChatMessageProps) => {
             className="chat-message__content"
             dangerouslySetInnerHTML={{ __html: content }}
           />
+          {details}
         </div>
       </div>
     );
   }
 
-  if (props.role === "function") {
-    let parsedContent = props.content;
+  if (message.role === "function") {
+    let parsedContent = message.content;
 
     try {
-      parsedContent = JSON.stringify(JSON.parse(props.content), null, 2);
+      parsedContent = JSON.stringify(JSON.parse(message.content), null, 2);
     } catch (error) {
       log(
         "Could not format JSON function content, using original value.",
-        props.content,
+        message.content,
       );
     }
 
@@ -103,15 +134,16 @@ export const ChatMessage = (props: ChatMessageProps) => {
             <i className="fa fa-code"></i>
           </span>
           <span className="chat-message__content">
-            <strong>{props.name}</strong>
+            <strong>{message.name}</strong>
             {` => ${parsedContent}`}
           </span>
+          {details}
         </div>
       </div>
     );
   }
 
-  if (props.role === "system") {
+  if (message.role === "system") {
     return (
       <div className={`chat-message chat-message--system`}>
         <div className="chat-message__container">
@@ -120,8 +152,9 @@ export const ChatMessage = (props: ChatMessageProps) => {
           </span>
           <span className="chat-message__content">
             <strong>System &mdash; </strong>
-            {props.content}
+            {message.content}
           </span>
+          {details}
         </div>
       </div>
     );
@@ -135,8 +168,8 @@ export const ChatMessage = (props: ChatMessageProps) => {
         </span>
         <span className="chat-message__content">
           Unknown message type:
-          <div>{props.role}</div>
-          <div>{props.content}</div>
+          <div>{message.role}</div>
+          <div>{message.content}</div>
         </span>
       </div>
     </div>

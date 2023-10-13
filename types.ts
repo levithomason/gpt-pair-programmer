@@ -1,21 +1,7 @@
-import type { ChatCompletionCreateParamsStreaming } from "openai/src/resources/chat/completions.js";
-import type { ChatMessageType } from "./app/components/chat/types";
-
-export type OpenAIModel = {
-  name: Exclude<
-    ChatCompletionCreateParamsStreaming["model"],
-    "gpt-4-0314" | "gpt-4-32k-0314" | "gpt-3.5-turbo-0301"
-  >;
-  description: string;
-  contextMaxTokens: number;
-  inputCost: number;
-  outputCost: number;
-  supportsFunctionCalling: boolean;
-  supportsFineTuning: boolean;
-  supportsChat: boolean;
-  supportsEmbeddings: boolean;
-  outputDimensions?: number;
-};
+import type {
+  ChatMessage,
+  ChatMessageCreationAttributes,
+} from "./server/models/index.js";
 
 // TODO: Replace with `openapi-types`
 // =============================================================================
@@ -65,6 +51,30 @@ export type OpenAPISchemaProperties = {
 // =============================================================================
 // OpenAI
 // =============================================================================
+export type SupportedOpenAIModels =
+  | "gpt-3.5-turbo"
+  | "gpt-3.5-turbo-0613"
+  | "gpt-3.5-turbo-16k"
+  | "gpt-3.5-turbo-16k-0613"
+  | "gpt-4"
+  | "gpt-4-0613"
+  | "gpt-4-32k"
+  | "gpt-4-32k-0613"
+  | "text-embedding-ada-002";
+
+export type OpenAIModel = {
+  name: SupportedOpenAIModels;
+  description: string;
+  contextSize: number;
+  inputCost: number;
+  outputCost: number;
+  supportsFunctionCalling: boolean;
+  supportsFineTuning: boolean;
+  supportsChat: boolean;
+  supportsEmbeddings: boolean;
+  outputDimensions?: number;
+};
+
 export type OpenAIFunction = {
   name: string;
   description?: string;
@@ -93,7 +103,14 @@ export type ToolAttributes = {
 // =============================================================================
 export interface ServerToClientEvents {
   /** Tell clients a new chat message has been created */
-  newChatMessage: (data: { message: ChatMessageType }) => void;
+  chatMessageCreate: (data: { message: ChatMessageCreationAttributes }) => void;
+
+  chatMessageStream: (data: {
+    id: ChatMessage["id"];
+    chunk: ChatMessageCreationAttributes["content"];
+  }) => void;
+
+  chatMessageStreamEnd: () => void;
 
   /** Tell clients we're online */
   serverHeartbeat: () => void;

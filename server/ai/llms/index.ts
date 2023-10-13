@@ -1,10 +1,17 @@
 import { PromptTemplate } from "langchain/prompts";
 
-import { ollamaLLM } from "./ollama.js";
+import {
+  codellamaLLM,
+  llama2LLM,
+  mistralLLM,
+  mistralTextLLM,
+} from "./ollama.js";
 import { openAILLM } from "./openai.js";
 
 import { ChatMessage } from "../../models/index.js";
 import { getDB, setupDB } from "../../database/index.js";
+import type { Ollama } from "langchain/llms/ollama";
+import type { OpenAI } from "langchain/llms/openai";
 
 const db = await getDB();
 await setupDB(db);
@@ -118,10 +125,18 @@ const prompt = ("" ||
   promptCondenseMemory ||
   "") as PromptTemplate;
 
-const model = ollamaLLM || openAILLM;
-const chain = prompt.pipe(model);
+const model =
+  mistralLLM ||
+  //
+  mistralTextLLM ||
+  //
+  llama2LLM ||
+  //
+  codellamaLLM ||
+  //
+  openAILLM;
 
-const isSingleInputPrompt = prompt.inputVariables.length > 1;
+const chain = prompt.pipe(model);
 
 const context = [];
 
@@ -130,12 +145,15 @@ for (let i = 0; i < chatMessages.length; i++) {
 
   console.log();
   console.log("-".repeat(60));
-  console.log(`Message ${i + 1}:`);
+  console.log(`[Message ${i + 1}]`);
   console.log();
-  console.log("MESSAGE => ", newMessage);
-  console.log("CONTEXT => ", ...context);
+  console.log("MESSAGE =>", newMessage);
+  console.log();
+  console.log("CONTEXT =>", context);
 
-  if (isSingleInputPrompt) {
-    context.push(await chain.invoke({ context, newMessage }));
-  }
+  context.push(await chain.invoke({ context, newMessage }));
 }
+
+console.log("-".repeat(60));
+console.log();
+console.log("FINAL CONTEXT =>", context);

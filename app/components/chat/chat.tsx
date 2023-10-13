@@ -3,15 +3,20 @@ import * as React from "react";
 
 import "./chat.css";
 
-import type { ChatMessageAttributes } from "../../../types";
+import { MODEL } from "../../../shared/config";
+import type {
+  ChatMessage as ChatMessageType,
+  ChatMessageCreationAttributes,
+} from "../../../server/models";
+
 import { makeDebug } from "../../utils";
 import { socket } from "../../socket.io-client";
 import { ErrorBanner } from "../banner/error-banner";
 
 import { ChatMessage } from "./chat-message";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
-import type { ChatMessageType } from "./types";
 import { useIsFirstRender } from "../../hooks/use-first-render";
+import type { ServerToClientEvents } from "../../../types";
 
 const log = makeDebug("components:chat");
 
@@ -24,45 +29,43 @@ const suggestedMessages = [
   // markdownKitchenSink,
 ];
 
-export const Chat = () => {
-  const [messages, setMessages] = React.useState<ChatMessageType[]>([]);
-  const [message, setMessage] = React.useState<string>("");
-  const [reply, setReply] = React.useState<string>("");
-  const isFirstRender = useIsFirstRender();
+type MessagesByID = {
+  [id in ChatMessageType["id"]]: ChatMessageCreationAttributes;
+};
 
-  const [loading, setLoading] = React.useState<boolean>(true);
+export const Chat = () => {
+  const [messagesByID, setMessagesByID] = React.useState<MessagesByID>({});
+  const [userMessage, setUserMessage] = React.useState<string>("");
+  const [streaming, setStreaming] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>("");
 
-  // const chatMessagesRef = React.useRef<HTMLDivElement>(null);
+  const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const abortRef = React.useRef<AbortController | null>(null);
 
-  // const scrollTimerRef = React.useRef(null);
+  const isFirstRender = useIsFirstRender();
 
-  // const scrollToBottom = () => {
-  //   const scroll = () => {
-  //     // chatMessagesRef.current?.scrollTo({
-  //     //   top: chatMessagesRef.current.scrollHeight,
-  //     //   behavior: "smooth",
-  //     // });
-  //   };
-  //
-  //   // immediate first scroll
-  //   if (scrollTimerRef.current === null) {
-  //     scroll();
-  //     return;
-  //   }
-  //
-  //   // debounce future scrolls
-  //   clearTimeout(scrollTimerRef.current);
-  //
-  //   scrollTimerRef.current = setTimeout(scroll, 1000);
-  // };
+  const scrollToBottom = () => {
+    log("scrollToBottom", chatMessagesRef.current);
+    chatMessagesRef.current?.scrollTo({
+      top: chatMessagesRef.current.scrollHeight,
+      behavior: "instant",
+    });
+  };
 
-  // scroll to bottom after activity stops
-  // React.useEffect(() => {
-  //   scrollToBottom();
-  // }, [messages]);
+  // scroll to bottom if needed
+  const lastScrollHeight = React.useRef<number>(
+    chatMessagesRef.current?.scrollHeight || 0,
+  );
+  React.useEffect(() => {
+    const didScrollHeightChange =
+      chatMessagesRef.current.scrollHeight !== lastScrollHeight.current;
+
+    if (didScrollHeightChange) {
+      scrollToBottom();
+    }
+
+    lastScrollHeight.current = chatMessagesRef.current.scrollHeight;
+  });
 
   React.useEffect(() => {
     // Get initial messages
@@ -71,103 +74,77 @@ export const Chat = () => {
         .then((res) => res.json())
         .then((res) => {
           log("fetched chat messages", res);
-          setMessages(res);
-          setLoading(false);
+          setMessagesByID(
+            res.reduce((acc: MessagesByID, message: ChatMessageType) => {
+              acc[message.id] = message;
+              return acc;
+            }, {} as MessagesByID),
+          );
         })
         .catch((err) => {
           log(err);
           setError(err.toString());
-          setLoading(false);
         });
     }
 
     // Listen for new messages
-    const handleNewChatMessage = ({ message }) => {
-      log("newChatMessage", message);
-      setMessages((prev) => [...prev, message]);
-    };
+    const handleChatMessageCreate: ServerToClientEvents["chatMessageCreate"] =
+      ({ message }) => {
+        setMessagesByID((prev) => {
+          return { ...prev, [message.id]: message };
+        });
+      };
 
-    socket.on("newChatMessage", handleNewChatMessage);
+    const handleChatMessageStream: ServerToClientEvents["chatMessageStream"] =
+      ({ chunk, id }) => {
+        setStreaming(true);
+        setMessagesByID((prev) => {
+          const updatedMessage = {
+            ...prev[id],
+            content: prev[id].content + chunk,
+          };
+          return { ...prev, [id]: updatedMessage };
+        });
+      };
+
+    const handleChatMessageStreamEnd: ServerToClientEvents["chatMessageStreamEnd"] =
+      () => {
+        setStreaming(false);
+      };
+
+    socket.on("chatMessageCreate", handleChatMessageCreate);
+    socket.on("chatMessageStream", handleChatMessageStream);
+    socket.on("chatMessageStreamEnd", handleChatMessageStreamEnd);
 
     return () => {
-      socket.off("newChatMessage", handleNewChatMessage);
+      socket.off("chatMessageCreate", handleChatMessageCreate);
+      socket.off("chatMessageStream", handleChatMessageStream);
     };
-  }, []);
+  }, [isFirstRender]);
 
   const handleSend = React.useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
 
-      if (loading) {
-        return;
-      }
+      if (streaming || !userMessage.trim()) return;
 
-      if (!message.trim()) {
-        setMessage("");
-        return;
-      }
-
-      setLoading(true);
-      setMessage("");
-      // scrollToBottom();
+      setUserMessage("");
 
       const endpoint = `http://localhost:5004/chat`;
-      const messageURI = encodeURIComponent(message);
+      const messageURI = encodeURIComponent(userMessage);
       const getUrl = `${endpoint}?message=${messageURI}`;
 
       try {
-        // abortRef.current = new AbortController();
-
-        // https://stackoverflow.com/questions/31061838/how-to-cancel-an-http-fetch-request
-        // signal: abortRef.current.signal,
-        await fetch(getUrl).then(async (res) => {
-          log("res", res);
-          const reader = res.body!.getReader();
-
-          log("reader", reader);
-          const decoder = new TextDecoder();
-
-          const read = async () => {
-            const { done, value } = await reader.read();
-            const decoded = decoder.decode(value);
-            log(decoded);
-
-            if (!done) {
-              setReply((prevReply) => {
-                // scrollToBottom();
-                return prevReply + decoded;
-              });
-              await read();
-              return;
-            }
-
-            log("done");
-            setReply("");
-            setLoading(false);
-            // scrollToBottom();
-          };
-
-          await read();
-        });
+        await fetch(getUrl);
       } catch (err) {
         log(err);
         setError(err.toString());
-
-        setLoading(false);
-        abortRef.current = null;
       }
     },
-    [message, loading],
+    [userMessage, streaming],
   );
 
-  // Focus ref after reply is set
-  React.useEffect(() => {
-    if (!reply && !loading) {
-      inputRef.current?.focus();
-    }
-  }, [reply, loading]);
-
-  log("render", { messages, message, reply, loading, error });
+  log("render", { messagesByID, userMessage, streaming, error });
 
   React.useEffect(() => {
     if (!error) return;
@@ -177,14 +154,30 @@ export const Chat = () => {
     return () => clearTimeout(timeout);
   }, [error]);
 
+  let runningInputTokens = 0;
+  let runningOutputTokens = 0;
+
   return (
     <div id="chat">
       <ErrorBanner error={error} />
-      <div /* ref={chatMessagesRef} */ className="chat-messages">
-        {messages.map((msg, index) => (
-          <ChatMessage key={index} {...msg} />
-        ))}
-        {reply && <ChatMessage role="assistant" content={reply} />}
+      <div ref={chatMessagesRef} className="chat-messages">
+        {Object.values(messagesByID).map((msg, index) => {
+          if (msg.role === "assistant") runningOutputTokens += msg.tokens;
+          else runningInputTokens += msg.tokens;
+
+          return (
+            <ChatMessage
+              key={msg.id}
+              message={msg}
+              runningInputTokens={runningInputTokens}
+              runningOutputTokens={runningOutputTokens}
+              cost={
+                (runningInputTokens / 1000) * MODEL.inputCost +
+                (runningOutputTokens / 1000) * MODEL.outputCost
+              }
+            />
+          );
+        })}
       </div>
       <div className="suggested-messages">
         {suggestedMessages.map((msg) => {
@@ -194,7 +187,7 @@ export const Chat = () => {
               key={msg}
               className="suggested-message"
               onClick={(e) => {
-                setMessage(msg);
+                setUserMessage(msg);
                 setTimeout(() => {
                   const button = document.querySelector(
                     "button[type=submit]",
@@ -215,25 +208,13 @@ export const Chat = () => {
       <form onSubmit={handleSend} className="chat-form">
         <input
           ref={inputRef}
-          disabled={loading}
-          placeholder={loading ? "" : "Send a message"}
+          placeholder={streaming ? "" : "Send a message"}
           type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          value={userMessage}
+          onChange={(e) => setUserMessage(e.target.value)}
         />
-        {/*{typeof abortRef.current?.abort === "function" && (*/}
-        {/*  <button*/}
-        {/*    onClick={() => {*/}
-        {/*      abortRef.current.abort();*/}
-        {/*      setLoading(false);*/}
-        {/*      abortRef.current = null;*/}
-        {/*    }}*/}
-        {/*  >*/}
-        {/*    Stop*/}
-        {/*  </button>*/}
-        {/*)}*/}
-        <button type="submit" disabled={loading}>
-          {loading ? "🤖" : "👉"}
+        <button type="submit" disabled={streaming}>
+          {streaming ? "🤖" : "👉"}
         </button>
       </form>
     </div>

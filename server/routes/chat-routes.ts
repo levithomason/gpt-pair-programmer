@@ -2,14 +2,18 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js"
 import express from "express";
 import debug from "debug";
 import {
+  chatGPTFunctionsPrompt,
+  countTokens,
   openAIFunctions,
   ToolError,
-  trimStringToTokens,
 } from "../utils/index.js";
 import { tools } from "../tools/index.js";
 
 import { ChatMessage } from "../models/index.js";
-import { MODEL, openai } from "../ai/utils.js";
+import { openai } from "../ai/utils.js";
+import { promptSystemDefault } from "../ai/prompts.js";
+import { getSocketIO } from "../socket.io-server.js";
+import { MODEL } from "../../shared/config.js";
 
 const log = debug("gpp:server:routes:chat");
 
@@ -31,24 +35,6 @@ export const chatRoutes = express.Router();
 chatRoutes.post("/chat/new", async (req, res) => {
   await ChatMessage.sync({ force: true });
 
-  // TODO: better system message, possibly expose setting to end user
-  await ChatMessage.create({
-    role: "system",
-    content: [
-      "You are pair programming with the user on their computer.",
-      "All your functions are executed on the user's computer with the user's permissions.",
-      "Use markdown codeblocks in mermaid language to make charts, graphs, or diagrams to explain relationships.",
-      "",
-      "Be concise. Be informative. Get straight to the point.",
-      "",
-      "Never claim you are unable to accomplish a goal.",
-      "Make a plan to accomplish the goal using your tools.",
-      "",
-      "Always use your tools to accomplish your tasks.",
-      "Never assume you know something, check using your tools.",
-    ].join("\n"),
-  });
-
   res.json(await ChatMessage.findAll());
 });
 
@@ -68,84 +54,103 @@ chatRoutes.get("/chat", async (req, res) => {
   // create user message
   await userMessage.save();
 
-  // TODO: count tokens & cost:
-  //       - https://github.com/niieani/gpt-tokenizer
-  //       - https://github.com/dqbd/tiktoken
-  //   NOTE: OpenAPI responses include token "usage" if not streaming
-  //   https://platform.openai.com/docs/api-reference/chat/object
-
   const callModel = async () => {
     // get all messages
-    const dbMessages = await ChatMessage.findAll();
-    const messages = dbMessages.map(ChatMessageToOpenAIMessage);
+    const dbMessages = await ChatMessage.findAll({
+      order: [["createdAt", "ASC"]],
+    });
 
-    // TODO: crude measure of function call cost
-    let lenOfAllMessages = JSON.stringify(openAIFunctions).length;
+    log(`/chat ${dbMessages.length} dbMessages`);
 
-    const trimmedMessages = messages
-      .map((message) => {
-        lenOfAllMessages += JSON.stringify(message).length;
-        return message;
-      })
-      .map((message) => {
-        const percentageOfTotal =
-          lenOfAllMessages / JSON.stringify(message).length;
-        return {
-          ...message,
-          content: trimStringToTokens(
-            message.content,
-            percentageOfTotal * MODEL.contextMaxTokens * 0.52, // leave headroom
-          ),
-        };
-      });
+    const RESPONSE_TOKENS = Math.floor(MODEL.contextSize * 0.4);
+    const CONTEXT_TOKENS = MODEL.contextSize - RESPONSE_TOKENS;
+    const FUNCTIONS_TOKENS = countTokens(MODEL.name, chatGPTFunctionsPrompt);
+    const SYSTEM_MESSAGE_TOKENS = countTokens(MODEL.name, promptSystemDefault);
 
-    log("/chat callModel", trimmedMessages);
+    let messageTokensBudget =
+      CONTEXT_TOKENS - FUNCTIONS_TOKENS - SYSTEM_MESSAGE_TOKENS;
 
-    let assistantReply = "";
+    const contextMessages: ChatCompletionMessageParam[] = [];
+    let messagesTokens = 0;
+
+    while (dbMessages.length > 0 && messageTokensBudget > 0) {
+      const message = dbMessages.pop();
+
+      if (message.tokens > messageTokensBudget) {
+        const TOKEN_BUFFER = 100;
+        const LENGTH_BUFFER = TOKEN_BUFFER * 4; // ~1 token = 4 chars
+        const percentTokensAvailable = message.tokens / messageTokensBudget;
+        const maxContentLength =
+          message.content.length * percentTokensAvailable - LENGTH_BUFFER;
+
+        // keep as much of the tail of the last message that will fit in context
+        message.content = message.content.slice(maxContentLength);
+        messagesTokens += countTokens(MODEL.name, message.content);
+        messageTokensBudget = 0;
+        break;
+      }
+
+      messageTokensBudget -= message.tokens;
+      messagesTokens += message.tokens;
+      contextMessages.unshift(ChatMessageToOpenAIMessage(message));
+    }
+
+    log("/chat tokens", {
+      budgetTotal: MODEL.contextSize,
+      budgetContext: CONTEXT_TOKENS,
+      budgetResponse: RESPONSE_TOKENS,
+      contextFunctions: FUNCTIONS_TOKENS,
+      contextSystem: SYSTEM_MESSAGE_TOKENS,
+      contextMessages: messagesTokens,
+      contextTotal: messagesTokens + FUNCTIONS_TOKENS + SYSTEM_MESSAGE_TOKENS,
+    });
+
+    // this is safe because we budgeted for it
+    contextMessages.unshift({ role: "system", content: promptSystemDefault });
+
+    log(
+      `/chat ${contextMessages.length} messages ${messagesTokens} tokens`,
+      contextMessages.map((m) => {
+        return `${m.role}: ${m.content.slice(0, 20)}...`;
+      }),
+    );
+
+    const io = getSocketIO();
+
+    // Function call args stream in, build them up
+    let func = "";
+    let args = "";
 
     try {
-      const stream = await openai.chat.completions.create({
-        model: MODEL.name,
-        messages: trimmedMessages,
-        stream: true,
-        n: 1,
-        functions: openAIFunctions,
-        function_call: "auto",
+      const replyMessage = await ChatMessage.create({
+        role: "assistant",
+        content: "",
       });
 
-      // Function call args stream in, build them up
-      let func = "";
-      let args = "";
-
       const write = (message: string) => {
-        assistantReply += message;
-        res.write(message);
+        replyMessage.content += message;
+
+        io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
       };
 
       const saveAssistantReply = async () => {
-        await ChatMessage.create({
-          role: "assistant",
-          content: assistantReply,
-        });
+        await replyMessage.save();
       };
+
+      const stream = await openai.chat.completions.create({
+        model: MODEL.name,
+        messages: contextMessages,
+        stream: true,
+        n: 1,
+        max_tokens: RESPONSE_TOKENS,
+        functions: openAIFunctions,
+        function_call: "auto",
+      });
 
       // Stream
       // res.setHeader("Content-Type", "text/event-stream");
       for await (const part of stream) {
         const { delta, finish_reason } = part.choices[0];
-        if (finish_reason === "stop") {
-          log("finish_reason", finish_reason);
-          await saveAssistantReply();
-          break;
-        }
-
-        if (finish_reason === "length") {
-          log("finish_reason", finish_reason);
-          write("\n\n(...truncated due to max length)");
-          await saveAssistantReply();
-          break;
-        }
-
         if (delta?.function_call?.name) {
           func = delta?.function_call?.name;
         }
@@ -155,9 +160,26 @@ chatRoutes.get("/chat", async (req, res) => {
         }
 
         //
+        // Stop
+        //
+        if (finish_reason === "stop") {
+          log("finish_reason", finish_reason);
+          await saveAssistantReply();
+        }
+
+        //
+        // Content Length
+        //
+        else if (finish_reason === "length") {
+          log("finish_reason", finish_reason);
+          write("\n\n(...truncated due to max length)");
+          await saveAssistantReply();
+        }
+
+        //
         // Call function
         //
-        if (finish_reason === "function_call") {
+        else if (finish_reason === "function_call") {
           log("finish_reason", finish_reason);
 
           const printArgs = args === "{}" ? "" : args;
@@ -186,9 +208,17 @@ chatRoutes.get("/chat", async (req, res) => {
         }
 
         //
+        // Content Filter
+        //
+        else if (finish_reason === "content_filter") {
+          log("finish_reason", finish_reason);
+          write(`\n\nContent Filter: "${delta.content}"\n\n`);
+        }
+
+        //
         // Send text
         //
-        if (finish_reason === null) {
+        else if (finish_reason === null) {
           if (typeof delta.content === "string") {
             write(delta.content);
           }
@@ -198,10 +228,17 @@ chatRoutes.get("/chat", async (req, res) => {
         }
       }
     } catch (error) {
-      res.status(500).write(`\n\n500 Error: ${error}`);
+      res.write(`\n\n500 Error: ${error.toString()}`);
+      throw error;
     }
 
-    log("/chat end", messages);
+    log(
+      "/chat end",
+      contextMessages.map((m) => {
+        return `${m.role}: ${m.content.slice(0, 20)}...`;
+      }),
+    );
+    io.emit("chatMessageStreamEnd");
     res.end();
   };
 

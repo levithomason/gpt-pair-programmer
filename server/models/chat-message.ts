@@ -2,27 +2,48 @@ import debug from "debug";
 import type { InferAttributes, InferCreationAttributes } from "sequelize";
 import { DataTypes } from "sequelize";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
-import { Column, Model, Table } from "sequelize-typescript";
+import {
+  AfterCreate,
+  BeforeSave,
+  Column,
+  Model,
+  Table,
+} from "sequelize-typescript";
 
 import { getSocketIO } from "../socket.io-server.js";
+import { countTokens } from "../utils/index.js";
+
+export type ChatMessageAttributes = InferAttributes<ChatMessage>;
+export type ChatMessageCreationAttributes =
+  InferCreationAttributes<ChatMessage>;
 
 const log = debug("gpp:server:models:chat-message");
 
-@Table({
-  hooks: {
-    afterCreate: (instance: ChatMessage) => {
-      log("afterCreate", instance.toJSON());
-
-      const io = getSocketIO();
-      io.emit("newChatMessage", { message: instance.toJSON() });
-    },
-    // TODO: handle afterUpdate, afterDestroy
-  },
-})
+@Table({})
 export class ChatMessage extends Model<
-  InferAttributes<ChatMessage>,
-  InferCreationAttributes<ChatMessage>
+  ChatMessageAttributes,
+  ChatMessageCreationAttributes
 > {
+  @BeforeSave
+  static countTokens(attributes: ChatMessage) {
+    // TODO: Should handle tokens for different models.
+    //       At time of writing all supported models used the same cl100k_base encoding
+    attributes.tokens = countTokens("gpt-3.5-turbo", attributes.content);
+  }
+
+  @AfterCreate
+  static emitNewChatMessage(instance: ChatMessage) {
+    const json = instance.toJSON();
+
+    log("afterCreate", json);
+
+    const io = getSocketIO();
+    io.emit("chatMessageCreate", { message: json });
+  }
+
+  @Column({ type: DataTypes.INTEGER })
+  tokens: number;
+
   @Column({ type: DataTypes.ENUM("system", "user", "assistant", "function") })
   role: ChatCompletionMessageParam["role"];
 
