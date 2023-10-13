@@ -122,14 +122,16 @@ chatRoutes.post("/chat", async (req, res) => {
     let func = "";
     let args = "";
 
-    try {
-      const replyMessage = await ChatMessage.create({
-        role: "assistant",
-        content: "",
-      });
+    let assistantMessage = "";
 
+    const replyMessage = await ChatMessage.create({
+      role: "assistant",
+      content: "",
+    });
+
+    try {
       const write = (message: string) => {
-        replyMessage.update({ content: replyMessage.content + message });
+        assistantMessage += message;
 
         io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
       };
@@ -216,6 +218,7 @@ chatRoutes.post("/chat", async (req, res) => {
         else if (finish_reason === null) {
           if (typeof delta.content === "string") {
             write(delta.content);
+            replyMessage.save();
           }
         } else {
           write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
