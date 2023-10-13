@@ -7,6 +7,36 @@ import { OPENAI_MODELS } from "../../shared/config.js";
 
 const log = debug("gpp:server:utils:tokens");
 
+export const trimStringToTokens = (
+  model: SupportedOpenAIModels,
+  maxTokens: number,
+  text: string,
+) => {
+  const string = typeof text === "string" ? text : JSON.stringify(text);
+
+  const joinText = "\n\n...TRUNCATED...\n\n";
+  const joinTextTokens = countTokens(model, joinText);
+
+  const textTokens = countTokens(model, string);
+  log("trimStringToTokens", { maxTokens, textTokens });
+
+  if (textTokens <= maxTokens) {
+    log("trimStringToTokens", "no need to trim");
+    return text;
+  }
+
+  const percentage = (maxTokens - joinTextTokens) / textTokens;
+  const trimLength = Math.floor(text.length * percentage);
+
+  log("trimStringToTokens", { percentage, trimLength });
+
+  return (
+    text.slice(0, trimLength / 2) +
+    joinText +
+    text.slice(text.length - trimLength / 2)
+  );
+};
+
 //
 // Token Counter
 // See: https://github.com/dqbd/tiktoken/blob/main/js/examples/dynamic.ts

@@ -118,8 +118,17 @@ export const ChatMessage = (props: ChatMessageProps) => {
   if (message.role === "function") {
     let parsedContent = message.content;
 
+    // TODO: we're making stored function return values look like:
+    //       - strings: to keep new lines
+    //       - objects: when JSON is returned
+    //   However, the model is always going to receive the data from the db, string.
+    //   Consider returning the proper type (string or JSON) from the DB.
+    //   This way, tool endpoints also can return JSON if needed.
     try {
-      parsedContent = JSON.stringify(JSON.parse(message.content), null, 2);
+      parsedContent = JSON.parse(message.content);
+      if (typeof parsedContent !== "string") {
+        parsedContent = JSON.stringify(parsedContent, null, 2);
+      }
     } catch (error) {
       log(
         "Could not format JSON function content, using original value.",

@@ -6,6 +6,7 @@ import {
   countTokens,
   openAIFunctions,
   ToolError,
+  trimStringToTokens,
 } from "../utils/index.js";
 import { tools } from "../tools/index.js";
 
@@ -57,30 +58,51 @@ chatRoutes.post("/chat", async (req, res) => {
 
   const callModel = async () => {
     // get all messages
+    const ABOUT_TWO_SENTENCES_TOKENS = 32;
+    const NUMBER_OF_MESSAGES = Math.floor(
+      MODEL.contextSize / ABOUT_TWO_SENTENCES_TOKENS,
+    );
     const dbMessages = await ChatMessage.findAll({
       order: [["createdAt", "ASC"]],
+      limit: NUMBER_OF_MESSAGES,
     });
 
     log(`/chat ${dbMessages.length} dbMessages`);
 
-    const RESPONSE_TOKENS = Math.floor(MODEL.contextSize * 0.4);
-    const CONTEXT_TOKENS = MODEL.contextSize - RESPONSE_TOKENS;
+    const RESPONSE_TOKEN_BUDGET = Math.floor(MODEL.contextSize * 0.4);
+    const CONTEXT_TOKEN_BUDGET = MODEL.contextSize - RESPONSE_TOKEN_BUDGET;
     const FUNCTIONS_TOKENS = countTokens(MODEL.name, chatGPTFunctionsPrompt);
     const SYSTEM_MESSAGE_TOKENS = countTokens(MODEL.name, promptSystemDefault);
 
+    const LARGEST_SINGLE_MESSAGE_TOKENS = 0.25 * CONTEXT_TOKEN_BUDGET;
+
     let messageTokensBudget =
-      CONTEXT_TOKENS - FUNCTIONS_TOKENS - SYSTEM_MESSAGE_TOKENS;
+      CONTEXT_TOKEN_BUDGET - FUNCTIONS_TOKENS - SYSTEM_MESSAGE_TOKENS;
 
     const contextMessages: ChatCompletionMessageParam[] = [];
     let messagesTokens = 0;
 
+    // Build the context of messages starting from the most recent message
+    // and going backwards. Once we reach the end of the context token budget,
+    // trim the last message to fit.
     while (dbMessages.length > 0 && messageTokensBudget > 0) {
       const message = dbMessages.pop();
 
-      if (message.tokens > messageTokensBudget) {
+      const messageTokens = countTokens(MODEL.name, message.content);
+
+      // No single message should be allowed to dominate the entire context.
+      if (messageTokens > LARGEST_SINGLE_MESSAGE_TOKENS) {
+        trimStringToTokens(
+          MODEL.name,
+          LARGEST_SINGLE_MESSAGE_TOKENS,
+          message.content,
+        );
+      }
+
+      if (messageTokens > messageTokensBudget) {
         const TOKEN_BUFFER = 100;
         const LENGTH_BUFFER = TOKEN_BUFFER * 4; // ~1 token = 4 chars
-        const percentTokensAvailable = message.tokens / messageTokensBudget;
+        const percentTokensAvailable = messageTokens / messageTokensBudget;
         const maxContentLength =
           message.content.length * percentTokensAvailable - LENGTH_BUFFER;
 
@@ -91,15 +113,15 @@ chatRoutes.post("/chat", async (req, res) => {
         break;
       }
 
-      messageTokensBudget -= message.tokens;
-      messagesTokens += message.tokens;
+      messageTokensBudget -= messageTokens;
+      messagesTokens += messageTokens;
       contextMessages.unshift(ChatMessageToOpenAIMessage(message));
     }
 
     log("/chat tokens", {
       budgetTotal: MODEL.contextSize,
-      budgetContext: CONTEXT_TOKENS,
-      budgetResponse: RESPONSE_TOKENS,
+      budgetContext: CONTEXT_TOKEN_BUDGET,
+      budgetResponse: RESPONSE_TOKEN_BUDGET,
       contextFunctions: FUNCTIONS_TOKENS,
       contextSystem: SYSTEM_MESSAGE_TOKENS,
       contextMessages: messagesTokens,
@@ -141,7 +163,7 @@ chatRoutes.post("/chat", async (req, res) => {
         messages: contextMessages,
         stream: true,
         n: 1,
-        max_tokens: RESPONSE_TOKENS,
+        max_tokens: RESPONSE_TOKEN_BUDGET,
         functions: openAIFunctions,
         function_call: "auto",
       });

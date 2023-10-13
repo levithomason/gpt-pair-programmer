@@ -174,6 +174,9 @@ export const Chat = () => {
               runningInputTokens={runningInputTokens}
               runningOutputTokens={runningOutputTokens}
               cost={
+                // TODO: this is a poor-man's cost calculation
+                //  cost is only incurred on LLM call
+                //  it should be calc'd on call and stored in the DB if we're going to do this
                 (runningInputTokens / 1000) * MODEL.inputCost +
                 (runningOutputTokens / 1000) * MODEL.outputCost
               }
