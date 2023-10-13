@@ -144,20 +144,20 @@ chatRoutes.post("/chat", async (req, res) => {
     let func = "";
     let args = "";
 
-    let assistantMessage = "";
-
     const replyMessage = await ChatMessage.create({
       role: "assistant",
       content: "",
     });
 
+    let assistantMessage = "";
+
+    const write = (message: string) => {
+      assistantMessage += message;
+
+      io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
+    };
+
     try {
-      const write = (message: string) => {
-        assistantMessage += message;
-
-        io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
-      };
-
       const stream = await openai.chat.completions.create({
         model: MODEL.name,
         messages: contextMessages,
@@ -174,10 +174,18 @@ chatRoutes.post("/chat", async (req, res) => {
         const { delta, finish_reason } = part.choices[0];
         if (delta?.function_call?.name) {
           func = delta?.function_call?.name;
+          replyMessage.functionCall = replyMessage.functionCall || {
+            name: func,
+            arguments: "",
+          };
         }
 
         if (delta?.function_call?.arguments) {
           args += delta?.function_call?.arguments;
+          replyMessage.functionCall = replyMessage.functionCall || {
+            name: "",
+            arguments: replyMessage.functionCall.arguments + args,
+          };
         }
 
         //
@@ -214,15 +222,12 @@ chatRoutes.post("/chat", async (req, res) => {
             // TODO: break? retry? The function will not get the correct args.
           }
 
-          await ChatMessage.create({
-            role: "assistant",
-            content: `\`${func}(${printArgs})\``,
-            functionCall: { name: func, arguments: args },
-          });
+          await replyMessage.save();
 
           // call function
           await callFunction(func, argsJSon);
 
+          // let model reply to function
           return await callModel();
         }
 
@@ -240,7 +245,7 @@ chatRoutes.post("/chat", async (req, res) => {
         else if (finish_reason === null) {
           if (typeof delta.content === "string") {
             write(delta.content);
-            replyMessage.save();
+            await replyMessage.save();
           }
         } else {
           write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
@@ -248,7 +253,8 @@ chatRoutes.post("/chat", async (req, res) => {
         }
       }
     } catch (error) {
-      res.write(`\n\n500 Error: ${error.toString()}`);
+      write(`\n\n500 Error: ${error.toString()}`);
+      await replyMessage.save();
       throw error;
     }
 
