@@ -128,13 +128,9 @@ chatRoutes.get("/chat", async (req, res) => {
       });
 
       const write = (message: string) => {
-        replyMessage.content += message;
+        replyMessage.update({ content: replyMessage.content + message });
 
         io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
-      };
-
-      const saveAssistantReply = async () => {
-        await replyMessage.save();
       };
 
       const stream = await openai.chat.completions.create({
@@ -164,7 +160,6 @@ chatRoutes.get("/chat", async (req, res) => {
         //
         if (finish_reason === "stop") {
           log("finish_reason", finish_reason);
-          await saveAssistantReply();
         }
 
         //
@@ -173,7 +168,6 @@ chatRoutes.get("/chat", async (req, res) => {
         else if (finish_reason === "length") {
           log("finish_reason", finish_reason);
           write("\n\n(...truncated due to max length)");
-          await saveAssistantReply();
         }
 
         //
