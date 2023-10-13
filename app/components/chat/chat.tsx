@@ -130,12 +130,14 @@ export const Chat = () => {
 
       setUserMessage("");
 
-      const endpoint = `http://localhost:5004/chat`;
-      const messageURI = encodeURIComponent(userMessage);
-      const getUrl = `${endpoint}?message=${messageURI}`;
-
       try {
-        await fetch(getUrl);
+        await fetch(`http://localhost:5004/chat`, {
+          method: "POST",
+          body: JSON.stringify({ message: userMessage }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
       } catch (err) {
         log(err);
         setError(err.toString());

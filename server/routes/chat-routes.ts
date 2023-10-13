@@ -44,10 +44,11 @@ chatRoutes.get("/chat/messages", async (req, res) => {
   res.send(messages);
 });
 
-chatRoutes.get("/chat", async (req, res) => {
+chatRoutes.post("/chat", async (req, res) => {
+  log("/chat", req.body);
   const userMessage = ChatMessage.build({
     role: "user",
-    content: req.query.message as string,
+    content: req.body.message,
   });
   log(userMessage.toJSON());
 
