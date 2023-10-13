@@ -149,10 +149,8 @@ chatRoutes.post("/chat", async (req, res) => {
       content: "",
     });
 
-    let assistantMessage = "";
-
     const write = (message: string) => {
-      assistantMessage += message;
+      replyMessage.content += message;
 
       io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
     };
@@ -193,6 +191,7 @@ chatRoutes.post("/chat", async (req, res) => {
         //
         if (finish_reason === "stop") {
           log("finish_reason", finish_reason);
+          break;
         }
 
         //
@@ -201,6 +200,7 @@ chatRoutes.post("/chat", async (req, res) => {
         else if (finish_reason === "length") {
           log("finish_reason", finish_reason);
           write("\n\n(...truncated due to max length)");
+          break;
         }
 
         //
@@ -245,7 +245,6 @@ chatRoutes.post("/chat", async (req, res) => {
         else if (finish_reason === null) {
           if (typeof delta.content === "string") {
             write(delta.content);
-            await replyMessage.save();
           }
         } else {
           write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
@@ -254,7 +253,6 @@ chatRoutes.post("/chat", async (req, res) => {
       }
     } catch (error) {
       write(`\n\n500 Error: ${error.toString()}`);
-      await replyMessage.save();
       throw error;
     }
 
@@ -264,6 +262,7 @@ chatRoutes.post("/chat", async (req, res) => {
         return `${m.role}: ${m.content.slice(0, 20)}...`;
       }),
     );
+    await replyMessage.save();
     io.emit("chatMessageStreamEnd");
     res.end();
   };
