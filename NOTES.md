@@ -62,6 +62,13 @@ The markdown parser just needs to prefix these paths in the chat message.
 
 ## Context
 
+### Process Flow Diagram
+
+When a developer works on a project, they keep compartmentalized process flow diagrams in their mind, and can consider how one part of the system interfaces with another.
+When a module or function is mentioned, or some specific part of the program, they immediately recall how this part relates to other parts of the program, and where it fits in the overall flow.
+
+When project directory is selected, and semantic codebase intelligence is created, the LLM could crawl the files and create a flow diagram of each file or module, so that this could be recalled later. This would give an understanding of what relates to what in a project.
+
 ### Tracking with the user
 
 When pair programming with a colleague, the colleague is aware of every action the other is taking since they can observe the user's actions.
