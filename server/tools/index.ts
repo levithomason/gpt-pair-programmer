@@ -61,7 +61,7 @@ fs.readdirSync(__dirname).forEach((entry) => {
           // TODO: when the user calls a function: role='user', name='<username>'
           //       otherwise, the model thinks it called the function
           role: "function",
-          content: JSON.stringify(error.message),
+          content: error.toString(),
           name: basename,
         });
 
