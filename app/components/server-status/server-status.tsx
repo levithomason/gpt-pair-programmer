@@ -9,19 +9,27 @@ import { useIsFirstRender } from "../../hooks/use-first-render";
 
 const log = makeDebug("components:server-status");
 
+export enum ServerStatusEnum {
+  Online = "online",
+  Offline = "offline",
+  Pending = "pending",
+}
+
 export const ServerStatus = () => {
-  const [status, setStatus] = React.useState("Pending");
+  const [status, setStatus] = React.useState<ServerStatusEnum>(
+    ServerStatusEnum.Pending,
+  );
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const isFirstRender = useIsFirstRender();
 
   if (isFirstRender) {
     socket.on("serverHeartbeat", () => {
-      setStatus("online");
+      setStatus(ServerStatusEnum.Online);
 
       clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         log("Stopped receiving heartbeats");
-        setStatus("offline");
+        setStatus(ServerStatusEnum.Offline);
       }, SERVER_STATUS_HEARTBEAT_INTERVAL + 1000);
     });
   }

@@ -31,13 +31,15 @@
   z-index: 1;
 }
 .header__item {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   display: flex;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
 }
-
+.header__item--stretch {
+  flex: 0 1 auto;
+}
 #main {
   flex: 1;
   position: relative;
