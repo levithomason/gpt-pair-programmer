@@ -6,7 +6,6 @@ import morgan from "morgan";
 import cors from "cors";
 import bodyParser from "body-parser";
 
-// import { wss } from "./websocket.js";
 import { logErrors, returnErrors } from "./middleware/errors.js";
 import { openApiJson } from "./utils/index.js";
 
@@ -16,6 +15,7 @@ import { toolRoutes } from "./routes/tool-routes.js";
 
 import { getDB, setupDB } from "./database/index.js";
 import { setupSocketIO } from "./socket.io-server.js";
+import { settingsRoutes } from "./routes/settings-routes.js";
 
 const log = debug("gpp:server:main");
 
@@ -60,6 +60,7 @@ app.use(returnErrors);
 // ============================================================================
 app.use(chatGptPluginRoutes);
 app.use(chatRoutes);
+app.use(settingsRoutes);
 app.use(toolRoutes(openApiJson));
 
 app.get("/status", (req, res) => {

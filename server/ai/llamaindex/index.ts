@@ -1,12 +1,10 @@
-import { SimpleDirectoryReader } from "llamaindex";
+import { Document, VectorStoreIndex } from "llamaindex";
 
 // example.ts
 import fs from "fs/promises";
 import path from "path";
 
-import { Document, VectorStoreIndex, SubQuestionQueryEngine } from "llamaindex";
-
-import { PROJECT_ROOT } from "../../config.js";
+import { PROJECT_ROOT } from "../../paths.js";
 
 //
 // FILES

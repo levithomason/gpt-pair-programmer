@@ -1,8 +1,8 @@
-import type { OpenAIModel } from "../types.js";
+import type { OpenAIModel, SupportedOpenAIModel } from "../types.js";
 
 export const SERVER_STATUS_HEARTBEAT_INTERVAL = 2000;
 
-export const OPENAI_MODELS: Record<OpenAIModel["name"], OpenAIModel> = {
+export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
   "gpt-3.5-turbo": {
     name: "gpt-3.5-turbo",
     description:
@@ -34,7 +34,7 @@ export const OPENAI_MODELS: Record<OpenAIModel["name"], OpenAIModel> = {
     contextSize: 16385,
     inputCost: 0.003,
     outputCost: 0.004,
-    supportsFunctionCalling: false,
+    supportsFunctionCalling: true,
     supportsFineTuning: false,
     supportsChat: true,
     supportsEmbeddings: false,
@@ -45,7 +45,7 @@ export const OPENAI_MODELS: Record<OpenAIModel["name"], OpenAIModel> = {
     contextSize: 16385,
     inputCost: 0.003,
     outputCost: 0.004,
-    supportsFunctionCalling: false,
+    supportsFunctionCalling: true,
     supportsFineTuning: false,
     supportsChat: true,
     supportsEmbeddings: false,
@@ -112,6 +112,3 @@ export const OPENAI_MODELS: Record<OpenAIModel["name"], OpenAIModel> = {
     supportsEmbeddings: true,
   },
 };
-
-// TODO: this should be moved to state and selectable by the user
-export const MODEL = OPENAI_MODELS["gpt-3.5-turbo"];

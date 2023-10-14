@@ -1,14 +1,22 @@
 import * as React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faAnglesLeft,
+  faAnglesRight,
+  faDatabase,
+} from "@fortawesome/free-solid-svg-icons";
 
 import "./app.css";
 
-import { classNames, makeDebug } from "../utils";
+import { makeDebug } from "../utils";
 import background from "../../public/dark-gradient-background-with-copy-space.avif";
 
 import { Chat } from "./chat/chat";
 import { Logo } from "./logo/logo";
 import { Tools } from "./tools/tools";
 import { ServerStatus } from "./server-status/server-status";
+import { SelectProject } from "./select-project/select-project";
+import { SelectModel } from "./select-project/select-model";
 
 const log = makeDebug("components:app");
 
@@ -30,23 +38,29 @@ export const App = () => {
     <div id="app">
       <div id="main">
         <div id="header">
-          <Logo />
-          <ServerStatus />
-          <div>
-            <button className="button--transparent" onClick={resetChat}>
-              Reset
+          <div className="header__item ">
+            <Logo />
+            <ServerStatus />
+          </div>
+          <div className="header__item">
+            <SelectProject />
+            <SelectModel />
+          </div>
+          <div className="header__item ">
+            <button
+              className="button--icon button--transparent"
+              onClick={resetChat}
+            >
+              <FontAwesomeIcon icon={faDatabase} />
             </button>
             <button
               onClick={() => setShowRight(!showRight)}
-              className="button--transparent"
+              className="button--icon button--transparent"
               title='Show "Tools"'
             >
-              <i
-                className={classNames(
-                  "fa",
-                  showRight ? "fa-angles-right" : "fa-angles-left",
-                )}
-              ></i>
+              <FontAwesomeIcon
+                icon={showRight ? faAnglesRight : faAnglesLeft}
+              />
             </button>
           </div>
         </div>

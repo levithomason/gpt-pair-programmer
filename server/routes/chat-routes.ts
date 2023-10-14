@@ -14,7 +14,7 @@ import { ChatMessage } from "../models/index.js";
 import { openai } from "../ai/utils.js";
 import { promptSystemDefault } from "../ai/prompts.js";
 import { getSocketIO } from "../socket.io-server.js";
-import { MODEL } from "../../shared/config.js";
+import { activeModel } from "../settings.js";
 
 const log = debug("gpp:server:routes:chat");
 
@@ -57,10 +57,12 @@ chatRoutes.post("/chat", async (req, res) => {
   await userMessage.save();
 
   const callModel = async () => {
+    const model = activeModel();
+
     // get all messages
     const ABOUT_TWO_SENTENCES_TOKENS = 32;
     const NUMBER_OF_MESSAGES = Math.floor(
-      MODEL.contextSize / ABOUT_TWO_SENTENCES_TOKENS,
+      model.contextSize / ABOUT_TWO_SENTENCES_TOKENS,
     );
     const dbMessages = await ChatMessage.findAll({
       order: [["createdAt", "ASC"]],
@@ -69,10 +71,10 @@ chatRoutes.post("/chat", async (req, res) => {
 
     log(`/chat ${dbMessages.length} dbMessages`);
 
-    const RESPONSE_TOKEN_BUDGET = Math.floor(MODEL.contextSize * 0.4);
-    const CONTEXT_TOKEN_BUDGET = MODEL.contextSize - RESPONSE_TOKEN_BUDGET;
-    const FUNCTIONS_TOKENS = countTokens(MODEL.name, chatGPTFunctionsPrompt);
-    const SYSTEM_MESSAGE_TOKENS = countTokens(MODEL.name, promptSystemDefault);
+    const RESPONSE_TOKEN_BUDGET = Math.floor(model.contextSize * 0.4);
+    const CONTEXT_TOKEN_BUDGET = model.contextSize - RESPONSE_TOKEN_BUDGET;
+    const FUNCTIONS_TOKENS = countTokens(model.name, chatGPTFunctionsPrompt);
+    const SYSTEM_MESSAGE_TOKENS = countTokens(model.name, promptSystemDefault);
 
     const LARGEST_SINGLE_MESSAGE_TOKENS = 0.25 * CONTEXT_TOKEN_BUDGET;
 
@@ -88,12 +90,12 @@ chatRoutes.post("/chat", async (req, res) => {
     while (dbMessages.length > 0 && messageTokensBudget > 0) {
       const message = dbMessages.pop();
 
-      const messageTokens = countTokens(MODEL.name, message.content);
+      const messageTokens = countTokens(model.name, message.content);
 
       // No single message should be allowed to dominate the entire context.
       if (messageTokens > LARGEST_SINGLE_MESSAGE_TOKENS) {
         trimStringToTokens(
-          MODEL.name,
+          model.name,
           LARGEST_SINGLE_MESSAGE_TOKENS,
           message.content,
         );
@@ -108,7 +110,7 @@ chatRoutes.post("/chat", async (req, res) => {
 
         // keep as much of the tail of the last message that will fit in context
         message.content = message.content.slice(maxContentLength);
-        messagesTokens += countTokens(MODEL.name, message.content);
+        messagesTokens += countTokens(model.name, message.content);
         messageTokensBudget = 0;
         break;
       }
@@ -119,7 +121,7 @@ chatRoutes.post("/chat", async (req, res) => {
     }
 
     log("/chat tokens", {
-      budgetTotal: MODEL.contextSize,
+      budgetTotal: model.contextSize,
       budgetContext: CONTEXT_TOKEN_BUDGET,
       budgetResponse: RESPONSE_TOKEN_BUDGET,
       contextFunctions: FUNCTIONS_TOKENS,
@@ -157,7 +159,7 @@ chatRoutes.post("/chat", async (req, res) => {
 
     try {
       const stream = await openai.chat.completions.create({
-        model: MODEL.name,
+        model: model.name,
         messages: contextMessages,
         stream: true,
         n: 1,

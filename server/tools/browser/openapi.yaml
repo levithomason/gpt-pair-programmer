@@ -53,7 +53,7 @@ paths:
             schema:
               type: object
               required:
-                  - code
+                - code
               properties:
                 code:
                   type: string

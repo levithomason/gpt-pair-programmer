@@ -12,6 +12,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 0 16px;
   width: 100%;
   height: var(--app-header-height);
@@ -28,6 +29,13 @@
   background-size: 600px 200px;
   background-position: -250px -100px;
   z-index: 1;
+}
+.header__item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 #main {

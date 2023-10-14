@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
 import type { ToolFunction } from "../../../types.js";
-import { absPath } from "../../config.js";
+import { absProjectPath } from "../../paths.js";
 import { ToolError } from "../../utils/index.js";
 
 type Args = {
@@ -14,7 +14,7 @@ type Return = {
 };
 
 const fileRead: ToolFunction<Args, Return> = async (file) => {
-  const fileAbsPath = absPath(file.path);
+  const fileAbsPath = absProjectPath(file.path);
 
   if (!fs.existsSync(fileAbsPath)) {
     throw new ToolError({

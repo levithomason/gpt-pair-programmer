@@ -6,7 +6,8 @@ import type { OpenAPISpec, ToolAttributes } from "../../../types";
 import { makeDebug, queryString } from "../../utils";
 import { useIsFirstRender } from "../../hooks/use-first-render";
 import { forEachOpenAPIPath } from "../../../shared/openapi";
-import { socket } from "../../socket.io-client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCode } from "@fortawesome/free-solid-svg-icons";
 
 const log = makeDebug("components:tools");
 
@@ -78,7 +79,8 @@ export const Tools = () => {
   return (
     <div id="tools">
       <h3 className="tools_header">
-        <i className="fa fa-microchip"></i>&nbsp;Tools
+        <FontAwesomeIcon icon={faCode} />
+        &nbsp;Tools
       </h3>
       <div className="tool-list">
         {tools.map((tool: ToolAttributes) => (
@@ -94,10 +96,11 @@ export const Tools = () => {
             <div className="tool__name">{tool.operationId}</div>
             <div className="tool__controls">
               {loadingByTool[tool.operationId] ? (
-                <span
-                  className="tool__loading-icon fa-solid fa-microchip fa-fade"
-                  // className="tool__loading-icon fa-solid fa-spinner fa-spin-pulse"
-                ></span>
+                <FontAwesomeIcon
+                  className="tool__loading-icon"
+                  icon={faCode}
+                  fade
+                />
               ) : (
                 <button
                   type="submit"

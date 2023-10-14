@@ -3,7 +3,6 @@ import * as React from "react";
 
 import "./chat.css";
 
-import { MODEL } from "../../../shared/config";
 import type {
   ChatMessage as ChatMessageType,
   ChatMessageCreationAttributes,
@@ -17,6 +16,8 @@ import { ChatMessage } from "./chat-message";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
 import { useIsFirstRender } from "../../hooks/use-first-render";
 import type { ServerToClientEvents } from "../../../types";
+import { useSettings } from "../../hooks/use-settings";
+import { OPENAI_MODELS } from "../../../shared/config";
 
 const log = makeDebug("components:chat");
 
@@ -38,6 +39,7 @@ export const Chat = () => {
   const [userMessage, setUserMessage] = React.useState<string>("");
   const [streaming, setStreaming] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string>("");
+  const [settings] = useSettings();
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -47,7 +49,7 @@ export const Chat = () => {
   const scrollToBottom = () => {
     log("scrollToBottom", chatMessagesRef.current);
     chatMessagesRef.current?.scrollTo({
-      top: chatMessagesRef.current.scrollHeight,
+      top: chatMessagesRef.current?.scrollHeight,
       behavior: "instant",
     });
   };
@@ -58,13 +60,13 @@ export const Chat = () => {
   );
   React.useEffect(() => {
     const didScrollHeightChange =
-      chatMessagesRef.current.scrollHeight !== lastScrollHeight.current;
+      chatMessagesRef.current?.scrollHeight !== lastScrollHeight.current;
 
     if (didScrollHeightChange) {
       scrollToBottom();
     }
 
-    lastScrollHeight.current = chatMessagesRef.current.scrollHeight;
+    lastScrollHeight.current = chatMessagesRef.current?.scrollHeight;
   });
 
   React.useEffect(() => {
@@ -167,6 +169,8 @@ export const Chat = () => {
           if (msg.role === "assistant") runningOutputTokens += msg.tokens;
           else runningInputTokens += msg.tokens;
 
+          const model = settings ? OPENAI_MODELS[settings.modelName] : null;
+
           return (
             <ChatMessage
               key={msg.id}
@@ -174,11 +178,13 @@ export const Chat = () => {
               runningInputTokens={runningInputTokens}
               runningOutputTokens={runningOutputTokens}
               cost={
-                // TODO: this is a poor-man's cost calculation
-                //  cost is only incurred on LLM call
-                //  it should be calc'd on call and stored in the DB if we're going to do this
-                (runningInputTokens / 1000) * MODEL.inputCost +
-                (runningOutputTokens / 1000) * MODEL.outputCost
+                model
+                  ? // TODO: this is a poor-man's cost calculation
+                    //  cost is only incurred on LLM call
+                    //  it should be calc'd on call and stored in the DB if we're going to do this
+                    (runningInputTokens / 1000) * model.inputCost +
+                    (runningOutputTokens / 1000) * model.outputCost
+                  : 0
               }
             />
           );

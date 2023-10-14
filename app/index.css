@@ -81,8 +81,8 @@ select,
 button {
   display: flex;
   height: var(--form-element-height);
-  padding: 0.2rem 0.5rem;
-  font-size: 1rem;
+  padding: 4px 8px;
+  font-size: 16px;
   border: 2px solid #ffffff11;
   border-radius: 4px;
 }
@@ -101,11 +101,6 @@ button {
 button:hover {
   background: rgba(0, 149, 194, 0.8);
 }
-button:focus {
-  box-shadow:
-    inset 0 0 0 1px #ccc,
-    0 0 0 1px #111;
-}
 
 /* buttons */
 .button--icon {
@@ -118,17 +113,37 @@ button:focus {
   background: transparent;
   color: var(--body-color);
 }
-
-input:focus,
-select:focus,
-button:focus {
-  outline: none;
-}
 button[disabled] {
   opacity: 0.2;
   cursor: default;
 }
 
+/* select */
+select {
+  position: relative;
+  min-width: 100px;
+  max-width: 140px;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  color: var(--body-color);
+  background: none;
+  border: none;
+  border-bottom: 2px solid #ffffff11;
+  cursor: pointer;
+  border-radius: 0;
+}
+select:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+/* form control focus */
+input:focus,
+select:focus,
+button:focus {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px #ccc,
+    0 0 0 1px #111;
+}
 /* table */
 table {
   border-collapse: collapse;

@@ -1,0 +1,15 @@
+.server-status {
+  margin-top: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+}
+.server-status--online {
+  background-color: hsla(120, 32%, 56%, 0.8);
+}
+.server-status--offline {
+  background-color: hsl(5, 100%, 70%);
+}
+.server-status--pending {
+  background-color: hsla(0, 0%, 69%, 0.5);
+}

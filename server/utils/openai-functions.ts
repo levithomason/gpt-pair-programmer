@@ -1,11 +1,11 @@
 import debug from "debug";
 import * as fs from "fs";
+import path from "path";
 
 import type { OpenAIFunction } from "../../types.js";
 import { forEachOpenAPIPath } from "../../shared/openapi.js";
 import { openApiJson } from "./openapi-loader.js";
-import { absPath } from "../config.js";
-import { countTokens } from "./tokens.js";
+import { SERVER_ROOT } from "../paths.js";
 
 const log = debug("gpp:utils:openai-functions");
 
@@ -24,7 +24,7 @@ forEachOpenAPIPath(openApiJson, ({ operationId, description, schema }) => {
 // Creates a prompt similar to what ChatGPT uses for plugins
 //
 const aiJson = fs.readFileSync(
-  absPath("server/.well-known/ai-plugin.json"),
+  path.join(SERVER_ROOT, ".well-known", "ai-plugin.json"),
   "utf-8",
 );
 const aiJsonObj = JSON.parse(aiJson);

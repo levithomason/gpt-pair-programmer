@@ -51,7 +51,7 @@ export type OpenAPISchemaProperties = {
 // =============================================================================
 // OpenAI
 // =============================================================================
-export type SupportedOpenAIModels =
+export type SupportedOpenAIModel =
   | "gpt-3.5-turbo"
   | "gpt-3.5-turbo-0613"
   | "gpt-3.5-turbo-16k"
@@ -63,7 +63,7 @@ export type SupportedOpenAIModels =
   | "text-embedding-ada-002";
 
 export type OpenAIModel = {
-  name: SupportedOpenAIModels;
+  name: SupportedOpenAIModel;
   description: string;
   contextSize: number;
   inputCost: number;
@@ -114,6 +114,9 @@ export interface ServerToClientEvents {
 
   /** Tell clients we're online */
   serverHeartbeat: () => void;
+
+  /** Tell clients when settings update */
+  settingsUpdate: (data: Settings) => void;
 }
 
 export interface ClientToServerEvents {}
@@ -125,3 +128,12 @@ export interface InterServerEvents {
 export interface SocketData {
   //
 }
+
+// =============================================================================
+// Settings
+// =============================================================================
+export type Settings = {
+  projectsDirectory: string;
+  project: string;
+  modelName: SupportedOpenAIModel;
+};

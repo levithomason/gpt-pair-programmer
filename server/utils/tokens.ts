@@ -2,13 +2,13 @@ import debug from "debug";
 import type { TiktokenBPE } from "js-tiktoken/lite";
 import { getEncodingNameForModel, Tiktoken } from "js-tiktoken/lite";
 
-import type { SupportedOpenAIModels } from "../../types.js";
+import type { SupportedOpenAIModel } from "../../types.js";
 import { OPENAI_MODELS } from "../../shared/config.js";
 
 const log = debug("gpp:server:utils:tokens");
 
 export const trimStringToTokens = (
-  model: SupportedOpenAIModels,
+  model: SupportedOpenAIModel,
   maxTokens: number,
   text: string,
 ) => {
@@ -64,7 +64,7 @@ for (const model of models) {
 
 log("encodingCache", Object.keys(encodingCache));
 
-export const countTokens = (model: SupportedOpenAIModels, text: string) => {
+export const countTokens = (model: SupportedOpenAIModel, text: string) => {
   const encodingName = getEncodingNameForModel(model);
   const cachedEncoding = encodingCache[encodingName];
 

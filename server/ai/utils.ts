@@ -1,9 +1,9 @@
 import { OpenAI } from "openai";
 import debug from "debug";
 
-import { MODEL } from "../../shared/config.js";
 import { BaseError, retryUntil } from "../utils/index.js";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
+import { settings } from "../settings.js";
 
 const log = debug("gpp:server:ai:utils");
 
@@ -23,7 +23,7 @@ export const getChatCompletion = async (
   messages: ChatCompletionMessageParam[],
 ) => {
   const result = await openai.chat.completions.create({
-    model: MODEL.name,
+    model: settings.modelName,
     messages,
     stream: false,
     n: 1,

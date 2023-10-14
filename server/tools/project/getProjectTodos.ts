@@ -1,5 +1,5 @@
 import type { ToolFunction } from "../../../types.js";
-import { PROJECT_ROOT } from "../../config.js";
+import { PROJECT_ROOT } from "../../paths.js";
 
 import * as fs from "fs";
 import * as path from "path";

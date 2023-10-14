@@ -11,18 +11,26 @@ export const PUBLIC_ROOT = path.resolve(PROJECT_ROOT, "public");
 export const DIST_ROOT = path.resolve(PROJECT_ROOT, "dist");
 export const TOOLS_ROOT = path.resolve(SERVER_ROOT, "tools");
 
-export const relPath = (p: string) => {
-  if (p.startsWith("~")) {
-    p = path.join(process.env.HOME || "", p.slice(1));
-  }
-  return path.relative(PROJECT_ROOT, p);
-};
-
-export const absPath = (p: string) => {
-  if (p.startsWith("~")) {
-    p = path.join(process.env.HOME || "", p.slice(1));
-  }
-  return path.resolve(PROJECT_ROOT, p);
-};
-
 export const BASE_SPEC_PATH = path.join(SERVER_ROOT, "openapi.base.yaml");
+export const SETTINGS_PATH = path.join(SERVER_ROOT, "settings.json");
+
+const resolveHomePath = (p: string) => {
+  if (p.startsWith("~")) {
+    p = path.join(process.env.HOME || "", p.slice(1));
+  }
+  return p;
+};
+
+/**
+ * Returns a path relative to the project root.
+ */
+export const relProjectPath = (...p: string[]) => {
+  return path.relative(PROJECT_ROOT, resolveHomePath(path.join(...p)));
+};
+
+/**
+ * Returns an absolute path relative to the project root.
+ */
+export const absProjectPath = (...p: string[]) => {
+  return path.resolve(PROJECT_ROOT, resolveHomePath(path.join(...p)));
+};

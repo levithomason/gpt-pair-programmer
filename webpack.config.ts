@@ -4,7 +4,7 @@ import type { Configuration as DevServerConfiguration } from "webpack-dev-server
 import type { Configuration } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 
-import { APP_ROOT, DIST_ROOT, PUBLIC_ROOT } from "./server/config.js";
+import { APP_ROOT, DIST_ROOT, PUBLIC_ROOT } from "./server/paths.js";
 
 export default {
   mode: "development",

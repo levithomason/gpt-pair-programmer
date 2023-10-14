@@ -10,8 +10,6 @@ import { openAILLM } from "./openai.js";
 
 import { ChatMessage } from "../../models/index.js";
 import { getDB, setupDB } from "../../database/index.js";
-import type { Ollama } from "langchain/llms/ollama";
-import type { OpenAI } from "langchain/llms/openai";
 
 const db = await getDB();
 await setupDB(db);

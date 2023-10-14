@@ -7,6 +7,17 @@ import "highlight.js/styles/atom-one-dark-reasonable.css";
 
 import type { ChatMessageAttributes } from "../../../server/models";
 import { makeDebug } from "../../utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowRightFromBracket,
+  faArrowRightToBracket,
+  faCode,
+  faEquals,
+  faGear,
+  faRobot,
+  faUser,
+  faWarning,
+} from "@fortawesome/free-solid-svg-icons";
 
 const log = makeDebug("components:chat-message");
 
@@ -58,14 +69,14 @@ export const ChatMessage = (props: ChatMessageProps) => {
     <div className="chat-message-details">
       <span className="chat-message-details__item">
         {runningInputTokens}
-        <i className="fa fa-arrow-right-to-bracket"></i>
+        <FontAwesomeIcon icon={faArrowRightToBracket} />
       </span>
       <span className="chat-message-details__item">
         {runningOutputTokens}
-        <i className="fa fa-arrow-right-from-bracket"></i>
+        <FontAwesomeIcon icon={faArrowRightFromBracket} />
       </span>
       <span className="chat-message-details__item">
-        <i className="fa fa-equals"></i>
+        <FontAwesomeIcon icon={faEquals} />
         {runningInputTokens + runningOutputTokens}
       </span>
       <span className="chat-message-details__item">
@@ -82,7 +93,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--user`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <i className="fa-regular fa-user"></i>
+            <FontAwesomeIcon icon={faUser} />
           </span>
           <span className="chat-message__content">{message.content}</span>
           {details}
@@ -103,7 +114,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--assistant`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <i className="fa fa-robot"></i>
+            <FontAwesomeIcon icon={faRobot} />
           </span>
           <span
             className="chat-message__content"
@@ -140,7 +151,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--function`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <i className="fa fa-code"></i>
+            <FontAwesomeIcon icon={faCode} />
           </span>
           <span className="chat-message__content">
             <strong>{message.name}</strong>
@@ -157,7 +168,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--system`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <i className="fa fa-gear"></i>
+            <FontAwesomeIcon icon={faGear} />
           </span>
           <span className="chat-message__content">
             <strong>System &mdash; </strong>
@@ -173,7 +184,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
     <div className={`chat-message`}>
       <div className="chat-message__container">
         <span className="chat-message__avatar">
-          <i className={"fa fa-warning"}></i>
+          <FontAwesomeIcon icon={faWarning} />
         </span>
         <span className="chat-message__content">
           Unknown message type:

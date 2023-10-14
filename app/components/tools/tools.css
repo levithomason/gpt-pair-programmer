@@ -79,7 +79,8 @@
   opacity: 1;
 }
 .tool__loading-icon {
-  --fa-animation-duration: 0.3s;
+  --fa-animation-duration: 0.2s;
+  --fa-fade-opacity: 0.3;
   color: var(--body-color-system-message);
 }
 .tool__description {

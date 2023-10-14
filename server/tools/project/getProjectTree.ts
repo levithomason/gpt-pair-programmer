@@ -1,5 +1,5 @@
 import type { ToolFunction } from "../../../types.js";
-import { PROJECT_ROOT } from "../../config.js";
+import { PROJECT_ROOT } from "../../paths.js";
 import { generateTree } from "../../utils/index.js";
 
 const getProjectTree: ToolFunction<never, string> = async () => {

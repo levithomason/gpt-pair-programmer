@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import { absPath, PROJECT_ROOT } from "../config.js";
+import { absProjectPath, PROJECT_ROOT } from "../paths.js";
 import { generateTree } from "../utils/index.js";
 
 export const promptSystemDefault = `
@@ -22,5 +22,5 @@ PROJECT TREE
 ${generateTree(PROJECT_ROOT, 2)}
 
 PROJECT README
-- README.md: " + ${fs.readFileSync(absPath("README.md"), "utf-8")}
+- README.md: " + ${fs.readFileSync(absProjectPath("README.md"), "utf-8")}
 `;
