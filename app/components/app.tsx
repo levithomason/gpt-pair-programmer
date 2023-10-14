@@ -40,13 +40,13 @@ export const App = () => {
         <div id="header">
           <div className="header__item">
             <Logo />
+            <ServerStatus />
           </div>
           <div className="header__item">
             <SelectProject />
             <SelectModel />
           </div>
           <div className="header__item">
-            <ServerStatus />
             <button
               className="button--icon button--transparent"
               onClick={resetChat}

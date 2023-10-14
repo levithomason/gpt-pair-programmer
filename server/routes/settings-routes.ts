@@ -16,6 +16,22 @@ settingsRoutes
   .post("/settings", async (req, res) => {
     log("POST /settings", req.body);
 
+    const { modelName, project } = req.body;
+
+    if (modelName && !OPENAI_MODELS[modelName]) {
+      const models = Object.keys(OPENAI_MODELS).join(", ");
+      return res.status(400).send({
+        message: `Model "${modelName}" does not exist: ${models}`,
+      });
+    }
+
+    const projects = listProjects();
+    if (project && !projects.includes(project)) {
+      return res.status(400).send({
+        message: `Project "${project}" does not exist: ${projects.join(", ")}`,
+      });
+    }
+
     try {
       saveSettings(req.body);
       res.send({ settings });

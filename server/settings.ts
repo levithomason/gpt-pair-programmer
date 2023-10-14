@@ -27,7 +27,7 @@ export const listProjects = () => {
   });
 };
 
-export const saveSettings = (partial: Settings) => {
+export const saveSettings = (partial: Partial<Settings>) => {
   log("saveSettings", partial);
 
   Object.assign(settings, partial);
