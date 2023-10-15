@@ -87,35 +87,6 @@ export const promptGit = async () => {
     gitBranch = "Failed to get branch: " + error.message;
   }
 
-  let gitLog: string;
-  try {
-    const { stdout } = await run(
-      "git log -n 10 --oneline --no-color --date=format:'%Y-%m-%d' --format='%h %cd %s'",
-    );
-    gitLog = stdout
-      .trim()
-      .split("\n")
-      .map((l) => `  - ${l}`)
-      .join("\n");
-  } catch (error) {
-    log(`Failed to get git log: ${error}`);
-    gitLog = "Failed to get log: " + error.message;
-  }
-
-  let firstCommit: string;
-  try {
-    const { stdout: shaLong } = await run("git rev-list --max-parents=0 HEAD");
-    const { stdout: details } = await run(
-      `git log --abbrev-commit --date=format:"%Y-%m-%d" --format="%h %cd %s" -n 1 ${shaLong.trim()}`,
-    );
-    const [sha, date, ...msgParts] = details.trim().split("\n");
-    const msg = msgParts.join("\n");
-    firstCommit = `${sha} (${date}) "${msg}"`;
-  } catch (error) {
-    log(`Failed to get first commit: ${error}`);
-    firstCommit = "Failed to get first commit: " + error.message;
-  }
-
   let groupedStatus: string;
   try {
     const { stdout } = await run("git status --porcelain");
@@ -139,8 +110,49 @@ export const promptGit = async () => {
     groupedStatus = "Failed to get status: " + error.message;
   }
 
+  let unpushed: string | number;
+  try {
+    const { stdout } = await run(
+      "git log --branches --not --remotes --oneline",
+    );
+    unpushed = stdout.trim().split("\n").filter(Boolean).length;
+  } catch (error) {
+    log(`Failed to get unpushed commits: ${error}`);
+    unpushed = "Failed to get unpushed commits: " + error.message;
+  }
+
+  let firstCommit: string;
+  try {
+    const { stdout: shaLong } = await run("git rev-list --max-parents=0 HEAD");
+    const { stdout: details } = await run(
+      `git log --abbrev-commit --date=format:"%Y-%m-%d" --format="%h %cd %s" -n 1 ${shaLong.trim()}`,
+    );
+    const [sha, date, ...msgParts] = details.trim().split("\n");
+    const msg = msgParts.join("\n");
+    firstCommit = `${sha} (${date}) "${msg}"`;
+  } catch (error) {
+    log(`Failed to get first commit: ${error}`);
+    firstCommit = "Failed to get first commit: " + error.message;
+  }
+
+  let gitLog: string;
+  try {
+    const { stdout } = await run(
+      "git log -n 10 --oneline --no-color --date=format:'%Y-%m-%d' --format='%h %cd %s'",
+    );
+    gitLog = stdout
+      .trim()
+      .split("\n")
+      .map((l) => `  - ${l}`)
+      .join("\n");
+  } catch (error) {
+    log(`Failed to get git log: ${error}`);
+    gitLog = "Failed to get log: " + error.message;
+  }
+
   return `- branch: ${gitBranch}
 - status: ${groupedStatus}
+- unpushed: ${unpushed}
 - first commit: ${firstCommit}
 - recent log:\n${gitLog}
 `.trim();
