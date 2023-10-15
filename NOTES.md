@@ -73,7 +73,7 @@ When project directory is selected, and semantic codebase intelligence is create
 
 When pair programming with a colleague, the colleague is aware of every action the other is taking since they can observe the user's actions.
 
-This information could be useful to GPT as well for tracking with the user. Events could be generated each time the user interacts with their IDE, browser, or terminal. This list of events could then be fed to GPT so it is aware of what the user has been up to and can better assist.
+This information could be useful to GPT as well for tracking with the user. Events could be generated each time the user interacts with their IDE, browser, or terminal. Git hooks could be fired on git activity. This list of events could then be fed to GPT so it is aware of what the user has been up to and can better assist.
 
 ### Contextualizing
 
