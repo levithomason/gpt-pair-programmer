@@ -216,7 +216,7 @@ export const promptSystemDefault = async () => {
 - package manager: ${packageManager}
 
 ## PROJECT: Tree
-${generateTree(projectPath(), 1)}
+${generateTree(projectPath(), { maxDepth: 1, reportContents: false })}
 
 ## PROJECT: package.json
 ${await promptPackageJSON()}

@@ -189,16 +189,7 @@
   right: 0;
   border: none;
   background-color: transparent;
-  font-size: 24px;
   z-index: 1;
-}
-.chat-form button:hover,
-.chat-form button:focus,
-.chat-form button:active {
-  transform: scale(1.25);
-  text-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
-  box-shadow: none;
-  outline: none;
 }
 
 /*

@@ -4,7 +4,11 @@ import * as path from "path";
 /**
  * Returns a tree for a given directory.
  */
-export const generateTree = (dir: string, maxDepth: number = 1): string => {
+export const generateTree = (
+  dir: string,
+  options?: { maxDepth?: number; reportContents?: boolean },
+): string => {
+  const { maxDepth = 1, reportContents = false } = options || {};
   // node modules, dotfiles, and dot directories
   const skipRegex = /node_modules|^\..*/;
   const indent = "  ";
@@ -98,14 +102,19 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       const willIterate = shouldIterate(nextPath);
 
       const dirSlash = isDir ? "/" : "";
-      const itemCount =
-        isDir && isMaxDepth
-          ? ` (${reportMaxDepth(nextPath)})`
-          : isDir && !willIterate
-          ? ` (${reportIgnored(nextPath)})`
-          : "";
 
-      localTree += `${currIndent}${entry}${dirSlash}${itemCount}\n`;
+      if (!reportContents) {
+        localTree += `${currIndent}${entry}${dirSlash}\n`;
+      } else {
+        const itemCount =
+          isDir && isMaxDepth
+            ? ` (${reportMaxDepth(nextPath)})`
+            : isDir && !willIterate
+            ? ` (${reportIgnored(nextPath)})`
+            : "";
+
+        localTree += `${currIndent}${entry}${dirSlash}${itemCount}\n`;
+      }
 
       if (willIterate) {
         localTree += recurse(nextPath, currentDepth + 1);

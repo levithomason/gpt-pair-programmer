@@ -1,5 +1,8 @@
 import type { FormEvent } from "react";
 import * as React from "react";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faCircleStop } from "@fortawesome/free-regular-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./chat.css";
 
@@ -225,7 +228,11 @@ export const Chat = () => {
           onChange={(e) => setUserMessage(e.target.value)}
         />
         <button type="submit" disabled={streaming}>
-          {streaming ? "🤖" : "👉"}
+          {streaming ? (
+            <FontAwesomeIcon icon={faPaperPlane} />
+          ) : (
+            <FontAwesomeIcon icon={faCircleStop} />
+          )}
         </button>
       </form>
     </div>
