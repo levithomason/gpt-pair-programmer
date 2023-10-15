@@ -3,7 +3,7 @@ import type { ExecException } from "child_process";
 import { exec } from "child_process";
 
 import debug from "debug";
-import { PROJECT_ROOT } from "../paths.js";
+import { projectPath } from "../settings.js";
 
 const log = debug("gpp:server:utils:shell");
 
@@ -25,7 +25,7 @@ export type RunReturn = {
  */
 export const run = (command: string, cwd: string = "."): Promise<RunReturn> => {
   const options = {
-    cwd: path.resolve(PROJECT_ROOT, cwd),
+    cwd: path.resolve(projectPath(), cwd),
     shell: process.env.SHELL,
   };
   log("run()", command, options);

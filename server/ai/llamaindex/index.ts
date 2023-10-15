@@ -4,13 +4,13 @@ import { Document, VectorStoreIndex } from "llamaindex";
 import fs from "fs/promises";
 import path from "path";
 
-import { PROJECT_ROOT } from "../../paths.js";
+import { ROOT } from "../../paths.js";
 
 //
 // FILES
 //
 const essay = await fs.readFile(
-  path.resolve(PROJECT_ROOT, "node_modules/llamaindex/examples/abramov.txt"),
+  path.resolve(ROOT, "node_modules/llamaindex/examples/abramov.txt"),
   "utf-8",
 );
 

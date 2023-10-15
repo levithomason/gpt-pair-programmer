@@ -1,7 +1,12 @@
 import express from "express";
 import debug from "debug";
 
-import { listProjects, saveSettings, settings } from "../settings.js";
+import type { Settings } from "../../types.js";
+import {
+  getComputedSettings,
+  listProjects,
+  saveSettings,
+} from "../settings.js";
 import { OPENAI_MODELS } from "../../shared/config.js";
 
 const log = debug("gpp:server:routes:settings");
@@ -10,13 +15,13 @@ export const settingsRoutes = express.Router();
 
 settingsRoutes
   .get("/settings", (_, res) => {
-    res.send(settings);
+    res.send(getComputedSettings());
   })
 
   .post("/settings", async (req, res) => {
     log("POST /settings", req.body);
 
-    const { modelName, project } = req.body;
+    const { modelName, projectName } = req.body as Settings;
 
     if (modelName && !OPENAI_MODELS[modelName]) {
       const models = Object.keys(OPENAI_MODELS).join(", ");
@@ -25,36 +30,23 @@ settingsRoutes
       });
     }
 
-    const projects = listProjects();
-    if (project && !projects.includes(project)) {
-      return res.status(400).send({
-        message: `Project "${project}" does not exist: ${projects.join(", ")}`,
-      });
+    if (projectName) {
+      const projects = listProjects();
+      if (!projects.includes(projectName)) {
+        return res.status(400).send({
+          message: `Project "${projectName}" does not exist: ${projects.join(
+            ", ",
+          )}`,
+        });
+      }
     }
 
     try {
-      saveSettings(req.body);
-      res.send({ settings });
+      res.send(saveSettings(req.body));
     } catch (error) {
       log("error", error);
       res.status(500).send({
         message: `Failed to save settings: ${error.message}`,
       });
     }
-  })
-
-  .get("/settings/projects", (_, res) => {
-    try {
-      res.send(listProjects());
-    } catch (error) {
-      log("error", error);
-      res.status(500).send({
-        message: `Failed to read settings.projectsDirectory: "${settings.projectsDirectory}": ${error.message}`,
-      });
-    }
-  })
-
-  .get("/settings/models", (_, res) => {
-    const models = Object.values(OPENAI_MODELS);
-    res.send(models);
   });

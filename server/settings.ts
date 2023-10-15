@@ -2,39 +2,87 @@ import fs from "fs";
 import path from "path";
 import debug from "debug";
 
-import type { Settings } from "../types.js";
+import type { Settings, SettingsComputed } from "../types.js";
+import { OPENAI_MODELS } from "../shared/config.js";
 import { SETTINGS_PATH } from "./paths.js";
 import { getSocketIO } from "./socket.io-server.js";
-import { OPENAI_MODELS } from "../shared/config.js";
+import { BaseError } from "./utils/index.js";
 
 const log = debug("gpp:server:settings");
 
 export const settings: Settings = {
-  projectsDirectory: path.join(process.env.HOME, "src"),
-  project: "",
+  projectsRoot: path.join(process.env.HOME, "src"),
+  projectName: "",
   modelName: "gpt-3.5-turbo",
 };
 
-// TODO: model should be stored in settings object
+//
+// Computed Values
+//
+export const projectPath = (...paths: string[]) => {
+  if (!settings.projectsRoot) return "";
+  if (!settings.projectName) return "";
+
+  return path.join(settings.projectsRoot, settings.projectName, ...paths);
+};
+
 export const activeModel = () => {
+  if (!settings.modelName) return null;
+
+  if (!OPENAI_MODELS[settings.modelName]) {
+    const modelNames = Object.keys(OPENAI_MODELS).join(", ");
+
+    throw new BaseError(
+      `settings.modelName "${settings.modelName}" is not supported: ${modelNames}`,
+    );
+  }
+
   return OPENAI_MODELS[settings.modelName];
 };
 
-// TODO: store projects in settings object?
 export const listProjects = () => {
-  return fs.readdirSync(settings.projectsDirectory).filter((name) => {
+  if (!settings.projectsRoot) return [];
+
+  if (!fs.existsSync(settings.projectsRoot)) {
+    throw new BaseError(
+      `settings.projectsRoot does not exist: "${settings.projectsRoot}"`,
+    );
+  }
+
+  if (!fs.statSync(settings.projectsRoot).isDirectory()) {
+    throw new BaseError(
+      `settings.projectsRoot is not a directory: "${settings.projectsRoot}"`,
+    );
+  }
+
+  return fs.readdirSync(settings.projectsRoot).filter((name) => {
     return !name.startsWith(".");
   });
 };
 
-export const saveSettings = (partial: Partial<Settings>) => {
+export const getComputedSettings = (): SettingsComputed => ({
+  settings,
+  projectPath: projectPath(),
+  projects: listProjects(),
+  models: Object.values(OPENAI_MODELS),
+  model: activeModel(),
+});
+
+//
+// Save/Load
+//
+export const saveSettings = (partial: Partial<Settings>): SettingsComputed => {
   log("saveSettings", partial);
 
   Object.assign(settings, partial);
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
 
+  const computedSettings = getComputedSettings();
+
   const io = getSocketIO();
-  io.emit("settingsUpdate", settings);
+  io.emit("settingsComputed", computedSettings);
+
+  return computedSettings;
 };
 
 export const loadSettings = () => {

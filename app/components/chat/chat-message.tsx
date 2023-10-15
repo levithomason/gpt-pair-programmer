@@ -82,6 +82,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <span className="chat-message-details__item">
         {cost.toLocaleString("en-US", {
           style: "currency",
+          maximumFractionDigits: 3,
           currency: "USD",
         })}
       </span>

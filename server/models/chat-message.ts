@@ -12,6 +12,7 @@ import {
 
 import { getSocketIO } from "../socket.io-server.js";
 import { countTokens } from "../utils/index.js";
+import { getComputedSettings } from "../settings.js";
 
 export type ChatMessageAttributes = InferAttributes<ChatMessage>;
 export type ChatMessageCreationAttributes =
@@ -26,9 +27,9 @@ export class ChatMessage extends Model<
 > {
   @BeforeSave
   static countTokens(attributes: ChatMessage) {
-    // TODO: Should handle tokens for different models.
-    //       At time of writing all supported models used the same cl100k_base encoding
-    attributes.tokens = countTokens("gpt-3.5-turbo", attributes.content);
+    // TODO: should count tokens sent in requests, not tokens saved to DB
+    const settings = getComputedSettings();
+    attributes.tokens = countTokens(settings.model.name, attributes.content);
   }
 
   @AfterCreate

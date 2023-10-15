@@ -7,40 +7,22 @@ const log = makeDebug("components:select-project");
 
 export const SelectProject = () => {
   const [settings, setSettings] = useSettings();
-  const [projects, setProjects] = React.useState<string[]>([]);
-
-  const getProjects = async () => {
-    const res = await fetch("http://localhost:5004/settings/projects");
-    const projects = await res.json();
-
-    log("projects", projects);
-
-    setProjects(projects);
-  };
-
-  const handleClick = async () => {
-    await getProjects();
-  };
 
   const handleChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    log("handleChange", event.target.value);
     const project = event.target.value;
-    setSettings({ project });
+    setSettings({ projectName: project });
   };
 
-  React.useEffect(() => {
-    getProjects();
-  }, []);
-
-  log("render settings", settings?.project);
+  log(`render`, settings);
 
   return (
     <select
-      value={settings?.project}
+      value={settings?.settings.projectName}
       className="select-project"
-      onClick={handleClick}
       onChange={handleChange}
     >
-      {projects.map((project) => (
+      {settings?.projects.map((project) => (
         <option key={project} value={project}>
           {project}
         </option>

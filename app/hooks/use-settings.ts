@@ -1,31 +1,19 @@
 import debug from "debug";
 import * as React from "react";
 
-import type { Settings } from "../../types";
+import type { Settings, SettingsComputed } from "../../types";
 import { socket } from "../socket.io-client";
-import { useIsFirstRender } from "./use-first-render";
 
 const log = debug("gpp:app:hooks:use-settings");
 
 export const useSettings = (): [
-  settings: Settings,
+  settings: SettingsComputed | undefined,
   (partial: Partial<Settings>) => void,
 ] => {
-  const [settings, setSettings] = React.useState<Settings>();
-  const isFirstRender = useIsFirstRender();
+  const [settings, setSettings] = React.useState<SettingsComputed>();
 
-  const fetchSettings = async () => {
-    const res = await fetch(`http://localhost:5004/settings`);
-    const json = await res.json();
-
-    setSettings((prevSettings) => ({
-      ...prevSettings,
-      ...json,
-    }));
-  };
-
-  const updateSettings = (partial: Partial<Settings>) => {
-    fetch(`http://localhost:5004/settings`, {
+  const updateSettings = async (partial: Partial<Settings>) => {
+    return fetch(`http://localhost:5004/settings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(partial),
@@ -33,22 +21,17 @@ export const useSettings = (): [
   };
 
   React.useEffect(() => {
-    if (isFirstRender) {
-      log("fetchSettings on mount");
-      fetchSettings();
-    }
-
-    const handleSettingsUpdate = (data: Settings) => {
+    const handleSettingsUpdate = (data: SettingsComputed) => {
       log("handleSettingsUpdate", data);
       setSettings(data);
     };
 
-    socket.on("settingsUpdate", handleSettingsUpdate);
+    socket.on("settingsComputed", handleSettingsUpdate);
 
     return () => {
-      socket.off("settingsUpdate", handleSettingsUpdate);
+      socket.off("settingsComputed", handleSettingsUpdate);
     };
-  }, [isFirstRender]);
+  }, []);
 
   return [settings, updateSettings];
 };

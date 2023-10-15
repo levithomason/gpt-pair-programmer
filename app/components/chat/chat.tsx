@@ -17,7 +17,6 @@ import { ChatMessage } from "./chat-message";
 import { useIsFirstRender } from "../../hooks/use-first-render";
 import type { ServerToClientEvents } from "../../../types";
 import { useSettings } from "../../hooks/use-settings";
-import { OPENAI_MODELS } from "../../../shared/config";
 
 const log = makeDebug("components:chat");
 
@@ -75,7 +74,7 @@ export const Chat = () => {
       fetch(`http://localhost:5004/chat/messages`)
         .then((res) => res.json())
         .then((res) => {
-          log("fetched chat messages", res);
+          log("initial chat messages", res);
           setMessagesByID(
             res.reduce((acc: MessagesByID, message: ChatMessageType) => {
               acc[message.id] = message;
@@ -169,7 +168,7 @@ export const Chat = () => {
           if (msg.role === "assistant") runningOutputTokens += msg.tokens;
           else runningInputTokens += msg.tokens;
 
-          const model = settings ? OPENAI_MODELS[settings.modelName] : null;
+          const model = settings?.model;
 
           return (
             <ChatMessage

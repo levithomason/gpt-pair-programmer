@@ -14,7 +14,7 @@ import { ChatMessage } from "../models/index.js";
 import { openai } from "../ai/utils.js";
 import { promptSystemDefault } from "../ai/prompts.js";
 import { getSocketIO } from "../socket.io-server.js";
-import { activeModel } from "../settings.js";
+import { getComputedSettings } from "../settings.js";
 
 const log = debug("gpp:server:routes:chat");
 
@@ -57,7 +57,7 @@ chatRoutes.post("/chat", async (req, res) => {
   await userMessage.save();
 
   const callModel = async () => {
-    const model = activeModel();
+    const { model } = getComputedSettings();
 
     // get all messages
     const ABOUT_TWO_SENTENCES_TOKENS = 32;
@@ -74,7 +74,10 @@ chatRoutes.post("/chat", async (req, res) => {
     const RESPONSE_TOKEN_BUDGET = Math.floor(model.contextSize * 0.4);
     const CONTEXT_TOKEN_BUDGET = model.contextSize - RESPONSE_TOKEN_BUDGET;
     const FUNCTIONS_TOKENS = countTokens(model.name, chatGPTFunctionsPrompt);
-    const SYSTEM_MESSAGE_TOKENS = countTokens(model.name, promptSystemDefault);
+    const SYSTEM_MESSAGE_TOKENS = countTokens(
+      model.name,
+      promptSystemDefault(),
+    );
 
     const LARGEST_SINGLE_MESSAGE_TOKENS = 0.25 * CONTEXT_TOKEN_BUDGET;
 
@@ -131,7 +134,7 @@ chatRoutes.post("/chat", async (req, res) => {
     });
 
     // this is safe because we budgeted for it
-    contextMessages.unshift({ role: "system", content: promptSystemDefault });
+    contextMessages.unshift({ role: "system", content: promptSystemDefault() });
 
     log(
       `/chat ${contextMessages.length} messages ${messagesTokens} tokens`,
@@ -153,7 +156,6 @@ chatRoutes.post("/chat", async (req, res) => {
 
     const write = (message: string) => {
       replyMessage.content += message;
-
       io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
     };
 
@@ -293,5 +295,11 @@ chatRoutes.post("/chat", async (req, res) => {
     }
   };
 
-  await callModel();
+  try {
+    await callModel();
+  } catch (error) {
+    log("callModel error", error);
+    res.status(500).write(`\n\n500 Error: ${error.toString()}`);
+    res.end();
+  }
 });

@@ -116,7 +116,7 @@ export interface ServerToClientEvents {
   serverHeartbeat: () => void;
 
   /** Tell clients when settings update */
-  settingsUpdate: (data: Settings) => void;
+  settingsComputed: (data: SettingsComputed) => void;
 }
 
 export interface ClientToServerEvents {}
@@ -133,7 +133,15 @@ export interface SocketData {
 // Settings
 // =============================================================================
 export type Settings = {
-  projectsDirectory: string;
-  project: string;
+  projectsRoot: string;
+  projectName: string;
   modelName: SupportedOpenAIModel;
+};
+
+export type SettingsComputed = {
+  settings: Settings;
+  projects: string[];
+  projectPath: string;
+  models: OpenAIModel[];
+  model: OpenAIModel;
 };

@@ -55,9 +55,12 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       }
     });
 
-    return [`...`, dirs && `${dirs} folders`, files && `${files} files`]
-      .filter(Boolean)
-      .join(" ");
+    return (
+      `...` +
+      [dirs && `${dirs} folders`, files && `${files} files`]
+        .filter(Boolean)
+        .join(" ")
+    );
   };
 
   const recurse = (dir: string, currentDepth: number): string => {

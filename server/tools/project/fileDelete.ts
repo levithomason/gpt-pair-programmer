@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
 import type { ToolFunction } from "../../../types.js";
-import { absProjectPath } from "../../paths.js";
+import { absPath } from "../../paths.js";
 import { ToolError } from "../../utils/index.js";
 
 type Args = {
@@ -11,7 +11,7 @@ type Args = {
 type Return = string;
 
 const fileDelete: ToolFunction<Args, Return> = async (file) => {
-  const fileAbsPath = absProjectPath(file.path);
+  const fileAbsPath = absPath(file.path);
 
   try {
     fs.unlinkSync(fileAbsPath);
