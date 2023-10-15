@@ -2,6 +2,7 @@ import type {
   ChatMessage,
   ChatMessageCreationAttributes,
 } from "./server/models/index.js";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 
 // TODO: Replace with `openapi-types`
 // =============================================================================

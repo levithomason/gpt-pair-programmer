@@ -1,16 +1,17 @@
-import { Document, VectorStoreIndex } from "llamaindex";
-
-// example.ts
 import fs from "fs/promises";
 import path from "path";
 
-import { ROOT } from "../../paths.js";
+import { Document, VectorStoreIndex } from "llamaindex";
+
+import { getComputedSettings } from "../../settings.js";
+
+const { projectPath } = getComputedSettings();
 
 //
 // FILES
 //
 const essay = await fs.readFile(
-  path.resolve(ROOT, "node_modules/llamaindex/examples/abramov.txt"),
+  path.resolve(projectPath, "node_modules/llamaindex/examples/abramov.txt"),
   "utf-8",
 );
 
@@ -19,10 +20,11 @@ const essay = await fs.readFile(
 //
 const document = new Document({ text: essay });
 const documents = [document];
+const documents = new SimpleDirectoryReader().loadData("./data");
+
 console.log();
 console.log("DOCUMENTS");
 console.log(documents);
-// const documents = new SimpleDirectoryReader().loadData("./data");
 
 //
 // INDEX

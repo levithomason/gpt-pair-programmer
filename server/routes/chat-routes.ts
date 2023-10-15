@@ -71,13 +71,12 @@ chatRoutes.post("/chat", async (req, res) => {
 
     log(`/chat ${dbMessages.length} dbMessages`);
 
+    const systemMessage = await promptSystemDefault();
+
     const RESPONSE_TOKEN_BUDGET = Math.floor(model.contextSize * 0.4);
     const CONTEXT_TOKEN_BUDGET = model.contextSize - RESPONSE_TOKEN_BUDGET;
     const FUNCTIONS_TOKENS = countTokens(model.name, chatGPTFunctionsPrompt);
-    const SYSTEM_MESSAGE_TOKENS = countTokens(
-      model.name,
-      promptSystemDefault(),
-    );
+    const SYSTEM_MESSAGE_TOKENS = countTokens(model.name, systemMessage);
 
     const LARGEST_SINGLE_MESSAGE_TOKENS = 0.25 * CONTEXT_TOKEN_BUDGET;
 
@@ -133,8 +132,8 @@ chatRoutes.post("/chat", async (req, res) => {
       contextTotal: messagesTokens + FUNCTIONS_TOKENS + SYSTEM_MESSAGE_TOKENS,
     });
 
-    // this is safe because we budgeted for it
-    contextMessages.unshift({ role: "system", content: promptSystemDefault() });
+    // insert system message at the start of every context stack
+    contextMessages.unshift({ role: "system", content: systemMessage });
 
     log(
       `/chat ${contextMessages.length} messages ${messagesTokens} tokens`,
@@ -145,10 +144,6 @@ chatRoutes.post("/chat", async (req, res) => {
 
     const io = getSocketIO();
 
-    // Function call args stream in, build them up
-    let func = "";
-    let args = "";
-
     const replyMessage = await ChatMessage.create({
       role: "assistant",
       content: "",
@@ -158,6 +153,10 @@ chatRoutes.post("/chat", async (req, res) => {
       replyMessage.content += message;
       io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
     };
+
+    // Function call args stream in, build them up
+    let func = "";
+    let args = "";
 
     try {
       const stream = await openai.chat.completions.create({
@@ -171,7 +170,6 @@ chatRoutes.post("/chat", async (req, res) => {
       });
 
       // Stream
-      // res.setHeader("Content-Type", "text/event-stream");
       for await (const part of stream) {
         const { delta, finish_reason } = part.choices[0];
         if (delta?.function_call?.name) {

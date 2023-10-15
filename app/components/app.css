@@ -51,9 +51,20 @@
   display: flex;
   gap: 16px;
   flex: 0 0 auto;
-  min-width: 32px;
   max-width: 300px;
   overflow-y: auto;
+}
+
+#left {
+  padding: 8px;
+  flex: 0 0 auto;
+  max-width: 360px;
+  overflow-y: auto;
+  overflow-x: auto;
+  white-space: pre;
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: var(--font-family-mono);
 }
 
 #background {

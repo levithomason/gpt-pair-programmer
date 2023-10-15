@@ -38,9 +38,13 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
       }
     });
 
-    return [`IGNORED`, dirs && `${dirs} folders`, files && `${files} files`]
+    return [
+      `IGNORED`,
+      dirs && `${dirs} dir${dirs === 1 ? "" : "s"}`,
+      files && `${files} file${files === 1 ? "" : "s"}`,
+    ]
       .filter(Boolean)
-      .join(" ");
+      .join(", ");
   };
 
   const reportMaxDepth = (dir: string) => {
@@ -56,10 +60,13 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
     });
 
     return (
-      `...` +
-      [dirs && `${dirs} folders`, files && `${files} files`]
+      "..." +
+      [
+        dirs && `${dirs} dir${dirs === 1 ? "" : "s"}`,
+        files && `${files} file${files === 1 ? "" : "s"}`,
+      ]
         .filter(Boolean)
-        .join(" ")
+        .join(", ")
     );
   };
 
@@ -108,5 +115,5 @@ export const generateTree = (dir: string, maxDepth: number = 1): string => {
     return localTree;
   };
 
-  return [`MAX DEPTH: ${maxDepth}\n`, recurse(dir, 1)].join("\n");
+  return recurse(dir, 1).trim();
 };

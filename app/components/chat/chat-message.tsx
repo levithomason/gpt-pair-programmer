@@ -15,9 +15,10 @@ import {
   faEquals,
   faGear,
   faRobot,
-  faUser,
   faWarning,
 } from "@fortawesome/free-solid-svg-icons";
+
+import { faUser } from "@fortawesome/free-regular-svg-icons";
 
 const log = makeDebug("components:chat-message");
 
@@ -94,7 +95,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--user`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <FontAwesomeIcon icon={faUser} />
+            <FontAwesomeIcon icon={faUser} className="fa-regular" />
           </span>
           <span className="chat-message__content">{message.content}</span>
           {details}

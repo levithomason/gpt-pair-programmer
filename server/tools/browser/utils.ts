@@ -3,7 +3,7 @@ import type { Browser, ConsoleMessage, Page } from "puppeteer";
 import puppeteer from "puppeteer";
 import * as htmlToText from "html-to-text";
 
-export const log = debug("gpp:tools:webpage");
+export const log = debug("gpp:tools:browser:utils");
 
 export const formatConsoleMessage = (msg: ConsoleMessage): string => {
   const { url, lineNumber: line, columnNumber: col } = msg.location();
@@ -28,16 +28,14 @@ export const getBrowser = async () => {
 };
 
 let page: Page;
-let $console = "";
+let $console: ConsoleMessage[] = [];
 export const getPage = async () => {
   if (!page || page.isClosed()) {
     const browser = await getBrowser();
     page = await browser.newPage();
 
     page.on("console", (msg: ConsoleMessage) => {
-      const formattedMessage = formatConsoleMessage(msg);
-      $console += `\n${formattedMessage}`;
-      $console.trim();
+      $console.push(msg);
     });
   }
 
@@ -70,10 +68,14 @@ export const readPage = async () => {
   return htmlToText.convert(domString);
 };
 
-export const readConsole = () => $console;
+export const getConsole = () => [...$console];
+
+export const readConsole = () => {
+  return $console.map(formatConsoleMessage).join("\n");
+};
 
 export const clearConsole = () => {
-  $console = "";
+  $console = [];
 };
 
 export const click = async (selector: string) => {

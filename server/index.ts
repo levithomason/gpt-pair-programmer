@@ -11,11 +11,12 @@ import { openApiJson } from "./utils/index.js";
 
 import { chatGptPluginRoutes } from "./routes/chat-gpt-plugin-routes.js";
 import { chatRoutes } from "./routes/chat-routes.js";
+import { promptRoutes } from "./routes/prompt-routes.js";
+import { settingsRoutes } from "./routes/settings-routes.js";
 import { toolRoutes } from "./routes/tool-routes.js";
 
 import { getDB, setupDB } from "./database/index.js";
 import { setupSocketIO } from "./socket.io-server.js";
-import { settingsRoutes } from "./routes/settings-routes.js";
 
 const log = debug("gpp:server:main");
 
@@ -60,6 +61,7 @@ app.use(returnErrors);
 // ============================================================================
 app.use(chatGptPluginRoutes);
 app.use(chatRoutes);
+app.use(promptRoutes);
 app.use(settingsRoutes);
 app.use(toolRoutes(openApiJson));
 

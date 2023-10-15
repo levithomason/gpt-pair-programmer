@@ -2,6 +2,8 @@ import * as React from "react";
 
 import { makeDebug } from "../../utils";
 import { useSettings } from "../../hooks/use-settings";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFolder } from "@fortawesome/free-regular-svg-icons";
 
 const log = makeDebug("components:select-project");
 

@@ -10,7 +10,7 @@ type Return = {
   packageJson: JSON;
 };
 
-const getProjectInfo: ToolFunction<never, Return> = async () => {
+const getProjectInfo: ToolFunction<void, Return> = async () => {
   const root = projectPath();
 
   // TODO: assemble more useful project info

@@ -48,7 +48,7 @@ export function findTodosInFile(filePath: string) {
 /**
  * Recursively searches a directory for TODO comments.
  */
-export function findTodosInDirectory(dirPath: string) {
+export function findTodosInDirectory(dirPath: string): TodoReport {
   const results: TodoReport = {};
   const files = fs.readdirSync(dirPath);
 
@@ -77,7 +77,10 @@ export function findTodosInDirectory(dirPath: string) {
   return results;
 }
 
-const getProjectTodos: ToolFunction<never, TodoReport> = async () => {
+const getProjectTodos: ToolFunction<
+  void,
+  TodoReport
+> = async (): Promise<TodoReport> => {
   return findTodosInDirectory(projectPath());
 };
 

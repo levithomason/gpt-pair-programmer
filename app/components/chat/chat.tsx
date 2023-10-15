@@ -3,10 +3,7 @@ import * as React from "react";
 
 import "./chat.css";
 
-import type {
-  ChatMessage as ChatMessageType,
-  ChatMessageCreationAttributes,
-} from "../../../server/models";
+import type { ChatMessageCreationAttributes } from "../../../server/models";
 
 import { makeDebug } from "../../utils";
 import { socket } from "../../socket.io-client";
@@ -30,7 +27,7 @@ const suggestedMessages = [
 ];
 
 type MessagesByID = {
-  [id in ChatMessageType["id"]]: ChatMessageCreationAttributes;
+  [id in ChatMessageCreationAttributes["id"]]: ChatMessageCreationAttributes;
 };
 
 export const Chat = () => {
@@ -44,6 +41,28 @@ export const Chat = () => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const isFirstRender = useIsFirstRender();
+
+  // Get initial messages
+  if (isFirstRender) {
+    fetch(`http://localhost:5004/chat/messages`)
+      .then((res) => res.json())
+      .then((res) => {
+        log("initial chat messages", res);
+        setMessagesByID(
+          res.reduce(
+            (acc: MessagesByID, message: ChatMessageCreationAttributes) => {
+              acc[message.id] = message;
+              return acc;
+            },
+            {} as MessagesByID,
+          ),
+        );
+      })
+      .catch((err) => {
+        log(err);
+        setError(err.toString());
+      });
+  }
 
   const scrollToBottom = () => {
     log("scrollToBottom", chatMessagesRef.current);
@@ -69,25 +88,6 @@ export const Chat = () => {
   });
 
   React.useEffect(() => {
-    // Get initial messages
-    if (isFirstRender) {
-      fetch(`http://localhost:5004/chat/messages`)
-        .then((res) => res.json())
-        .then((res) => {
-          log("initial chat messages", res);
-          setMessagesByID(
-            res.reduce((acc: MessagesByID, message: ChatMessageType) => {
-              acc[message.id] = message;
-              return acc;
-            }, {} as MessagesByID),
-          );
-        })
-        .catch((err) => {
-          log(err);
-          setError(err.toString());
-        });
-    }
-
     // Listen for new messages
     const handleChatMessageCreate: ServerToClientEvents["chatMessageCreate"] =
       ({ message }) => {
@@ -120,8 +120,9 @@ export const Chat = () => {
     return () => {
       socket.off("chatMessageCreate", handleChatMessageCreate);
       socket.off("chatMessageStream", handleChatMessageStream);
+      socket.off("chatMessageStreamEnd", handleChatMessageStreamEnd);
     };
-  }, [isFirstRender]);
+  }, []);
 
   const handleSend = React.useCallback(
     async (e: FormEvent) => {

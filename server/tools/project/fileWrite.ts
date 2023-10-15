@@ -1,8 +1,8 @@
 import * as fs from "fs";
 
 import type { ToolFunction } from "../../../types.js";
-import { absPath } from "../../paths.js";
 import { ToolError } from "../../utils/index.js";
+import { projectPath } from "../../settings.js";
 
 type Args = {
   path: string;
@@ -12,7 +12,7 @@ type Args = {
 type Return = string;
 
 const fileWrite: ToolFunction<Args, Return> = async (file) => {
-  const absFilePath = absPath(file.path);
+  const absFilePath = projectPath(file.path);
   const dir = absFilePath.split("/").slice(0, -1).join("/");
 
   try {
