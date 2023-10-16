@@ -62,9 +62,21 @@ export const listProjects = () => {
     );
   }
 
-  return fs.readdirSync(settings.projectsRoot).filter((name) => {
-    return !name.startsWith(".");
-  });
+  return fs
+    .readdirSync(settings.projectsRoot)
+    .filter((name) => {
+      return !name.startsWith(".");
+    })
+    .sort((a, b) => {
+      // sort by most recently modified
+      const aPath = path.join(settings.projectsRoot, a);
+      const bPath = path.join(settings.projectsRoot, b);
+
+      const aStat = fs.statSync(aPath);
+      const bStat = fs.statSync(bPath);
+
+      return bStat.mtimeMs - aStat.mtimeMs;
+    });
 };
 
 export const getComputedSettings = (): SettingsComputed => ({
