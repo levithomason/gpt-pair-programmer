@@ -2,7 +2,7 @@ import * as fs from "fs";
 
 import type { ToolFunction } from "../../../types.js";
 import { ToolError } from "../../utils/index.js";
-import { projectPath } from "../../settings.js";
+import { absProjectPath } from "../../settings.js";
 
 type Edit = {
   start: string;
@@ -18,7 +18,7 @@ type Args = {
 type Return = string;
 
 const fileEdit: ToolFunction<Args, Return> = async (args) => {
-  const fileAbsPath = projectPath(args.path);
+  const fileAbsPath = absProjectPath(args.path);
 
   if (!fs.existsSync(fileAbsPath)) {
     throw new ToolError({
@@ -63,7 +63,7 @@ const fileEdit: ToolFunction<Args, Return> = async (args) => {
   });
 
   try {
-    fs.writeFileSync(projectPath(args.path), fileContents, "utf8");
+    fs.writeFileSync(absProjectPath(args.path), fileContents, "utf8");
     return fileContents;
   } catch (error) {
     throw new ToolError({

@@ -17,6 +17,7 @@ import { toolRoutes } from "./routes/tool-routes.js";
 
 import { getDB, setupDB } from "./database/index.js";
 import { setupSocketIO } from "./socket.io-server.js";
+import { setupPaths } from "./paths.js";
 
 const log = debug("gpp:server:main");
 
@@ -34,8 +35,9 @@ setupSocketIO(httpServer);
 // ============================================================================
 // Init
 // ============================================================================
-const db = await getDB();
-await setupDB(db);
+setupPaths();
+
+await setupDB(await getDB());
 
 // ============================================================================
 // Middleware
@@ -45,9 +47,10 @@ app.use(bodyParser.json());
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
+      // TODO: should come up with a better way of handling urls in the project
+      "http://localhost:3000", // app
+      "http://localhost:5004", // server
       "https://chat.openai.com",
-      "http://0.0.0.0:5004",
     ],
   }),
 );
@@ -64,10 +67,6 @@ app.use(chatRoutes);
 app.use(promptRoutes);
 app.use(settingsRoutes);
 app.use(toolRoutes(openApiJson));
-
-app.get("/status", (req, res) => {
-  res.json({ status: "ok" });
-});
 
 // ============================================================================
 // Server

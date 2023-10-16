@@ -2,9 +2,9 @@ import * as fs from "fs";
 import { globSync } from "glob";
 
 import type { ToolFunction } from "../../../types.js";
-import { relProjectPath } from "../../paths.js";
+import { relRootPath } from "../../paths.js";
 import { run, ToolError } from "../../utils/index.js";
-import { projectPath } from "../../settings.js";
+import { absProjectPath } from "../../settings.js";
 
 type Args = {
   query: string;
@@ -32,7 +32,7 @@ const getIgnorePatterns = (filePath: string): string[] => {
   } catch (error) {
     throw new ToolError({
       tool: "fileFind",
-      message: `Failed to read ${relProjectPath(filePath)} (for filtering)`,
+      message: `Failed to read ${relRootPath(filePath)} (for filtering)`,
       error,
     });
   }
@@ -48,7 +48,7 @@ const getIgnorePatterns = (filePath: string): string[] => {
  * => "mine/was/foundThere.js", "My/Stuff/Is_There.js", etc.
  */
 const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
-  const localGitignore = getIgnorePatterns(projectPath(".gitignore"));
+  const localGitignore = getIgnorePatterns(absProjectPath(".gitignore"));
   const globalGitignore = [];
 
   if (!query) {
@@ -60,7 +60,7 @@ const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
 
   try {
     const { stdout } = await run("git config --get core.excludesfile");
-    globalGitignore.push(...getIgnorePatterns(projectPath(stdout.trim())));
+    globalGitignore.push(...getIgnorePatterns(absProjectPath(stdout.trim())));
   } catch (error) {
     throw new ToolError({
       tool: "fileFind",
@@ -74,7 +74,7 @@ const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
     const options = {
       ignore: ["**/.git/**", ...localGitignore, ...globalGitignore],
       dot: true,
-      cwd: projectPath(),
+      cwd: absProjectPath(),
       nocase: true,
     };
 

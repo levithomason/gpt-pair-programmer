@@ -4,7 +4,7 @@ import * as yaml from "js-yaml";
 import debug from "debug";
 
 import type { OpenAPISpec } from "../../types.js";
-import { BASE_SPEC_PATH, relProjectPath, TOOLS_ROOT } from "../paths.js";
+import { BASE_SPEC_PATH, relRootPath, TOOLS_ROOT } from "../paths.js";
 import { BaseError } from "../utils/index.js";
 
 const log = debug("gpp:server:openapi-loader");
@@ -28,11 +28,11 @@ fs.readdirSync(TOOLS_ROOT).forEach((tool) => {
   const specPath = path.join(toolDir, "openapi.yaml");
   if (!fs.existsSync(specPath)) {
     throw new BaseError(
-      `Tool "${relProjectPath(toolDir)}" is missing an openapi.yaml spec.`,
+      `Tool "${relRootPath(toolDir)}" is missing an openapi.yaml spec.`,
     );
   }
 
-  log("load", relProjectPath(specPath));
+  log("load", relRootPath(specPath));
   const specYaml = fs.readFileSync(specPath, "utf8");
   const specJson = yaml.load(specYaml) as OpenAPISpec;
 

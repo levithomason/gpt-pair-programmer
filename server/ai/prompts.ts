@@ -1,8 +1,9 @@
+import path from "path";
 import * as fs from "fs";
 import debug from "debug";
 
 import { generateTree, run } from "../utils/index.js";
-import { projectPath, settings } from "../settings.js";
+import { absProjectPath, relProjectPath, settings } from "../settings.js";
 
 import { getConsole, getPage } from "../tools/browser/utils.js";
 import fileRead from "../tools/project/fileRead.js";
@@ -49,7 +50,7 @@ const promptToolBrowser = async () => {
 };
 
 export const promptPackageJSON = async () => {
-  if (!fs.existsSync(projectPath("package.json"))) {
+  if (!fs.existsSync(absProjectPath("package.json"))) {
     return `No package.json found.`;
   }
 
@@ -74,7 +75,7 @@ export const promptPackageJSON = async () => {
 };
 
 export const promptGit = async () => {
-  if (!fs.existsSync(projectPath(".git"))) {
+  if (!fs.existsSync(absProjectPath(".git"))) {
     return `<no .git directory>`;
   }
 
@@ -162,12 +163,16 @@ export const promptToolTodos = async () => {
   const todos = await getProjectTodos();
 
   const grouped = Object.entries(todos).reduce(
-    (acc, [path, todos]) => {
-      const rootPath = path.replace(projectPath(), "").split("/")[0];
+    (acc, [relTodoPath, todos]) => {
+      // group todos by 2 dirs deep
+      const shallowRoot = relTodoPath
+        .split(path.sep)
+        .slice(0, 2)
+        .join(path.sep);
 
       todos.forEach(() => {
-        if (typeof acc[rootPath] !== "number") acc[rootPath] = 0;
-        acc[rootPath]++;
+        if (typeof acc[shallowRoot] !== "number") acc[shallowRoot] = 0;
+        acc[shallowRoot]++;
       });
       return acc;
     },
@@ -183,9 +188,9 @@ export const promptToolTodos = async () => {
 };
 
 export const promptSystemDefault = async () => {
-  const packageManager = fs.existsSync(projectPath("yarn.lock"))
+  const packageManager = fs.existsSync(absProjectPath("yarn.lock"))
     ? "yarn"
-    : fs.existsSync(projectPath("package-lock.json"))
+    : fs.existsSync(absProjectPath("package-lock.json"))
     ? "npm"
     : "<no yarn.lock or package-lock.json>";
   return `
@@ -216,7 +221,7 @@ export const promptSystemDefault = async () => {
 - package manager: ${packageManager}
 
 ## PROJECT: Tree
-${generateTree(projectPath(), { maxDepth: 1, reportContents: false })}
+${generateTree(absProjectPath(), { maxDepth: 1, reportContents: false })}
 
 ## PROJECT: package.json
 ${await promptPackageJSON()}

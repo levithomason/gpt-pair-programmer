@@ -19,11 +19,18 @@ export const settings: Settings = {
 //
 // Computed Values
 //
-export const projectPath = (...paths: string[]) => {
+export const absProjectPath = (...paths: string[]) => {
   if (!settings.projectsRoot) return "";
   if (!settings.projectName) return "";
 
   return path.join(settings.projectsRoot, settings.projectName, ...paths);
+};
+
+/**
+ * Returns a path relative to the project root.
+ */
+export const relProjectPath = (toPath: string) => {
+  return path.relative(absProjectPath(), toPath);
 };
 
 export const activeModel = () => {
@@ -62,7 +69,7 @@ export const listProjects = () => {
 
 export const getComputedSettings = (): SettingsComputed => ({
   settings,
-  projectPath: projectPath(),
+  projectPath: absProjectPath(),
   projects: listProjects(),
   models: Object.values(OPENAI_MODELS),
   model: activeModel(),

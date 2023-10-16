@@ -4,7 +4,6 @@ import {
   faAnglesLeft,
   faAnglesRight,
   faDatabase,
-  faExpand,
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
 

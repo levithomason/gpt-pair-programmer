@@ -1,9 +1,8 @@
 import * as fs from "fs";
-import * as path from "path";
 
 import type { ToolFunction } from "../../../types.js";
 import { ToolError } from "../../utils/index.js";
-import { projectPath } from "../../settings.js";
+import { absProjectPath } from "../../settings.js";
 
 type Return = {
   readme: string;
@@ -11,11 +10,9 @@ type Return = {
 };
 
 const getProjectInfo: ToolFunction<void, Return> = async () => {
-  const root = projectPath();
-
   // TODO: assemble more useful project info
-  const readme = fs.readFileSync(path.join(root, "README.md"), "utf-8");
-  const pkgString = fs.readFileSync(path.join(root, "package.json"), "utf-8");
+  const readme = fs.readFileSync(absProjectPath("README.md"), "utf-8");
+  const pkgString = fs.readFileSync(absProjectPath("package.json"), "utf-8");
 
   let packageJson: JSON;
   try {

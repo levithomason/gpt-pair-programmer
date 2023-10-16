@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
-import {fileURLToPath} from "url";
+import { fileURLToPath } from "url";
 
 export const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,24 +17,23 @@ const devDeps = Object.keys(pkg.devDependencies);
 const deps = Object.keys(pkg.dependencies);
 
 try {
+  const commands = [
+    `yarn remove ${devDeps.join(" ")} ${deps.join(" ")}`,
+    `yarn add ${devDeps.join(" ")} --dev`,
+    `yarn add ${deps.join(" ")}`,
+  ];
 
-const commands = [
-  `yarn remove ${devDeps.join(" ")} ${deps.join(" ")}`,
-  `yarn add ${devDeps.join(" ")} --dev`,
-  `yarn add ${deps.join(" ")}`
-];
+  commands.forEach((command) => {
+    console.log("==========================");
+    console.log(command);
+    console.log("==========================");
+    execSync(command, { stdio: "inherit" });
+  });
 
-commands.forEach((command) => {
-  console.log('==========================');
-  console.log(command);
-  console.log('==========================');
-  execSync(command, { stdio: "inherit" });
-});
-
-// remove backup
-fs.unlinkSync(pkgBackupPath);
+  // remove backup
+  fs.unlinkSync(pkgBackupPath);
 } catch (error) {
-  console.error("Something failed. Restoring package.json from backup.")
+  console.error("Something failed. Restoring package.json from backup.");
   console.error(error);
 
   // restore backup

@@ -1,5 +1,5 @@
 import type { ToolFunction } from "../../../types.js";
-import { projectPath } from "../../settings.js";
+import { absProjectPath, relProjectPath } from "../../settings.js";
 
 import * as fs from "fs";
 import * as path from "path";
@@ -67,7 +67,7 @@ export function findTodosInDirectory(dirPath: string): TodoReport {
         const todos = findTodosInFile(fullPath);
 
         if (todos.length > 0) {
-          const relPath = path.relative(projectPath(), fullPath);
+          const relPath = relProjectPath(fullPath);
           results[relPath] = todos;
         }
       }
@@ -81,7 +81,7 @@ const getProjectTodos: ToolFunction<
   void,
   TodoReport
 > = async (): Promise<TodoReport> => {
-  return findTodosInDirectory(projectPath());
+  return findTodosInDirectory(absProjectPath());
 };
 
 export default getProjectTodos;
