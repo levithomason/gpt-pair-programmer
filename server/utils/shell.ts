@@ -28,7 +28,7 @@ export const run = (command: string, cwd: string = "."): Promise<RunReturn> => {
     cwd: path.resolve(absProjectPath(), cwd),
     shell: process.env.SHELL,
   };
-  log("run()", command, options);
+  log(command, options);
 
   return new Promise((resolve) => {
     exec(command, options, (error, stdout, stderr) => {
