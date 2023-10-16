@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+import fs from "fs";
 
 import {
   SimpleDirectoryReader,
@@ -6,25 +6,29 @@ import {
   VectorStoreIndex,
 } from "llamaindex";
 
-import { absProjectPath } from "../../settings.js";
+import { absProjectPath, relProjectPath } from "../../settings.js";
 import { LLAMAINDEX_STORAGE_PATH } from "../../paths.js";
 
 //
 // FILES
 //
-const essay = await fs.readFile(absProjectPath("README.md"), "utf-8");
+const essay = fs.readFileSync(absProjectPath("README.md"), "utf-8");
 
 //
 // DOCUMENTS
 //
 const directoryReader = new SimpleDirectoryReader();
 const documents = await directoryReader.loadData({
-  directoryPath: absProjectPath("src"),
+  directoryPath: absProjectPath("docs"),
 });
 
 console.log();
 console.log("DOCUMENTS");
-console.log(documents);
+console.log(
+  documents.map((d) => {
+    return relProjectPath(d.id_);
+  }),
+);
 
 //
 // INDEX
