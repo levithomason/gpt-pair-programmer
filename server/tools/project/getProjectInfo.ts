@@ -1,31 +1,22 @@
-import * as fs from "fs";
-
 import type { ToolFunction } from "../../../types.js";
 import { ToolError } from "../../utils/index.js";
-import { absProjectPath } from "../../settings.js";
+import { promptSystemDefault } from "../../ai/prompts.js";
 
-type Return = {
-  readme: string;
-  packageJson: JSON;
-};
+type Return = string;
 
 const getProjectInfo: ToolFunction<void, Return> = async () => {
-  // TODO: assemble more useful project info
-  const readme = fs.readFileSync(absProjectPath("README.md"), "utf-8");
-  const pkgString = fs.readFileSync(absProjectPath("package.json"), "utf-8");
-
-  let packageJson: JSON;
+  let info: string;
   try {
-    packageJson = JSON.parse(pkgString);
+    info = await promptSystemDefault();
   } catch (error) {
     throw new ToolError({
       tool: "getProjectInfo",
-      message: "Failed to parse package.json",
+      message: "Failed to get system default prompt",
       error,
     });
   }
 
-  return { readme, packageJson };
+  return info;
 };
 
 export default getProjectInfo;
