@@ -4,7 +4,7 @@ import debug from "debug";
 
 import type { Settings, SettingsComputed } from "../types.js";
 import { OPENAI_MODELS } from "../shared/config.js";
-import { SETTINGS_PATH } from "./paths.js";
+import { SETTINGS_PATH, WORKING_DIRECTORY } from "./paths.js";
 import { getSocketIO } from "./socket.io-server.js";
 import { BaseError } from "./utils/index.js";
 
@@ -20,8 +20,12 @@ export const settings: Settings = {
 // Computed Values
 //
 export const absProjectPath = (...paths: string[]) => {
-  if (!settings.projectsRoot) return "";
-  if (!settings.projectName) return "";
+  if (!settings.projectsRoot) {
+    throw new BaseError("settings.projectsRoot is not set");
+  }
+  if (!settings.projectName) {
+    throw new BaseError("settings.projectName is not set");
+  }
 
   return path.join(settings.projectsRoot, settings.projectName, ...paths);
 };
@@ -29,8 +33,8 @@ export const absProjectPath = (...paths: string[]) => {
 /**
  * Returns a path relative to the project root.
  */
-export const relProjectPath = (toPath: string) => {
-  return path.relative(absProjectPath(), toPath);
+export const relProjectPath = (toPath: string = "") => {
+  return toPath.replace(absProjectPath() + path.sep, "");
 };
 
 export const activeModel = () => {
@@ -79,12 +83,31 @@ export const listProjects = () => {
     });
 };
 
+export const projectWorkingDirectory = (...paths: string[]) => {
+  const absPath = path.join(WORKING_DIRECTORY, settings.projectName, ...paths);
+
+  if (!fs.existsSync(absPath)) {
+    fs.mkdirSync(absPath, { recursive: true });
+  }
+
+  return absPath;
+};
+
+export const setupProjectWorkingDirectory = () => {
+  const directory = projectWorkingDirectory();
+
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true });
+  }
+};
+
 export const getComputedSettings = (): SettingsComputed => ({
   settings,
   projectPath: absProjectPath(),
   projects: listProjects(),
-  models: Object.values(OPENAI_MODELS),
+  projectWorkingDirectory: projectWorkingDirectory(),
   model: activeModel(),
+  models: Object.values(OPENAI_MODELS),
 });
 
 //
@@ -92,6 +115,10 @@ export const getComputedSettings = (): SettingsComputed => ({
 //
 export const saveSettings = (partial: Partial<Settings>): SettingsComputed => {
   log("saveSettings", partial);
+
+  if (partial.projectName !== settings.projectName) {
+    setupProjectWorkingDirectory();
+  }
 
   Object.assign(settings, partial);
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
@@ -111,6 +138,8 @@ export const loadSettings = () => {
 
     Object.assign(settings, object);
   }
+
+  setupProjectWorkingDirectory();
 };
 
 loadSettings();

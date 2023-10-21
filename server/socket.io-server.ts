@@ -8,7 +8,6 @@ import type {
   ServerToClientEvents,
   SocketData,
 } from "../types.js";
-import { SERVER_STATUS_HEARTBEAT_INTERVAL } from "../shared/config.js";
 import { getComputedSettings } from "./settings.js";
 
 const log = debug("gpp:server:socket.io-server");
@@ -40,17 +39,12 @@ export const setupSocketIO = (httpServer: any) => {
 
   io.on("connection", (socket) => {
     log("connection ", socket.id);
-    io.emit("serverHeartbeat");
     io.emit("settingsComputed", getComputedSettings());
   });
 
   io.on("disconnect", (socket) => {
     log("disconnect ", socket.id);
   });
-
-  setInterval(() => {
-    io.emit("serverHeartbeat");
-  }, SERVER_STATUS_HEARTBEAT_INTERVAL);
 };
 
 export const getSocketIO = (): Server<

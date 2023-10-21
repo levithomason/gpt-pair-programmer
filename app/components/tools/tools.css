@@ -33,7 +33,6 @@
 }
 .tool {
   position: relative;
-  font-size: 14px;
   background: #ffffff08;
   padding: var(--tool-padding-y) var(--tool-padding-x);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
@@ -85,7 +84,6 @@
 }
 .tool__description {
   opacity: 0.7;
-  font-size: 14px;
 }
 .tool__args {
   grid-area: args;
@@ -132,7 +130,6 @@
   margin-top: 4px;
   left: 0;
   padding: 8px;
-  font-size: 14px;
   color: #ddd;
   background: #222;
   backdrop-filter: blur(4px);

@@ -1,42 +1,15 @@
-import * as fs from "fs";
-import { globSync } from "glob";
+import { globby } from "globby";
 
 import type { ToolFunction } from "../../../types.js";
-import { relRootPath } from "../../paths.js";
-import { run, ToolError } from "../../utils/index.js";
+import { ToolError } from "../../utils/index.js";
 import { absProjectPath } from "../../settings.js";
+import { getGlobalGitignoreGlobs } from "./utils.js";
 
 type Args = {
   query: string;
 };
 
 type Return = string[];
-
-const getIgnorePatterns = (filePath: string): string[] => {
-  if (!fs.existsSync(filePath)) {
-    return [];
-  }
-
-  try {
-    return fs
-      .readFileSync(filePath, "utf8")
-      .split("\n")
-      .filter((line) => line.trim() !== "" && !line.startsWith("#"))
-      .map((line) => {
-        // remove trailing and leading slashes
-        if (line.endsWith("/")) line = line.slice(0, -1);
-        if (line.startsWith("/")) line = line.slice(1);
-
-        return `**/${line}/**`;
-      });
-  } catch (error) {
-    throw new ToolError({
-      tool: "fileFind",
-      message: `Failed to read ${relRootPath(filePath)} (for filtering)`,
-      error,
-    });
-  }
-};
 
 // TODO: generate openapi.yaml files from docstrings
 /**
@@ -48,9 +21,6 @@ const getIgnorePatterns = (filePath: string): string[] => {
  * => "mine/was/foundThere.js", "My/Stuff/Is_There.js", etc.
  */
 const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
-  const localGitignore = getIgnorePatterns(absProjectPath(".gitignore"));
-  const globalGitignore = [];
-
   if (!query) {
     throw new ToolError({
       tool: "fileFind",
@@ -58,27 +28,18 @@ const fileFind: ToolFunction<Args, Return> = async ({ query }) => {
     });
   }
 
-  try {
-    const { stdout } = await run("git config --get core.excludesfile");
-    globalGitignore.push(...getIgnorePatterns(absProjectPath(stdout.trim())));
-  } catch (error) {
-    throw new ToolError({
-      tool: "fileFind",
-      message: "Failed to get global gitignore path",
-      error,
-    });
-  }
+  const globalGitignoreGlobs = await getGlobalGitignoreGlobs();
 
   try {
     const pattern = `**/**${query.split("").join("*")}*`;
-    const options = {
-      ignore: ["**/.git/**", ...localGitignore, ...globalGitignore],
+    return globby(pattern, {
+      gitignore: true,
+      ignore: ["**/.git/**", ...globalGitignoreGlobs],
       dot: true,
       cwd: absProjectPath(),
-      nocase: true,
-    };
-
-    return globSync(pattern, options);
+      caseSensitiveMatch: false,
+      expandDirectories: true,
+    });
   } catch (error) {
     throw new ToolError({
       tool: "fileFind",

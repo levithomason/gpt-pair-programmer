@@ -99,7 +99,7 @@ paths:
     post:
       operationId: fileFind
       summary: Find a file
-      description: Matches any part of the file name. Case insensitive. Returns all matching results.
+      description: Query matches any part of the file name (fuzzy subsequence, case insensitive). Returns all matching results.
       requestBody:
         required: true
         content:

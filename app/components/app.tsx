@@ -1,11 +1,13 @@
 import * as React from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAnglesLeft,
   faAnglesRight,
-  faDatabase,
+  faBug,
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
+import { faTrashCan } from "@fortawesome/free-regular-svg-icons";
 
 import "./app.css";
 
@@ -15,11 +17,12 @@ import background from "../../public/dark-gradient-background-with-copy-space.av
 import { Chat } from "./chat/chat";
 import { Logo } from "./logo/logo";
 import { Tools } from "./tools/tools";
-import { ServerStatus } from "./server-status/server-status";
 import { SelectProject } from "./select-project/select-project";
 import { SelectModel } from "./select-project/select-model";
+import { IndexProject } from "./index-project/index-project";
 
 import { useSettings } from "../hooks/use-settings";
+import { socket } from "../socket.io-client";
 
 const log = makeDebug("components:app");
 
@@ -29,7 +32,64 @@ export const App = () => {
     tokens: number;
   }>();
   const [showRight, setShowRight] = React.useState<boolean>(false);
+  const [showLeft, setShowLeft] = React.useState<boolean>(false);
   const [settings] = useSettings();
+
+  React.useEffect(() => {
+    let id: string;
+
+    socket.on("indexingProgress", ({ file, files, filename, chunk }) => {
+      id = toast(
+        (t) => {
+          const filenameStyle: React.CSSProperties = {
+            width: 160,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            color: "rgba(255, 255, 255, 0.5)",
+            whiteSpace: "nowrap",
+            fontSize: 14,
+          };
+          const progressBarStyle: React.CSSProperties = {
+            width: (file / files) * 100 + "%",
+            height: 4,
+            backgroundColor: "rgba(0, 255, 0, 0.5)",
+            borderRadius: 999,
+          };
+
+          const filepathParts = filename.split("/");
+          const root = filepathParts[0];
+          const basename = filepathParts[filepathParts.length - 1];
+
+          return (
+            <div>
+              <div>
+                Indexing {file}/{files}
+              </div>
+              <div style={{ background: "rgba(255, 255, 255, 0.2)" }}>
+                <div style={progressBarStyle}></div>
+              </div>
+              <div style={filenameStyle}>
+                {chunk} {basename}
+              </div>
+            </div>
+          );
+        },
+        { id },
+      );
+    });
+
+    socket.on("indexingComplete", ({ files, chunks }) => {
+      toast.success(`${files} files indexed (${chunks} chunks)`, {
+        id,
+        duration: 3000,
+      });
+    });
+
+    return () => {
+      socket.off("indexingProgress");
+      socket.off("indexingComplete");
+    };
+  }, []);
 
   const resetChat = () => {
     if (!confirm("RESET the db?")) {
@@ -56,11 +116,16 @@ export const App = () => {
       });
   }, [settings]);
 
-  log("rend", systemPrompt);
+  log("render", { systemPrompt });
 
   return (
     <div id="app">
-      {systemPrompt && (
+      <Toaster
+        position="top-right"
+        containerStyle={{ top: 64, bottom: 128 }}
+        toastOptions={{ className: "toast" }}
+      />
+      {showLeft && (
         <div id="left">
           <FontAwesomeIcon icon={faGear} />
           &nbsp;System Message ({systemPrompt.tokens} tokens)
@@ -72,18 +137,24 @@ export const App = () => {
         <div id="header">
           <div className="header__item">
             <Logo />
-            <ServerStatus />
           </div>
           <div className="header__item">
+            <IndexProject />
             <SelectProject />
             <SelectModel />
           </div>
           <div className="header__item">
             <button
               className="button--icon button--transparent"
+              onClick={() => setShowLeft(!showLeft)}
+            >
+              <FontAwesomeIcon icon={faBug} />
+            </button>
+            <button
+              className="button--icon button--transparent"
               onClick={resetChat}
             >
-              <FontAwesomeIcon icon={faDatabase} />
+              <FontAwesomeIcon icon={faTrashCan} />
             </button>
             <button
               onClick={() => setShowRight(!showRight)}

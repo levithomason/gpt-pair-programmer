@@ -39,7 +39,11 @@ export default {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },
-  plugins: [new HtmlWebpackPlugin()],
+  plugins: [
+    new HtmlWebpackPlugin({
+      favicon: path.join(PUBLIC_ROOT, "logo-on-light.png"),
+    }),
+  ],
   devServer: {
     port: 3000,
     static: {

@@ -13,6 +13,7 @@ html {
   --body-color-assistant: var(--body-color);
   --font-family-mono: "Fira Code", monospace;
   --font-family-body: "Roboto", sans-serif;
+  --font-size-body: 14px;
 
   --app-right-bar-width: 300px;
   --app-header-height: 48px;
@@ -20,6 +21,8 @@ html {
   --form-element-height: 2rem;
 
   --body-color-system-message: hsla(41, 80%, 80%, 0.8);
+
+  font-size: var(--font-size-body);
 }
 
 body {
@@ -27,7 +30,7 @@ body {
   width: 100vw;
   height: 100vh;
   font-family: var(--font-family-body);
-  font-size: 16px;
+  font-size: var(--font-size-body);
   line-height: 1.8;
   background: var(--body-bg);
   color: var(--body-color);
@@ -82,7 +85,6 @@ button {
   display: flex;
   height: var(--form-element-height);
   padding: 4px 8px;
-  font-size: 16px;
   border: 2px solid #ffffff11;
   border-radius: 4px;
 }
@@ -91,8 +93,8 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 0 16px;
+  gap: 8px;
+  padding: 0 8px;
   color: var(--body-color);
   background: rgba(0, 149, 194, 0.6);
   border: none;
@@ -104,8 +106,9 @@ button:hover {
 
 /* buttons */
 .button--icon {
-  padding: 0.5rem;
+  padding: 0;
   width: var(--form-element-height);
+  height: var(--form-element-height);
   line-height: 1;
   background: rgba(0, 149, 194, 0.6);
 }
@@ -127,7 +130,6 @@ select {
   min-width: 100px;
   max-width: 180px;
   text-overflow: ellipsis;
-  font-size: 14px;
   color: var(--body-color);
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 320 512"><path fill="rgba(255, 255, 255, 0.5)" d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/></svg>');
   background-repeat: no-repeat;

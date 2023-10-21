@@ -1,26 +1,22 @@
-import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const resolveHomePath = (p: string) => {
+/** Resolves `~` to the user's home directory. */
+export const resolveHomePath = (p: string) => {
   if (p.startsWith("~")) {
     p = path.join(process.env.HOME || "", p.slice(1));
   }
   return p;
 };
 
-/**
- * Returns a path relative to the project root.
- */
-export const relRootPath = (...p: string[]) => {
-  return path.relative(ROOT, resolveHomePath(path.join(...p)));
+/** Returns a path relative to the repo root. */
+export const relRootPath = (...paths: string[]) => {
+  return path.relative(ROOT, resolveHomePath(path.join(...paths)));
 };
 
-/**
- * Returns an absolute path relative to the project root.
- */
-export const absRootPath = (...p: string[]) => {
-  return path.resolve(ROOT, resolveHomePath(path.join(...p)));
+/** Returns an absolute path relative to the repo root. */
+export const absRootPath = (...paths: string[]) => {
+  return path.resolve(ROOT, resolveHomePath(path.join(...paths)));
 };
 
 export const __filename = fileURLToPath(import.meta.url);
@@ -40,12 +36,6 @@ export const USER_HOME = process.env.HOME;
 export const WORKING_FOLDER_NAME = ".pair-programmer";
 export const WORKING_DIRECTORY = path.resolve(USER_HOME, WORKING_FOLDER_NAME);
 
-export const LLAMAINDEX_STORAGE_PATH = path.resolve(
-  WORKING_DIRECTORY,
-  "llamaindex",
-);
-
-export const setupPaths = () => {
-  // ensure working directory exists
-  fs.mkdirSync(WORKING_DIRECTORY, { recursive: true });
-};
+export const LANGCHAIN_INDEX_DIRNAME = "langchain-index";
+export const FAISS_DIRNAME = "faiss";
+export const FAISS_FILENAME = "faiss.index";

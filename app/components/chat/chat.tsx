@@ -10,13 +10,13 @@ import type { ChatMessageCreationAttributes } from "../../../server/models";
 
 import { makeDebug } from "../../utils";
 import { socket } from "../../socket.io-client";
-import { ErrorBanner } from "../banner/error-banner";
 
 import { ChatMessage } from "./chat-message";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
 import { useIsFirstRender } from "../../hooks/use-first-render";
 import type { ServerToClientEvents } from "../../../types";
 import { useSettings } from "../../hooks/use-settings";
+import toast from "react-hot-toast";
 
 const log = makeDebug("components:chat");
 
@@ -37,7 +37,6 @@ export const Chat = () => {
   const [messagesByID, setMessagesByID] = React.useState<MessagesByID>({});
   const [userMessage, setUserMessage] = React.useState<string>("");
   const [streaming, setStreaming] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<string>("");
   const [settings] = useSettings();
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
@@ -63,7 +62,7 @@ export const Chat = () => {
       })
       .catch((err) => {
         log(err);
-        setError(err.toString());
+        toast.error(err.toString());
       });
   }
 
@@ -131,7 +130,10 @@ export const Chat = () => {
     async (e: FormEvent) => {
       e.preventDefault();
 
-      if (streaming || !userMessage.trim()) return;
+      if (streaming || !userMessage.trim()) {
+        inputRef.current?.focus();
+        return;
+      }
 
       setUserMessage("");
 
@@ -145,28 +147,19 @@ export const Chat = () => {
         });
       } catch (err) {
         log(err);
-        setError(err.toString());
+        toast.error(err.toString());
       }
     },
     [userMessage, streaming],
   );
 
-  log("render", { messagesByID, userMessage, streaming, error });
-
-  React.useEffect(() => {
-    if (!error) return;
-
-    const timeout = setTimeout(() => setError(""), 2000);
-
-    return () => clearTimeout(timeout);
-  }, [error]);
+  log("render", { messagesByID, userMessage, streaming });
 
   let runningInputTokens = 0;
   let runningOutputTokens = 0;
 
   return (
     <div id="chat">
-      <ErrorBanner error={error} />
       <div ref={chatMessagesRef} className="chat-messages">
         {Object.values(messagesByID).map((msg, index) => {
           if (msg.role === "assistant") runningOutputTokens += msg.tokens;
@@ -229,9 +222,9 @@ export const Chat = () => {
         />
         <button type="submit" disabled={streaming}>
           {streaming ? (
-            <FontAwesomeIcon icon={faPaperPlane} />
-          ) : (
             <FontAwesomeIcon icon={faCircleStop} />
+          ) : (
+            <FontAwesomeIcon icon={faPaperPlane} />
           )}
         </button>
       </form>

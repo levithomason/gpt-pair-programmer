@@ -1,6 +1,9 @@
-import type { OpenAIModel, SupportedOpenAIModel } from "../types.js";
-
-export const SERVER_STATUS_HEARTBEAT_INTERVAL = 2000;
+import type {
+  OpenAIEmbeddingModel,
+  OpenAIModel,
+  SupportedOpenAIEmbeddingModel,
+  SupportedOpenAIModel,
+} from "../types.js";
 
 export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
   "gpt-3.5-turbo": {
@@ -13,19 +16,6 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     supportsFunctionCalling: false,
     supportsFineTuning: true,
     supportsChat: true,
-    supportsEmbeddings: false,
-  },
-  "gpt-3.5-turbo-0613": {
-    name: "gpt-3.5-turbo-0613",
-    description:
-      "Snapshot of gpt-3.5-turbo from June 13th 2023 with function calling data.",
-    contextSize: 4097,
-    inputCost: 0.0015,
-    outputCost: 0.002,
-    supportsFunctionCalling: true,
-    supportsFineTuning: true,
-    supportsChat: true,
-    supportsEmbeddings: false,
   },
   "gpt-3.5-turbo-16k": {
     name: "gpt-3.5-turbo-16k",
@@ -37,18 +27,6 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     supportsFunctionCalling: true,
     supportsFineTuning: false,
     supportsChat: true,
-    supportsEmbeddings: false,
-  },
-  "gpt-3.5-turbo-16k-0613": {
-    name: "gpt-3.5-turbo-16k-0613",
-    description: "Snapshot of gpt-3.5-turbo-16k from June 13th 2023.",
-    contextSize: 16385,
-    inputCost: 0.003,
-    outputCost: 0.004,
-    supportsFunctionCalling: true,
-    supportsFineTuning: false,
-    supportsChat: true,
-    supportsEmbeddings: false,
   },
   "gpt-4": {
     name: "gpt-4",
@@ -60,19 +38,6 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     supportsFunctionCalling: false,
     supportsFineTuning: false,
     supportsChat: true,
-    supportsEmbeddings: false,
-  },
-  "gpt-4-0613": {
-    name: "gpt-4-0613",
-    description:
-      "Same improvements as gpt-4 but with function calling capability.",
-    contextSize: 8192,
-    inputCost: 0.03,
-    outputCost: 0.06,
-    supportsFunctionCalling: true,
-    supportsFineTuning: false,
-    supportsChat: true,
-    supportsEmbeddings: false,
   },
   "gpt-4-32k": {
     name: "gpt-4-32k",
@@ -84,20 +49,13 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     supportsFunctionCalling: false,
     supportsFineTuning: false,
     supportsChat: true,
-    supportsEmbeddings: false,
   },
-  "gpt-4-32k-0613": {
-    name: "gpt-4-32k-0613",
-    description:
-      "Same improvements as gpt-4-32k but with function calling capability.",
-    contextSize: 32768,
-    inputCost: 0.06,
-    outputCost: 0.12,
-    supportsFunctionCalling: true,
-    supportsFineTuning: false,
-    supportsChat: true,
-    supportsEmbeddings: false,
-  },
+};
+
+export const OPENAI_EMBEDDING_MODELS: Record<
+  SupportedOpenAIEmbeddingModel,
+  OpenAIEmbeddingModel
+> = {
   "text-embedding-ada-002": {
     name: "text-embedding-ada-002",
     description:
@@ -106,9 +64,5 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     inputCost: 0.0001,
     outputCost: 0,
     outputDimensions: 1536,
-    supportsFunctionCalling: false,
-    supportsFineTuning: false,
-    supportsChat: false,
-    supportsEmbeddings: true,
   },
 };

@@ -58,11 +58,11 @@
 #left {
   padding: 8px;
   flex: 0 0 auto;
-  max-width: 360px;
+  max-width: 320px;
   overflow-y: auto;
   overflow-x: auto;
-  white-space: pre;
-  font-size: 13px;
+  white-space: pre-wrap;
+  font-size: 12px;
   line-height: 1.5;
   font-family: var(--font-family-mono);
 }
@@ -77,4 +77,9 @@
   /*mix-blend-mode: soft-light;*/
   opacity: 0.1;
   pointer-events: none;
+}
+
+.toast {
+  background: #555;
+  color: #fff;
 }

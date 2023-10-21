@@ -3,7 +3,7 @@ import * as fs from "fs";
 import debug from "debug";
 
 import { generateTree, run } from "../utils/index.js";
-import { absProjectPath, relProjectPath, settings } from "../settings.js";
+import { absProjectPath, settings } from "../settings.js";
 
 import { getConsole, getPage } from "../tools/browser/utils.js";
 import fileRead from "../tools/project/fileRead.js";
@@ -139,7 +139,7 @@ export const promptGit = async () => {
   let gitLog: string;
   try {
     const { stdout } = await run(
-      "git log -n 10 --oneline --no-color --date=format:'%Y-%m-%d' --format='%h %cd %s'",
+      "git log -n 5 --oneline --no-color --date=format:'%Y-%m-%d' --format='%h %cd %s'",
     );
     gitLog = stdout
       .trim()
@@ -232,10 +232,7 @@ ${await promptGit()}
 # TOOLS
 All tools are executed on the user's computer, with the user's permission levels.
 
-# TOOLS: browser state
+## TOOLS: browser state
 ${await promptToolBrowser()}
-
-# TOOLS: todos summary
-${await promptToolTodos()}
 `.trim();
 };

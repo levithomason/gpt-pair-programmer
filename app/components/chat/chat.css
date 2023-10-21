@@ -21,6 +21,7 @@
   padding-bottom: calc(var(--input-margin) * 2 + var(--input-height));
   height: auto;
   overflow-y: auto;
+  font-size: 16px;
   background: #ffffff08;
   /* border: 2px solid cyan; */
   border-bottom: 1px solid hsla(40, 40%, 50%, 0.1);
@@ -38,7 +39,7 @@
   margin: 0 auto;
 }
 .chat-message__avatar {
-  font-size: 21px;
+  font-size: 20px;
   padding-top: 4px;
   line-height: 1;
   flex: 0 0 var(--avatar-column-width);

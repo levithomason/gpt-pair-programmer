@@ -1,8 +1,8 @@
+import type { DataTypes as OriginalDataTypes } from "sequelize";
 import type {
   ChatMessage,
   ChatMessageCreationAttributes,
 } from "./server/models/index.js";
-import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 
 // TODO: Replace with `openapi-types`
 // =============================================================================
@@ -54,14 +54,11 @@ export type OpenAPISchemaProperties = {
 // =============================================================================
 export type SupportedOpenAIModel =
   | "gpt-3.5-turbo"
-  | "gpt-3.5-turbo-0613"
   | "gpt-3.5-turbo-16k"
-  | "gpt-3.5-turbo-16k-0613"
   | "gpt-4"
-  | "gpt-4-0613"
-  | "gpt-4-32k"
-  | "gpt-4-32k-0613"
-  | "text-embedding-ada-002";
+  | "gpt-4-32k";
+
+export type SupportedOpenAIEmbeddingModel = "text-embedding-ada-002";
 
 export type OpenAIModel = {
   name: SupportedOpenAIModel;
@@ -72,7 +69,14 @@ export type OpenAIModel = {
   supportsFunctionCalling: boolean;
   supportsFineTuning: boolean;
   supportsChat: boolean;
-  supportsEmbeddings: boolean;
+};
+
+export type OpenAIEmbeddingModel = {
+  name: SupportedOpenAIEmbeddingModel;
+  description: string;
+  contextSize: number;
+  inputCost: number;
+  outputCost: number;
   outputDimensions?: number;
 };
 
@@ -113,11 +117,16 @@ export interface ServerToClientEvents {
 
   chatMessageStreamEnd: () => void;
 
-  /** Tell clients we're online */
-  serverHeartbeat: () => void;
-
   /** Tell clients when settings update */
   settingsComputed: (data: SettingsComputed) => void;
+
+  indexingProgress: (data: {
+    filename: string;
+    file: number;
+    files: number;
+    chunk: number;
+  }) => void;
+  indexingComplete: (data: { files: number; chunks: number }) => void;
 }
 
 export interface ClientToServerEvents {}
@@ -141,8 +150,17 @@ export type Settings = {
 
 export type SettingsComputed = {
   settings: Settings;
-  projects: string[];
   projectPath: string;
-  models: OpenAIModel[];
+  projects: string[];
+  projectWorkingDirectory: string;
   model: OpenAIModel;
+  models: OpenAIModel[];
+};
+
+// =============================================================================
+// Sequelize
+// =============================================================================
+
+export type ExtendedDataTypes = typeof OriginalDataTypes & {
+  VECTOR(dimensions: number): any;
 };
