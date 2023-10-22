@@ -1,9 +1,4 @@
 import * as React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMagnifyingGlassChart,
-  faSpinner,
-} from "@fortawesome/free-solid-svg-icons";
 
 import { makeDebug } from "../../utils";
 
@@ -26,19 +21,13 @@ export const IndexProject = () => {
     setLoading(false);
   };
 
-  const icon = loading ? (
-    <FontAwesomeIcon icon={faSpinner} spinPulse />
-  ) : (
-    <FontAwesomeIcon icon={faMagnifyingGlassChart} />
-  );
-
   return (
     <button
       className="button--transparent"
       onClick={handleClick}
       disabled={loading}
     >
-      {icon} Index
+      Index Project
     </button>
   );
 };

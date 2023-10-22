@@ -1,14 +1,7 @@
 import * as React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faAnglesLeft,
-  faAnglesRight,
-  faMicrochip,
-  faCog,
-  faGear,
-  faTrashAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 import "./app.css";
 
@@ -43,7 +36,7 @@ export const App = () => {
       id = toast(
         (t) => {
           const filenameStyle: React.CSSProperties = {
-            width: 160,
+            width: 200,
             overflow: "hidden",
             textOverflow: "ellipsis",
             color: "rgba(255, 255, 255, 0.5)",
@@ -70,7 +63,7 @@ export const App = () => {
                 <div style={progressBarStyle}></div>
               </div>
               <div style={filenameStyle}>
-                {chunk} {basename}
+                [{chunk}] {basename}
               </div>
             </div>
           );
@@ -127,6 +120,7 @@ export const App = () => {
         position="top-right"
         containerStyle={{ top: 64, bottom: 128 }}
         toastOptions={{ className: "toast" }}
+        reverseOrder
       />
       {showLeft && (
         <div id="left">
@@ -142,25 +136,25 @@ export const App = () => {
             <Logo hideText={showLeft} />
           </div>
           <div className="header__item">
+            <IndexProject />
             <SelectProject />
             <SelectModel />
           </div>
           <div className="header__item">
-            <IndexProject />
             <button
               className="button--transparent"
               onClick={() => setShowLeft(!showLeft)}
             >
-              <FontAwesomeIcon icon={faCog} /> System
+              System Prompt
             </button>
             <button className="button--transparent" onClick={resetChat}>
-              <FontAwesomeIcon icon={faTrashAlt} /> Chat
+              New Chat
             </button>
             <button
               onClick={() => setShowRight(!showRight)}
               className="button--transparent"
             >
-              <FontAwesomeIcon icon={faMicrochip} /> Tools
+              Show Tools
             </button>
           </div>
         </div>
