@@ -77,7 +77,7 @@ export const indexProject = async () => {
         content: chunk,
         chunk: chunkNumber,
         chunks: chunks.length,
-        vector: embedding,
+        embedding: embedding,
       });
 
       io.emit("indexingProgress", {

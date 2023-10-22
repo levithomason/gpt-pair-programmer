@@ -36,5 +36,5 @@ export class ProjectFile extends Model<
   chunks: number;
 
   @Column({ type: DataTypes.ARRAY(DataTypes.FLOAT) })
-  vector: number[];
+  embedding: number[];
 }
