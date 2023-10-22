@@ -1,3 +1,4 @@
+import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
 import * as React from "react";
 import { micromark } from "micromark";
 import { gfm, gfmHtml } from "micromark-extension-gfm";
@@ -5,15 +6,14 @@ import mermaid from "mermaid";
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark-reasonable.css";
 
-import type { ChatMessageAttributes } from "../../../server/models";
 import { makeDebug } from "../../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
   faArrowRightToBracket,
-  faMicrochip,
   faEquals,
   faGear,
+  faMicrochip,
   faRobot,
   faWarning,
 } from "@fortawesome/free-solid-svg-icons";
@@ -23,10 +23,10 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 const log = makeDebug("components:chat-message");
 
 export type ChatMessageProps = {
-  message: ChatMessageAttributes;
-  runningInputTokens: number;
-  runningOutputTokens: number;
-  cost: number;
+  message: ChatCompletionMessageParam;
+  runningInputTokens?: number;
+  runningOutputTokens?: number;
+  cost?: number;
 };
 
 const removeWrappingPTag = (html: string) => {
@@ -66,29 +66,38 @@ export const ChatMessage = (props: ChatMessageProps) => {
     return () => clearTimeout(timeout);
   }, [message.content]);
 
-  const details = (
-    <div className="chat-message-details">
-      <span className="chat-message-details__item">
-        {runningInputTokens}
-        <FontAwesomeIcon icon={faArrowRightToBracket} />
-      </span>
-      <span className="chat-message-details__item">
-        {runningOutputTokens}
-        <FontAwesomeIcon icon={faArrowRightFromBracket} />
-      </span>
-      <span className="chat-message-details__item">
-        <FontAwesomeIcon icon={faEquals} />
-        {runningInputTokens + runningOutputTokens}
-      </span>
-      <span className="chat-message-details__item">
-        {cost.toLocaleString("en-US", {
-          style: "currency",
-          maximumFractionDigits: 3,
-          currency: "USD",
-        })}
-      </span>
-    </div>
-  );
+  const details =
+    runningInputTokens && runningOutputTokens && cost ? (
+      <div className="chat-message-details">
+        {runningInputTokens && (
+          <span className="chat-message-details__item">
+            {runningInputTokens}
+            <FontAwesomeIcon icon={faArrowRightToBracket} />
+          </span>
+        )}
+        {runningOutputTokens && (
+          <span className="chat-message-details__item">
+            {runningOutputTokens}
+            <FontAwesomeIcon icon={faArrowRightFromBracket} />
+          </span>
+        )}
+        {runningInputTokens & runningOutputTokens && (
+          <span className="chat-message-details__item">
+            <FontAwesomeIcon icon={faEquals} />
+            {runningInputTokens + runningOutputTokens}
+          </span>
+        )}
+        {cost && (
+          <span className="chat-message-details__item">
+            {cost.toLocaleString("en-US", {
+              style: "currency",
+              maximumFractionDigits: 3,
+              currency: "USD",
+            })}
+          </span>
+        )}
+      </div>
+    ) : null;
 
   if (message.role === "user") {
     return (

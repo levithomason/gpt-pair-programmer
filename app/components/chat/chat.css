@@ -5,10 +5,6 @@
   overflow-y: auto;
   /*border: 2px solid magenta;*/
   height: 100%;
-  --avatar-column-width: 48px;
-  --avatar-content-gap: 16px;
-  --input-height: 48px;
-  --input-margin: 32px;
 }
 
 /*
@@ -18,7 +14,7 @@
 .chat-messages {
   position: relative;
   flex-grow: 1;
-  padding-bottom: calc(var(--input-margin) * 2 + var(--input-height));
+  padding-bottom: calc(var(--chat-input-margin) * 2 + var(--chat-input-height));
   height: auto;
   overflow-y: auto;
   font-size: 16px;
@@ -28,12 +24,12 @@
 }
 
 .chat-message {
-  padding: 16px;
+  padding: var(--chat-message-padding);
 }
 .chat-message__container {
   position: relative;
   display: flex;
-  gap: var(--avatar-content-gap);
+  gap: var(--chat-avatar-content-gap);
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
@@ -42,7 +38,7 @@
   font-size: 20px;
   padding-top: 4px;
   line-height: 1;
-  flex: 0 0 var(--avatar-column-width);
+  flex: 0 0 var(--chat-avatar-column-width);
   text-align: center;
 }
 .chat-message__content {
@@ -125,25 +121,25 @@
   transition: box-shadow 0.2s ease-in-out;
   display: flex;
   position: absolute;
-  width: calc(100% - var(--input-margin) * 2);
+  width: calc(100% - var(--chat-input-margin) * 2);
   max-width: 800px;
   bottom: 0;
   left: 0;
   right: 0;
-  margin: 0 auto var(--input-margin) auto;
+  margin: 0 auto var(--chat-input-margin) auto;
   border-radius: 4px;
   z-index: 2;
   /*border: 2px solid yellow;*/
 }
 .chat-form-glass {
   position: absolute;
-  width: calc(100% - var(--input-margin) * 2);
+  width: calc(100% - var(--chat-input-margin) * 2);
   max-width: 800px;
-  height: var(--input-height);
+  height: var(--chat-input-height);
   bottom: 0;
   left: 0;
   right: 0;
-  margin: 0 auto var(--input-margin) auto;
+  margin: 0 auto var(--chat-input-margin) auto;
   background-image: linear-gradient(
     90deg,
     #2a3333,
@@ -229,21 +225,21 @@
   left: 0;
   right: 0;
   /*OPTION 1: fade full width */
-  height: calc(var(--input-margin) + var(--input-height) + var(--input-margin));
+  height: calc(var(--chat-input-margin) + var(--chat-input-height) + var(--chat-input-margin));
   background-image: linear-gradient(
     0deg,
-    #313133 var(--input-margin),
-    #313133ee calc(var(--input-margin) + 1px),
-    #313133aa calc(var(--input-margin) + var(--input-height)),
-    #31313366 calc(var(--input-margin) + var(--input-height) + 4px),
+    #313133 var(--chat-input-margin),
+    #313133ee calc(var(--chat-input-margin) + 1px),
+    #313133aa calc(var(--chat-input-margin) + var(--chat-input-height)),
+    #31313366 calc(var(--chat-input-margin) + var(--chat-input-height) + 4px),
     #31313300 100% /*#313233dd,*/ /*#313233aa 100%*/
   );
   /* OPTION 1 END */
   /* OPTION 2: only fade under the input*/
-  bottom: var(--input-margin);
-  width: calc(100% - var(--input-margin) * 2);
+  bottom: var(--chat-input-margin);
+  width: calc(100% - var(--chat-input-margin) * 2);
   max-width: 800px;
-  height: var(--input-height);
+  height: var(--chat-input-height);
   margin: 0 auto;
   background-image: linear-gradient(
     0deg,

@@ -1,4 +1,6 @@
 import type { DataTypes as OriginalDataTypes } from "sequelize";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js";
+
 import type {
   ChatMessage,
   ChatMessageCreationAttributes,
@@ -127,7 +129,15 @@ export interface ServerToClientEvents {
     chunk: number;
   }) => void;
   indexingComplete: (data: { files: number; chunks: number }) => void;
+
+  contextWindow: (data: {
+    messages: ChatCompletionMessageParam[];
+    tokens: number;
+  }) => void;
 }
+
+export type DataForEvent<E extends keyof ServerToClientEvents> =
+  ServerToClientEvents[E] extends (data: infer T) => void ? T : never;
 
 export interface ClientToServerEvents {}
 

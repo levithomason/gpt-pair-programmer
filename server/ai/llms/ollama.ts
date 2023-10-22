@@ -15,6 +15,12 @@ export const mistralTextLLM = new Ollama({
   temperature: 1,
 });
 
+export const mistralInstructLLM = new Ollama({
+  baseUrl: "http://localhost:11434",
+  model: "mistral:instruct",
+  temperature: 1,
+});
+
 export const codellamaLLM = new Ollama({
   baseUrl: "http://localhost:11434",
   model: "codellama",

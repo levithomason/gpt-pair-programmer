@@ -62,7 +62,7 @@ export const Chat = () => {
       })
       .catch((err) => {
         log(err);
-        toast.error(err.toString());
+        toast.error(`Get messages failed`);
       });
   }
 
@@ -147,7 +147,7 @@ export const Chat = () => {
         });
       } catch (err) {
         log(err);
-        toast.error(err.toString());
+        toast.error(`Posting /chat failed`);
       }
     },
     [userMessage, streaming],

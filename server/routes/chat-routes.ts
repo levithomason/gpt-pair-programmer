@@ -10,11 +10,14 @@ import {
 } from "../utils/index.js";
 import { tools } from "../tools/index.js";
 
-import { ChatMessage } from "../models/index.js";
+import { ChatMessage, ProjectFile } from "../models/index.js";
 import { openai } from "../ai/utils.js";
 import { promptSystemDefault } from "../ai/prompts.js";
 import { getSocketIO } from "../socket.io-server.js";
 import { getComputedSettings } from "../settings.js";
+import { getDB } from "../database/index.js";
+import { splitWords } from "../ai/text-splitters.js";
+import { embeddings } from "../ai/embeddings.js";
 
 const log = debug("gpp:server:routes:chat");
 
@@ -56,40 +59,63 @@ chatRoutes.post("/chat", async (req, res) => {
   // create user message
   await userMessage.save();
 
+  // Find files similar to the message
+  // Split the message up and look for files which are similar
+  const db = await getDB();
+  const chunks = splitWords(userMessage.content, embeddings.sequenceLength);
+
+  let similarFiles: ProjectFile[] = [];
+  for (const chunk of chunks) {
+    const chunkEmbedding = await embeddings.encode(chunk);
+    similarFiles = await ProjectFile.findAll({
+      order: [db.literal(`embedding <-> '[${chunkEmbedding}]'`)],
+      limit: 3,
+    });
+  }
+
+  const similarFilesPrompt =
+    "The codebase says:\n\n" +
+    similarFiles
+      .map((f) => {
+        const { path, content } = f.toJSON();
+        return `${path}:\n"""\n${content}\n"""\n`;
+      })
+      .join("\n");
+
+  log("similarFilesPrompt", similarFilesPrompt);
+
   const callModel = async () => {
     const { model } = getComputedSettings();
-
-    // get all messages
-    const ABOUT_TWO_SENTENCES_TOKENS = 32;
-    const NUMBER_OF_MESSAGES = Math.floor(
-      model.contextSize / ABOUT_TWO_SENTENCES_TOKENS,
-    );
-    const dbMessages = await ChatMessage.findAll({
-      order: [["createdAt", "ASC"]],
-      limit: NUMBER_OF_MESSAGES,
-    });
-
-    log(`/chat ${dbMessages.length} dbMessages`);
 
     const systemMessage = await promptSystemDefault();
 
     const RESPONSE_TOKEN_BUDGET = Math.floor(model.contextSize * 0.4);
     const CONTEXT_TOKEN_BUDGET = model.contextSize - RESPONSE_TOKEN_BUDGET;
     const FUNCTIONS_TOKENS = countTokens(model.name, chatGPTFunctionsPrompt);
+    const SIMILAR_FILES_TOKENS = countTokens(model.name, similarFilesPrompt);
     const SYSTEM_MESSAGE_TOKENS = countTokens(model.name, systemMessage);
 
     const LARGEST_SINGLE_MESSAGE_TOKENS = 0.25 * CONTEXT_TOKEN_BUDGET;
 
-    let messageTokensBudget =
-      CONTEXT_TOKEN_BUDGET - FUNCTIONS_TOKENS - SYSTEM_MESSAGE_TOKENS;
+    let MESSAGE_TOKENS_BUDGET =
+      CONTEXT_TOKEN_BUDGET -
+      FUNCTIONS_TOKENS -
+      SYSTEM_MESSAGE_TOKENS -
+      SIMILAR_FILES_TOKENS;
 
-    const contextMessages: ChatCompletionMessageParam[] = [];
-    let messagesTokens = 0;
+    // get enough messages to fill the context budget
+    const dbMessages = await ChatMessage.findAll({
+      order: [["createdAt", "ASC"]],
+      limit: 10,
+    });
+    log(`/chat ${dbMessages.length} dbMessages`);
 
     // Build the context of messages starting from the most recent message
     // and going backwards. Once we reach the end of the context token budget,
     // trim the last message to fit.
-    while (dbMessages.length > 0 && messageTokensBudget > 0) {
+    const contextMessages: ChatCompletionMessageParam[] = [];
+    let messagesTokens = 0;
+    while (dbMessages.length > 0 && MESSAGE_TOKENS_BUDGET > 0) {
       const message = dbMessages.pop();
 
       const messageTokens = countTokens(model.name, message.content);
@@ -103,24 +129,30 @@ chatRoutes.post("/chat", async (req, res) => {
         );
       }
 
-      if (messageTokens > messageTokensBudget) {
+      if (messageTokens > MESSAGE_TOKENS_BUDGET) {
         const TOKEN_BUFFER = 100;
         const LENGTH_BUFFER = TOKEN_BUFFER * 4; // ~1 token = 4 chars
-        const percentTokensAvailable = messageTokens / messageTokensBudget;
+        const percentTokensAvailable = messageTokens / MESSAGE_TOKENS_BUDGET;
         const maxContentLength =
           message.content.length * percentTokensAvailable - LENGTH_BUFFER;
 
         // keep as much of the tail of the last message that will fit in context
         message.content = message.content.slice(maxContentLength);
         messagesTokens += countTokens(model.name, message.content);
-        messageTokensBudget = 0;
+        MESSAGE_TOKENS_BUDGET = 0;
         break;
       }
 
-      messageTokensBudget -= messageTokens;
+      MESSAGE_TOKENS_BUDGET -= messageTokens;
       messagesTokens += messageTokens;
       contextMessages.unshift(ChatMessageToOpenAIMessage(message));
     }
+
+    const totalContextTokens =
+      messagesTokens +
+      FUNCTIONS_TOKENS +
+      SYSTEM_MESSAGE_TOKENS +
+      SIMILAR_FILES_TOKENS;
 
     log("/chat tokens", {
       budgetTotal: model.contextSize,
@@ -129,20 +161,30 @@ chatRoutes.post("/chat", async (req, res) => {
       contextFunctions: FUNCTIONS_TOKENS,
       contextSystem: SYSTEM_MESSAGE_TOKENS,
       contextMessages: messagesTokens,
-      contextTotal: messagesTokens + FUNCTIONS_TOKENS + SYSTEM_MESSAGE_TOKENS,
+      contextTotal: totalContextTokens,
     });
 
     // insert system message at the start of every context stack
     contextMessages.unshift({ role: "system", content: systemMessage });
+    contextMessages.push({
+      role: "function",
+      name: "memoriesFromAssistant",
+      content: similarFilesPrompt,
+    });
 
     log(
       `/chat ${contextMessages.length} messages ${messagesTokens} tokens`,
       contextMessages.map((m) => {
-        return `${m.role}: ${m.content.slice(0, 20)}...`;
+        return `${m.role}: ${m.content}`;
       }),
     );
 
     const io = getSocketIO();
+
+    io.emit("contextWindow", {
+      messages: contextMessages,
+      tokens: totalContextTokens,
+    });
 
     const replyMessage = await ChatMessage.create({
       role: "assistant",

@@ -1,18 +1,20 @@
 import debug from "debug";
 import * as React from "react";
-
-import type { Settings, SettingsComputed } from "../../types";
-import { socket } from "../socket.io-client";
 import toast from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 
+import type {
+  ServerToClientEvents,
+  Settings,
+  SettingsComputed,
+} from "../../types";
+import { socket } from "../socket.io-client";
+
 const log = debug("gpp:app:hooks:use-settings");
 
-type Subscription = (data: SettingsComputed) => void;
-
 const subs = [];
-const sub = (cb: Subscription) => {
+const subscribe = (cb: ServerToClientEvents["settingsComputed"]) => {
   subs.push(cb);
   return () => {
     const index = subs.indexOf(cb);
@@ -22,7 +24,7 @@ const sub = (cb: Subscription) => {
   };
 };
 
-const emit = (data: SettingsComputed) => {
+const emit: ServerToClientEvents["settingsComputed"] = (data) => {
   log("handleSettingsUpdate", data);
   subs.forEach((cb) => cb(data));
   toast("Settings updated", { icon: <FontAwesomeIcon icon={faCog} /> });
@@ -44,14 +46,12 @@ export const useSettings = (): [
 ] => {
   const [settings, setSettings] = React.useState<SettingsComputed>();
 
-  const handleSettings = React.useCallback((data: SettingsComputed) => {
-    log("handleSettings", data);
-    setSettings(data);
-  }, []);
-
   React.useEffect(() => {
-    return sub(handleSettings);
-  }, [handleSettings]);
+    return subscribe((data) => {
+      log("handleSettings", data);
+      setSettings(data);
+    });
+  }, []);
 
   return [settings, updateSettings];
 };

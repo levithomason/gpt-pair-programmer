@@ -27,7 +27,7 @@ export const IndexProject = () => {
       onClick={handleClick}
       disabled={loading}
     >
-      Index Project
+      Index
     </button>
   );
 };

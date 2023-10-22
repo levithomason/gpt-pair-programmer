@@ -1,10 +1,11 @@
 import * as React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { faExpand, faGear } from "@fortawesome/free-solid-svg-icons";
 
 import "./app.css";
 
+import { socket } from "../socket.io-client";
 import { makeDebug } from "../utils";
 import background from "../../public/dark-gradient-background-with-copy-space.avif";
 
@@ -16,7 +17,8 @@ import { SelectModel } from "./select-project/select-model";
 import { IndexProject } from "./index-project/index-project";
 
 import { useSettings } from "../hooks/use-settings";
-import { socket } from "../socket.io-client";
+import { useContextWindow } from "../hooks/use-context-window";
+import { ChatMessage } from "./chat/chat-message";
 
 const log = makeDebug("components:app");
 
@@ -26,8 +28,9 @@ export const App = () => {
     tokens: number;
   }>();
   const [showRight, setShowRight] = React.useState<boolean>(false);
-  const [showLeft, setShowLeft] = React.useState<boolean>(false);
+  const [showLeft, setShowLeft] = React.useState<boolean>(true);
   const [computedSettings] = useSettings();
+  const [contextWindow] = useContextWindow();
 
   React.useEffect(() => {
     let id: string;
@@ -73,10 +76,7 @@ export const App = () => {
     });
 
     socket.on("indexingComplete", ({ files, chunks }) => {
-      toast.success(`${files} files indexed (${chunks} chunks)`, {
-        id,
-        duration: 3000,
-      });
+      toast.success(`${files} files indexed (${chunks} chunks)`, { id });
     });
 
     return () => {
@@ -119,15 +119,31 @@ export const App = () => {
       <Toaster
         position="top-right"
         containerStyle={{ top: 64, bottom: 128 }}
-        toastOptions={{ className: "toast" }}
+        toastOptions={{ className: "toast", duration: 3500 }}
         reverseOrder
       />
       {showLeft && (
         <div id="left">
-          <FontAwesomeIcon icon={faGear} />
-          &nbsp;System Message ({systemPrompt.tokens} tokens)
-          <hr />
-          {systemPrompt.prompt}
+          {contextWindow.messages.length > 0 && (
+            <div>
+              <div style={{ padding: 4, background: "rgba(0, 0, 0, 0.25)" }}>
+                <FontAwesomeIcon icon={faExpand} />
+                &nbsp;Context Window ({contextWindow.tokens} tokens)
+              </div>
+              {contextWindow.messages.map((msg, i) => (
+                <ChatMessage key={i} message={msg} />
+              ))}
+            </div>
+          )}
+          {systemPrompt?.prompt?.length > 0 && (
+            <div>
+              <div style={{ padding: 4, background: "rgba(0, 0, 0, 0.25)" }}>
+                <FontAwesomeIcon icon={faGear} />
+                &nbsp;System Message ({systemPrompt.tokens} tokens)
+              </div>
+              <div style={{ padding: 8 }}>{systemPrompt.prompt}</div>
+            </div>
+          )}
         </div>
       )}
       <div id="main">
@@ -145,7 +161,7 @@ export const App = () => {
               className="button--transparent"
               onClick={() => setShowLeft(!showLeft)}
             >
-              System Prompt
+              Debug
             </button>
             <button className="button--transparent" onClick={resetChat}>
               New Chat
@@ -154,7 +170,7 @@ export const App = () => {
               onClick={() => setShowRight(!showRight)}
               className="button--transparent"
             >
-              Show Tools
+              Tools
             </button>
           </div>
         </div>

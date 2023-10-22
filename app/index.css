@@ -22,6 +22,12 @@ html {
 
   --body-color-system-message: hsla(41, 80%, 80%, 0.8);
 
+  --chat-message-padding: 16px;
+  --chat-avatar-column-width: 48px;
+  --chat-avatar-content-gap: 16px;
+  --chat-input-height: 48px;
+  --chat-input-margin: 32px;
+
   font-size: var(--font-size-body);
 }
 

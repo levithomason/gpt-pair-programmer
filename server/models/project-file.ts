@@ -1,13 +1,18 @@
 import debug from "debug";
 import type { InferAttributes, InferCreationAttributes } from "sequelize";
-import { DataTypes } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize";
 import { Column, Model, Table } from "sequelize-typescript";
+import pgvector from "pgvector/sequelize";
+
+import type { ExtendedDataTypes } from "../../types.js";
+import { embeddings } from "../ai/embeddings.js";
 
 export type VectorDocumentAttributes = InferAttributes<ProjectFile>;
 export type VectorDocumentCreationAttributes =
   InferCreationAttributes<ProjectFile>;
 
 const log = debug("gpp:server:models:vector-document");
+pgvector.registerType(Sequelize);
 
 @Table({})
 export class ProjectFile extends Model<
@@ -35,6 +40,8 @@ export class ProjectFile extends Model<
   @Column({ type: DataTypes.INTEGER })
   chunks: number;
 
-  @Column({ type: DataTypes.ARRAY(DataTypes.FLOAT) })
+  @Column({
+    type: (DataTypes as ExtendedDataTypes).VECTOR(embeddings.dimension),
+  })
   embedding: number[];
 }

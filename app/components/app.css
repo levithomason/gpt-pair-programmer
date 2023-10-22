@@ -56,9 +56,14 @@
 }
 
 #left {
-  padding: 8px;
+  --chat-message-padding: 4px;
+  --chat-avatar-column-width: 24px;
+  --chat-avatar-content-gap: 4px;
+
   flex: 0 0 auto;
-  max-width: 320px;
+  width: 25%;
+  min-width: 320px;
+  max-width: 600px;
   overflow-y: auto;
   overflow-x: auto;
   white-space: pre-wrap;

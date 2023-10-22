@@ -1,6 +1,5 @@
 import debug from "debug";
 import { Sequelize } from "sequelize-typescript";
-import pgvector from "pgvector/sequelize";
 
 import { BaseError } from "../utils/index.js";
 import * as models from "../models/index.js";
@@ -44,7 +43,6 @@ export const setupDB = async (db: Sequelize) => {
   }
 
   await db.query("CREATE EXTENSION IF NOT EXISTS vector");
-  pgvector.registerType(Sequelize);
   await db.sync();
 };
 

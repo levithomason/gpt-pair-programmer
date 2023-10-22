@@ -11,44 +11,6 @@ import getProjectTodos from "../tools/project/getProjectTodos.js";
 
 const log = debug("gpp:server:ai:prompts");
 
-const promptToolBrowser = async () => {
-  let pageURL = "<failed to get page>";
-  let consoleSummary = "<failed to get console>";
-
-  try {
-    const page = await getPage();
-    pageURL = page.url();
-  } catch (error) {
-    log(`Failed to get page URL: ${error}`);
-  }
-
-  try {
-    const $console = getConsole();
-    const { errors, warnings, infos, logs } = $console.reduce(
-      (acc, msg) => {
-        acc[msg.type()]++;
-        return acc;
-      },
-      { errors: 0, warnings: 0, infos: 0, logs: 0 },
-    );
-
-    consoleSummary =
-      [
-        errors && `${errors} error${errors > 1 ? "s" : ""}`,
-        warnings && `${warnings} warning${warnings > 1 ? "s" : ""}`,
-        infos && `${infos} info${infos > 1 ? "s" : ""}`,
-        logs && `${logs} log${logs > 1 ? "s" : ""}`,
-      ]
-        .filter(Boolean)
-        .join(", ") || "<no messages>";
-  } catch (error) {
-    log(`Failed to get console summary: ${error}`);
-  }
-
-  return `- url: ${pageURL}
-- console: ${consoleSummary}`;
-};
-
 export const promptPackageJSON = async () => {
   if (!fs.existsSync(absProjectPath("package.json"))) {
     return `No package.json found.`;
@@ -159,6 +121,66 @@ export const promptGit = async () => {
 `.trim();
 };
 
+export const promptProjectOverview = async () => {
+  const packageManager = fs.existsSync(absProjectPath("yarn.lock"))
+    ? "yarn"
+    : fs.existsSync(absProjectPath("package-lock.json"))
+    ? "npm"
+    : "<no yarn.lock or package-lock.json>";
+
+  return `# PROJECT: General
+- directory: ${settings.projectName}
+- package manager: ${packageManager}
+
+## PROJECT: Tree
+${generateTree(absProjectPath(), { maxDepth: 1, reportContents: false })}
+
+## PROJECT: package.json
+${await promptPackageJSON()}
+
+## PROJECT: git
+${await promptGit()}
+`;
+};
+
+const promptToolBrowser = async () => {
+  let pageURL = "<failed to get page>";
+  let consoleSummary = "<failed to get console>";
+
+  try {
+    const page = await getPage();
+    pageURL = page.url();
+  } catch (error) {
+    log(`Failed to get page URL: ${error}`);
+  }
+
+  try {
+    const $console = getConsole();
+    const { errors, warnings, infos, logs } = $console.reduce(
+      (acc, msg) => {
+        acc[msg.type()]++;
+        return acc;
+      },
+      { errors: 0, warnings: 0, infos: 0, logs: 0 },
+    );
+
+    consoleSummary =
+      [
+        errors && `${errors} error${errors > 1 ? "s" : ""}`,
+        warnings && `${warnings} warning${warnings > 1 ? "s" : ""}`,
+        infos && `${infos} info${infos > 1 ? "s" : ""}`,
+        logs && `${logs} log${logs > 1 ? "s" : ""}`,
+      ]
+        .filter(Boolean)
+        .join(", ") || "<no messages>";
+  } catch (error) {
+    log(`Failed to get console summary: ${error}`);
+  }
+
+  return `- url: ${pageURL}
+- console: ${consoleSummary}`;
+};
+
 export const promptToolTodos = async () => {
   const todos = await getProjectTodos();
 
@@ -188,11 +210,6 @@ export const promptToolTodos = async () => {
 };
 
 export const promptSystemDefault = async () => {
-  const packageManager = fs.existsSync(absProjectPath("yarn.lock"))
-    ? "yarn"
-    : fs.existsSync(absProjectPath("package-lock.json"))
-    ? "npm"
-    : "<no yarn.lock or package-lock.json>";
   return `
 # THE ASSISTANT
 - Is pair programming with the user on their computer.
@@ -200,7 +217,7 @@ export const promptSystemDefault = async () => {
 - Can use multiple tools together to reach a goal.
 - Is concise.
 
-# ASSISTANT GUARANTEES
+# ASSISTANT CHARACTERISTICS
 - Always thinks step-by-step.
 - Always breaks problems down.
 - Always shows its work.
@@ -211,23 +228,10 @@ export const promptSystemDefault = async () => {
 - Always uses specific project knowledge.
 - Never makes assumptions.
 - Never provides generic information.
-- Never asks the user to do something it can do itself.
+- Never asks the user to do tasks, but does them itself.
 
-# ASSISTANT CAPABILITIES
-- The assistant writes mermaid graphs to explain relationships, flows, and sequences.
-
-# PROJECT: General
-- directory: ${settings.projectName}
-- package manager: ${packageManager}
-
-## PROJECT: Tree
-${generateTree(absProjectPath(), { maxDepth: 1, reportContents: false })}
-
-## PROJECT: package.json
-${await promptPackageJSON()}
-
-## PROJECT: git
-${await promptGit()}
+# ASSISTANT'S CAPABILITIES
+- Uses mermaid markdown graphs when explaining relationships, flows, and sequences.
 
 # TOOLS
 All tools are executed on the user's computer, with the user's permission levels.
