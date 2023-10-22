@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRightFromBracket,
   faArrowRightToBracket,
-  faCode,
+  faMicrochip,
   faEquals,
   faGear,
   faRobot,
@@ -153,7 +153,7 @@ export const ChatMessage = (props: ChatMessageProps) => {
       <div className={`chat-message chat-message--function`}>
         <div className="chat-message__container">
           <span className="chat-message__avatar">
-            <FontAwesomeIcon icon={faCode} />
+            <FontAwesomeIcon icon={faMicrochip} />
           </span>
           <span className="chat-message__content">
             <strong>{message.name}</strong>

@@ -7,7 +7,7 @@ import { makeDebug, queryString } from "../../utils";
 import { useIsFirstRender } from "../../hooks/use-first-render";
 import { forEachOpenAPIPath } from "../../../shared/openapi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCode } from "@fortawesome/free-solid-svg-icons";
+import { faMicrochip } from "@fortawesome/free-solid-svg-icons";
 
 const log = makeDebug("components:tools");
 
@@ -79,7 +79,7 @@ export const Tools = () => {
   return (
     <div id="tools">
       <h3 className="tools_header">
-        <FontAwesomeIcon icon={faCode} />
+        <FontAwesomeIcon icon={faMicrochip} />
         &nbsp;Tools
       </h3>
       <div className="tool-list">
@@ -98,7 +98,7 @@ export const Tools = () => {
               {loadingByTool[tool.operationId] ? (
                 <FontAwesomeIcon
                   className="tool__loading-icon"
-                  icon={faCode}
+                  icon={faMicrochip}
                   fade
                 />
               ) : (

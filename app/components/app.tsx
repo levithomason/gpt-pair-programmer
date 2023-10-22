@@ -4,10 +4,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAnglesLeft,
   faAnglesRight,
-  faBug,
+  faMicrochip,
+  faCog,
   faGear,
+  faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
-import { faTrashCan } from "@fortawesome/free-regular-svg-icons";
 
 import "./app.css";
 
@@ -33,7 +34,7 @@ export const App = () => {
   }>();
   const [showRight, setShowRight] = React.useState<boolean>(false);
   const [showLeft, setShowLeft] = React.useState<boolean>(false);
-  const [settings] = useSettings();
+  const [computedSettings] = useSettings();
 
   React.useEffect(() => {
     let id: string;
@@ -57,7 +58,7 @@ export const App = () => {
           };
 
           const filepathParts = filename.split("/");
-          const root = filepathParts[0];
+          // const root = filepathParts[0];
           const basename = filepathParts[filepathParts.length - 1];
 
           return (
@@ -92,7 +93,9 @@ export const App = () => {
   }, []);
 
   const resetChat = () => {
-    if (!confirm("RESET the db?")) {
+    if (
+      !confirm(`DELETE all "${computedSettings?.settings.projectName}" chats?`)
+    ) {
       return;
     }
 
@@ -114,7 +117,7 @@ export const App = () => {
       .catch((error) => {
         log("error", error);
       });
-  }, [settings]);
+  }, [computedSettings]);
 
   log("render", { systemPrompt });
 
@@ -136,34 +139,28 @@ export const App = () => {
       <div id="main">
         <div id="header">
           <div className="header__item">
-            <Logo />
+            <Logo hideText={showLeft} />
           </div>
           <div className="header__item">
-            <IndexProject />
             <SelectProject />
             <SelectModel />
           </div>
           <div className="header__item">
+            <IndexProject />
             <button
-              className="button--icon button--transparent"
+              className="button--transparent"
               onClick={() => setShowLeft(!showLeft)}
             >
-              <FontAwesomeIcon icon={faBug} />
+              <FontAwesomeIcon icon={faCog} /> System
             </button>
-            <button
-              className="button--icon button--transparent"
-              onClick={resetChat}
-            >
-              <FontAwesomeIcon icon={faTrashCan} />
+            <button className="button--transparent" onClick={resetChat}>
+              <FontAwesomeIcon icon={faTrashAlt} /> Chat
             </button>
             <button
               onClick={() => setShowRight(!showRight)}
-              className="button--icon button--transparent"
-              title='Show "Tools"'
+              className="button--transparent"
             >
-              <FontAwesomeIcon
-                icon={showRight ? faAnglesRight : faAnglesLeft}
-              />
+              <FontAwesomeIcon icon={faMicrochip} /> Tools
             </button>
           </div>
         </div>

@@ -1,6 +1,9 @@
 import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileImport, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import {
+  faMagnifyingGlassChart,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { makeDebug } from "../../utils";
 
@@ -26,7 +29,7 @@ export const IndexProject = () => {
   const icon = loading ? (
     <FontAwesomeIcon icon={faSpinner} spinPulse />
   ) : (
-    <FontAwesomeIcon icon={faFileImport} />
+    <FontAwesomeIcon icon={faMagnifyingGlassChart} />
   );
 
   return (
