@@ -35,8 +35,8 @@
   margin: 0 auto;
 }
 .chat-message__avatar {
-  font-size: 20px;
-  padding-top: 4px;
+  font-size: var(--chat-avatar-size);
+  padding-top: 0.5%; /* center w/first line of text in chat & debug left pane. */
   line-height: 1;
   flex: 0 0 var(--chat-avatar-column-width);
   text-align: center;
@@ -50,6 +50,12 @@
   max-height: 25vh;
   border-radius: 4px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+.chat-message__content :first-child {
+  margin-top: 0;
+}
+.chat-message__content :last-child {
+  margin-bottom: 0;
 }
 
 .chat-message--user {
@@ -83,11 +89,6 @@
   border-bottom: 1px solid hsla(40, 40%, 10%, 0.3);
   border-radius: 8px;
   /*mix-blend-mode: soft-light;*/
-}
-
-.chat-message ~ .chat-message--function {
-  /* make functions look related to the last message (sender) */
-  padding-top: 0;
 }
 
 /*
@@ -221,22 +222,9 @@
  */
 #chat-messages-fade {
   position: absolute;
-  bottom: 0;
+  bottom: var(--chat-input-margin);
   left: 0;
   right: 0;
-  /*OPTION 1: fade full width */
-  height: calc(var(--chat-input-margin) + var(--chat-input-height) + var(--chat-input-margin));
-  background-image: linear-gradient(
-    0deg,
-    #313133 var(--chat-input-margin),
-    #313133ee calc(var(--chat-input-margin) + 1px),
-    #313133aa calc(var(--chat-input-margin) + var(--chat-input-height)),
-    #31313366 calc(var(--chat-input-margin) + var(--chat-input-height) + 4px),
-    #31313300 100% /*#313233dd,*/ /*#313233aa 100%*/
-  );
-  /* OPTION 1 END */
-  /* OPTION 2: only fade under the input*/
-  bottom: var(--chat-input-margin);
   width: calc(100% - var(--chat-input-margin) * 2);
   max-width: 800px;
   height: var(--chat-input-height);
@@ -246,7 +234,6 @@
     #313133ee,
     #313133aa 100% /*#313233dd,*/ /*#313233aa 100%*/
   );
-  /* OPTION 2 END */
   background-size: 100%;
   background-position: bottom center;
   background-repeat: no-repeat;

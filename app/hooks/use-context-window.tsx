@@ -9,36 +9,36 @@ import { socket } from "../socket.io-client";
 
 const log = debug("gpp:app:hooks:use-context-window");
 
-const subs = [];
-const subscribe = (cb: ServerToClientEvents["contextWindow"]) => {
-  subs.push(cb);
+const subscriptions = [];
+const subscribe = (cb: ServerToClientEvents["contextWindowUpdate"]) => {
+  subscriptions.push(cb);
   return () => {
-    const index = subs.indexOf(cb);
+    const index = subscriptions.indexOf(cb);
     if (index > -1) {
-      subs.splice(index, 1);
+      subscriptions.splice(index, 1);
     }
   };
 };
 
-const emit: ServerToClientEvents["contextWindow"] = (data) => {
+const emit: ServerToClientEvents["contextWindowUpdate"] = (data) => {
   log("handleContextWindowUpdate", data);
-  subs.forEach((cb) => cb(data));
+  subscriptions.forEach((cb) => cb(data));
   toast("Context window updated", {
     icon: <FontAwesomeIcon icon={faExpand} />,
   });
 };
 
-socket.on("contextWindow", emit);
+socket.on("contextWindowUpdate", emit);
 
 export const useContextWindow = (): [
-  contextWindow: DataForEvent<"contextWindow">,
+  contextWindow: DataForEvent<"contextWindowUpdate">,
 ] => {
   const [contextWindow, setContextWindow] = React.useState<
-    DataForEvent<"contextWindow">
+    DataForEvent<"contextWindowUpdate">
   >({ messages: [], tokens: null });
 
   React.useEffect(() => {
-    return subscribe((data: DataForEvent<"contextWindow">) => {
+    return subscribe((data: DataForEvent<"contextWindowUpdate">) => {
       log("handleContextWindow", data);
       setContextWindow(data);
     });

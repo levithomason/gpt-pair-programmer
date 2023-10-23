@@ -1,7 +1,7 @@
 import * as React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExpand, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faExpand, faGear, faClose } from "@fortawesome/free-solid-svg-icons";
 
 import "./app.css";
 
@@ -28,7 +28,7 @@ export const App = () => {
     tokens: number;
   }>();
   const [showRight, setShowRight] = React.useState<boolean>(false);
-  const [showLeft, setShowLeft] = React.useState<boolean>(true);
+  const [showLeft, setShowLeft] = React.useState<boolean>(false);
   const [computedSettings] = useSettings();
   const [contextWindow] = useContextWindow();
 
@@ -122,11 +122,22 @@ export const App = () => {
         toastOptions={{ className: "toast", duration: 3500 }}
         reverseOrder
       />
+
       {showLeft && (
         <div id="left">
-          {contextWindow.messages.length > 0 && (
+          <div className="left__header">
+            <SelectModel />
+            <button
+              className="button--icon button--transparent"
+              style={{ position: "absolute", top: 10, right: 8, zIndex: 1 }}
+              onClick={() => setShowLeft(false)}
+            >
+              <FontAwesomeIcon icon={faClose} />
+            </button>
+          </div>
+          {contextWindow.messages.length > 0 ? (
             <div>
-              <div style={{ padding: 4, background: "rgba(0, 0, 0, 0.25)" }}>
+              <div className="left__header">
                 <FontAwesomeIcon icon={faExpand} />
                 &nbsp;Context Window ({contextWindow.tokens} tokens)
               </div>
@@ -134,51 +145,62 @@ export const App = () => {
                 <ChatMessage key={i} message={msg} />
               ))}
             </div>
-          )}
-          {systemPrompt?.prompt?.length > 0 && (
+          ) : systemPrompt ? (
             <div>
-              <div style={{ padding: 4, background: "rgba(0, 0, 0, 0.25)" }}>
+              <div className="left__header">
                 <FontAwesomeIcon icon={faGear} />
                 &nbsp;System Message ({systemPrompt.tokens} tokens)
               </div>
               <div style={{ padding: 8 }}>{systemPrompt.prompt}</div>
             </div>
-          )}
+          ) : null}
         </div>
       )}
+
       <div id="main">
         <div id="header">
           <div className="header__item">
-            <Logo hideText={showLeft} />
+            <Logo />
+            {!showLeft && (
+              <button
+                className="button--transparent"
+                onClick={() => setShowLeft(!showLeft)}
+              >
+                Debug
+              </button>
+            )}
           </div>
           <div className="header__item">
             <IndexProject />
             <SelectProject />
-            <SelectModel />
           </div>
           <div className="header__item">
-            <button
-              className="button--transparent"
-              onClick={() => setShowLeft(!showLeft)}
-            >
-              Debug
-            </button>
             <button className="button--transparent" onClick={resetChat}>
               New Chat
             </button>
-            <button
-              onClick={() => setShowRight(!showRight)}
-              className="button--transparent"
-            >
-              Tools
-            </button>
+            {!showRight && (
+              <button
+                onClick={() => setShowRight(!showRight)}
+                className="button--transparent"
+              >
+                Tools
+              </button>
+            )}
           </div>
         </div>
         <Chat />
       </div>
+
       {showRight && (
         <div id="right">
           <Tools />
+          <button
+            className="button--icon button--transparent"
+            style={{ position: "absolute", top: 10, right: 16, zIndex: 1 }}
+            onClick={() => setShowRight(false)}
+          >
+            <FontAwesomeIcon icon={faClose} />
+          </button>
         </div>
       )}
       <img id="background" src={background} alt="Background" />

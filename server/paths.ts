@@ -35,7 +35,3 @@ export const SETTINGS_PATH = path.join(SERVER_ROOT, "settings.json");
 export const USER_HOME = process.env.HOME;
 export const WORKING_FOLDER_NAME = ".pair-programmer";
 export const WORKING_DIRECTORY = path.resolve(USER_HOME, WORKING_FOLDER_NAME);
-
-export const LANGCHAIN_INDEX_DIRNAME = "langchain-index";
-export const FAISS_DIRNAME = "faiss";
-export const FAISS_FILENAME = "faiss.index";

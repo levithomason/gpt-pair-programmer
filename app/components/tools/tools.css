@@ -1,8 +1,5 @@
 #tools {
-  position: relative;
   overflow-y: auto;
-  max-height: 100%;
-  min-width: 48px;
 
   --tool-padding-x: 8px;
   --tool-padding-y: 8px;
@@ -43,6 +40,7 @@
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 .tool__name {
+  font-size: 14px;
   font-weight: bold;
   font-family: var(--font-family-mono);
   padding-right: var(--tool-controls-width);

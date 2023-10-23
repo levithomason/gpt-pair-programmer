@@ -9,9 +9,7 @@
     "server": "nodemon -w package.json -w tsconfig.json -w server --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
     "server:start": "DEBUG=\"gpp:*\" node --no-warnings=ExperimentalWarning --loader ts-node/esm server/index.ts",
     "server:build": "tsc --project tsconfig.json",
-    "fix-deps": "node scripts/fix-deps.js",
-    "langchain": "nodemon -w server/ai/llms/index.ts --exec \"DEBUG=\\\"gpp:*\\\" node --no-warnings=ExperimentalWarning --loader ts-node/esm server/ai/llms/index.ts\"",
-    "langchain-index": "nodemon -w server/ai/langchain-index/index.ts --exec \"DEBUG=\\\"gpp:*\\\" node --no-warnings=ExperimentalWarning --loader ts-node/esm server/ai/langchain-index/index.ts\""
+    "fix-deps": "node scripts/fix-deps.js"
   },
   "keywords": [],
   "author": "me@levithomason.com",
@@ -65,7 +63,6 @@
     "highlight.js": "^11.8.0",
     "html-to-text": "^9.0.5",
     "js-tiktoken": "^1.0.7",
-    "langchain": "^0.0.160",
     "mermaid": "^10.5.0",
     "micromark": "^4.0.0",
     "micromark-extension-gfm": "^3.0.0",

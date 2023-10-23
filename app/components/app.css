@@ -51,25 +51,35 @@
   display: flex;
   gap: 16px;
   flex: 0 0 auto;
+  width: 25%;
+  min-width: 240px;
   max-width: 300px;
   overflow-y: auto;
 }
 
 #left {
-  --chat-message-padding: 4px;
+  --chat-message-padding: 8px 4px;
+  --chat-avatar-size: 14px;
   --chat-avatar-column-width: 24px;
   --chat-avatar-content-gap: 4px;
 
+  position: relative;
   flex: 0 0 auto;
   width: 25%;
-  min-width: 320px;
-  max-width: 600px;
+  min-width: 240px;
+  max-width: 480px;
   overflow-y: auto;
   overflow-x: auto;
   white-space: pre-wrap;
   font-size: 12px;
   line-height: 1.5;
   font-family: var(--font-family-mono);
+}
+.left__header {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 #background {

@@ -166,6 +166,8 @@ chatRoutes.post("/chat", async (req, res) => {
 
     // insert system message at the start of every context stack
     contextMessages.unshift({ role: "system", content: systemMessage });
+
+    // TODO: only push context messages if needed. Let LLM decide what context it needs.
     contextMessages.push({
       role: "function",
       name: "memoriesFromAssistant",
@@ -181,7 +183,7 @@ chatRoutes.post("/chat", async (req, res) => {
 
     const io = getSocketIO();
 
-    io.emit("contextWindow", {
+    io.emit("contextWindowUpdate", {
       messages: contextMessages,
       tokens: totalContextTokens,
     });
@@ -196,11 +198,11 @@ chatRoutes.post("/chat", async (req, res) => {
       io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
     };
 
-    // Function call args stream in, build them up
-    let func = "";
-    let args = "";
-
     try {
+      // Function call args stream in, build them up
+      let func = "";
+      let args = "";
+
       const stream = await openai.chat.completions.create({
         model: model.name,
         messages: contextMessages,

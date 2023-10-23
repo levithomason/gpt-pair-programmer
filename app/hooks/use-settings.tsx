@@ -40,15 +40,19 @@ const updateSettings = async (partial: Partial<Settings>) => {
   });
 };
 
+let cachedSettings: SettingsComputed | undefined;
+
 export const useSettings = (): [
   settings: SettingsComputed | undefined,
   (partial: Partial<Settings>) => void,
 ] => {
-  const [settings, setSettings] = React.useState<SettingsComputed>();
+  const [settings, setSettings] =
+    React.useState<SettingsComputed>(cachedSettings);
 
   React.useEffect(() => {
     return subscribe((data) => {
       log("handleSettings", data);
+      cachedSettings = data;
       setSettings(data);
     });
   }, []);
