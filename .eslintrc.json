@@ -23,6 +23,7 @@
     "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports" }],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": "off",
+    "no-async-promise-executor": "off",
     "no-control-regex": "off",
     "global-require": "error"
   }
