@@ -40,6 +40,12 @@ export class ProjectFile extends Model<
   @Column({ type: DataTypes.INTEGER })
   chunks: number;
 
+  @Column({ type: DataTypes.INTEGER })
+  indexStart: number;
+
+  @Column({ type: DataTypes.INTEGER })
+  indexEnd: number;
+
   @Column({
     type: (DataTypes as ExtendedDataTypes).VECTOR(embeddings.dimension),
   })

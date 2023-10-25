@@ -50,7 +50,7 @@ export const toolRoutes = (openApiJson: OpenAPISpec) => {
           if (error instanceof ToolError) {
             res.status(400).json({ error: error.message });
           } else {
-            res.status(500).json({ error: (error as Error).toString() });
+            res.status(500).json({ error: error.toString() });
           }
         }
       });

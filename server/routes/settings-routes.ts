@@ -46,7 +46,7 @@ settingsRoutes
     } catch (error) {
       log("error", error);
       res.status(500).send({
-        message: `Failed to save settings: ${error.message}`,
+        message: `Failed to save settings: ${error.toString()}`,
       });
     }
   });

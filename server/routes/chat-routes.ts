@@ -69,7 +69,7 @@ chatRoutes.post("/chat", async (req, res) => {
     const chunkEmbedding = await embeddings.encode(chunk);
     similarFiles = await ProjectFile.findAll({
       order: [db.literal(`embedding <-> '[${chunkEmbedding}]'`)],
-      limit: 3,
+      limit: 5,
     });
   }
 
@@ -168,11 +168,13 @@ chatRoutes.post("/chat", async (req, res) => {
     contextMessages.unshift({ role: "system", content: systemMessage });
 
     // TODO: only push context messages if needed. Let LLM decide what context it needs.
+    const lastMessage = contextMessages.pop();
     contextMessages.push({
       role: "function",
       name: "memoriesFromAssistant",
       content: similarFilesPrompt,
     });
+    contextMessages.push(lastMessage);
 
     log(
       `/chat ${contextMessages.length} messages ${messagesTokens} tokens`,

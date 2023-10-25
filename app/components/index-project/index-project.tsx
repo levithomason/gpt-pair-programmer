@@ -1,4 +1,5 @@
 import * as React from "react";
+import toast from "react-hot-toast";
 
 import { makeDebug } from "../../utils";
 
@@ -13,6 +14,10 @@ export const IndexProject = () => {
     try {
       await fetch(`http://localhost:5004/vector-store/index-project`, {
         method: "POST",
+      }).then(async (response) => {
+        if (!response.ok) {
+          toast.error(`Failed to index.\n\n${await response.text()}`);
+        }
       });
     } catch (error) {
       log("error", error);

@@ -235,8 +235,5 @@ export const promptSystemDefault = async () => {
 
 # TOOLS
 All tools are executed on the user's computer, with the user's permission levels.
-
-## TOOLS: browser state
-${await promptToolBrowser()}
 `.trim();
 };

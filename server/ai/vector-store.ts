@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import debug from "debug";
 import { globby } from "globby";
 
@@ -6,9 +7,9 @@ import { absProjectPath, settings } from "../settings.js";
 import { getGlobalGitignoreGlobs } from "../tools/project/utils.js";
 import { embeddings } from "./embeddings.js";
 import { splitWords } from "./text-splitters.js";
-import path from "path";
 import { ProjectFile } from "../models/project-file.js";
 import { getSocketIO } from "../socket.io-server.js";
+import { getDB } from "../database/index.js";
 
 const log = debug("gpp:server:ai:vector-store");
 
@@ -39,6 +40,7 @@ export const filesToIndex = async (): Promise<string[]> => {
       gitignore: true,
       ignore: [
         "**/.git/**",
+        "**/.yarn/**" /* yarn 3+ unignores some .yarn files */,
         "**/yarn.lock/**",
         "**/node_modules/**",
         ...globalGitignoreGlobs,
@@ -69,6 +71,9 @@ export const indexProject = async () => {
       totalChunks++;
       const embedding = await embeddings.encode(chunk);
 
+      const indexStart = (chunkNumber - 1) * maxLength;
+      const indexEnd = indexStart + chunk.length;
+
       await ProjectFile.upsert({
         id: `${settings.projectName}:${file}:${chunkNumber}`,
         project: settings.projectName,
@@ -77,6 +82,8 @@ export const indexProject = async () => {
         content: chunk,
         chunk: chunkNumber,
         chunks: chunks.length,
+        indexStart: indexStart,
+        indexEnd: indexEnd,
         embedding: embedding,
       });
 

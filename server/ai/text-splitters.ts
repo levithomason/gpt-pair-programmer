@@ -1,5 +1,6 @@
 type Splitter = (str: string, maxLength: number) => string[];
 
+// TODO: add overlap option for all splitters
 /**
  * Makes a function that splits a string into chunks which are no longer than `maxLength`.
  */

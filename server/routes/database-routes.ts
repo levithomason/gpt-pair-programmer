@@ -12,6 +12,6 @@ databaseRoutes.get("/db/reset", async (req, res) => {
     await resetDB(db);
     res.status(200).send("OK");
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send(error.toString());
   }
 });
