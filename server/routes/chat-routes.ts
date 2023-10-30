@@ -43,7 +43,11 @@ chatRoutes.post("/chat/new", async (req, res) => {
 });
 
 chatRoutes.get("/chat/messages", async (req, res) => {
-  const messages = await ChatMessage.findAll();
+  const messages = await ChatMessage.findAll({
+    where: {
+      project: settings.projectName,
+    },
+  });
 
   res.send(messages);
 });
@@ -53,6 +57,7 @@ chatRoutes.post("/chat", async (req, res) => {
   const userMessage = ChatMessage.build({
     role: "user",
     content: req.body.message,
+    project: settings.projectName,
   });
   log(userMessage.toJSON());
 
@@ -105,6 +110,9 @@ chatRoutes.post("/chat", async (req, res) => {
 
     // get enough messages to fill the context budget
     const dbMessages = await ChatMessage.findAll({
+      where: {
+        project: settings.projectName,
+      },
       order: [["createdAt", "ASC"]],
       limit: 10,
     });

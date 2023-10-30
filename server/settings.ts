@@ -115,17 +115,17 @@ export const getComputedSettings = (): SettingsComputed => ({
 //
 export const saveSettings = (partial: Partial<Settings>): SettingsComputed => {
   log("saveSettings", partial);
+  const io = getSocketIO();
 
   if (partial.projectName !== settings.projectName) {
     setupProjectWorkingDirectory();
+    io.emit("projectChanged", { project: partial.projectName });
   }
 
   Object.assign(settings, partial);
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
 
   const computedSettings = getComputedSettings();
-
-  const io = getSocketIO();
   io.emit("settingsComputed", computedSettings);
 
   return computedSettings;

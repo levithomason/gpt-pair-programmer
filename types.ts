@@ -301,6 +301,8 @@ export interface ServerToClientEvents {
   /** Tell clients when settings update */
   settingsComputed: (data: SettingsComputed) => void;
 
+  projectChanged: (data: { project: string }) => void;
+
   indexingProgress: (data: {
     filename: string;
     file: number;

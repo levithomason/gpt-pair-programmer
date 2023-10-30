@@ -42,6 +42,9 @@ export class ChatMessage extends Model<
     io.emit("chatMessageCreate", { message: json });
   }
 
+  @Column({ type: DataTypes.STRING })
+  project: string;
+
   @Column({ type: DataTypes.INTEGER })
   tokens: number;
 
