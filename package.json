@@ -1,7 +1,7 @@
 {
   "name": "gpt-pair-programmer",
   "version": "1.0.0",
-  "description": "Pair Program with OpenAI locally or with ChatGPT.",
+  "description": "Pair-program locally on your computer with local LLMs or as a ChatGPT plugin.",
   "type": "module",
   "scripts": {
     "app": "nodemon -w package.json -w tsconfig.json -w tsconfig.app.json -w webpack.config.ts --exec \"yarn app:start\"",

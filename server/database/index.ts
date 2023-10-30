@@ -5,11 +5,12 @@ import { BaseError } from "../utils/index.js";
 import * as models from "../models/index.js";
 
 const log = debug("gpp:server:database:index");
-const sequelLogger = debug("gpp:sequelize");
 
 let _sequelize: Sequelize;
 export const getDB = async (): Promise<Sequelize> => {
   if (_sequelize) return _sequelize;
+
+  // const sequelLogger = debug("gpp:sequelize");
 
   _sequelize = new Sequelize({
     dialect: "postgres",
@@ -18,7 +19,10 @@ export const getDB = async (): Promise<Sequelize> => {
     host: "localhost",
     port: 5432,
     database: "postgres",
-    logging: (sql, timing) => sequelLogger(sql),
+    logging: (sql, timing) => {
+      // ...silent for now
+      // sequelLogger(sql)
+    },
     models: [...Object.values(models)],
   });
 

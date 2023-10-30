@@ -15,7 +15,6 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     outputCost: 0.002,
     supportsFunctionCalling: false,
     supportsFineTuning: true,
-    supportsChat: true,
   },
   "gpt-3.5-turbo-16k": {
     name: "gpt-3.5-turbo-16k",
@@ -26,7 +25,6 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     outputCost: 0.004,
     supportsFunctionCalling: true,
     supportsFineTuning: false,
-    supportsChat: true,
   },
   "gpt-4": {
     name: "gpt-4",
@@ -37,7 +35,6 @@ export const OPENAI_MODELS: Record<SupportedOpenAIModel, OpenAIModel> = {
     outputCost: 0.06,
     supportsFunctionCalling: false,
     supportsFineTuning: false,
-    supportsChat: true,
   },
   "gpt-4-32k": {
     name: "gpt-4-32k",

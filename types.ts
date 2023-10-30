@@ -77,7 +77,6 @@ export type OpenAIModel = {
   outputCost: number;
   supportsFunctionCalling: boolean;
   supportsFineTuning: boolean;
-  supportsChat: boolean;
 };
 
 export type OpenAIEmbeddingModel = {
@@ -222,9 +221,9 @@ export type OllamaGenerateParameters = {
   /** Advanced: The full prompt or prompt template (overrides what is defined in the Modelfile) */
   template?: string;
   /** Advanced: The context parameter returned from a previous request to /generate, this can be used to keep a short conversational memory */
-  context?: string[];
+  context?: number[];
   /** Advanced: If false the response will be returned as a single response object, rather than a stream of objects */
-  stream?: string;
+  stream?: boolean;
 };
 
 export type OllamaResponseStreamingInProgress = {

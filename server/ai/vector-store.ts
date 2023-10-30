@@ -26,7 +26,7 @@ export const filesToIndex = async (): Promise<string[]> => {
   // TODO: meaningful/dedicated splitters for each file extension?
   return globby(
     [
-      /* code     */ "**/*.{js,jsx,ts,tsx,html,ejs,css,scss,less}",
+      /* code     */ "**/*.{js,jsx,ts,tsx}",
       /* html     */ "**/*.{html,ejs}",
       /* css      */ "**/*.{css,scss,less}",
       /* markdown */ "**/*.{md,markdown,mdx}",

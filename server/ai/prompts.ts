@@ -211,6 +211,8 @@ export const promptToolTodos = async () => {
 
 export const promptSystemDefault = async () => {
   return `
+You are the assistant.
+
 # THE ASSISTANT
 - Is pair programming with the user on their computer.
 - Calls tools to help the user reach their goals.

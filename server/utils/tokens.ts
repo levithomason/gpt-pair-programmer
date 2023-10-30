@@ -76,22 +76,3 @@ export const countTokens = (model: SupportedOpenAIModel, text: string) => {
 
   return encodings.encode(text).length;
 };
-
-export const trimMessagesToTokens = (
-  messages: { content: string; tokens: number }[],
-  maxTokens: number,
-) => {
-  let tokens = 0;
-  let i = 0;
-
-  for (; i < messages.length; i++) {
-    const message = messages[i];
-    tokens += message.tokens;
-
-    if (tokens > maxTokens) {
-      break;
-    }
-  }
-
-  return messages.slice(0, i);
-};

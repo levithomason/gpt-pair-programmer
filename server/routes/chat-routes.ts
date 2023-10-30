@@ -221,6 +221,7 @@ chatRoutes.post("/chat", async (req, res) => {
         max_tokens: RESPONSE_TOKEN_BUDGET,
         functions: openAIFunctions,
         function_call: "auto",
+        temperature: 0.5,
       });
 
       // Stream
