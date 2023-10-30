@@ -7,8 +7,8 @@ import pgvector from "pgvector/sequelize";
 import type { ExtendedDataTypes } from "../../types.js";
 import { embeddings } from "../ai/embeddings.js";
 
-export type VectorDocumentAttributes = InferAttributes<ProjectFile>;
-export type VectorDocumentCreationAttributes =
+export type ProjectFileAttributes = InferAttributes<ProjectFile>;
+export type ProjectFileCreationAttributes =
   InferCreationAttributes<ProjectFile>;
 
 const log = debug("gpp:server:models:vector-document");
@@ -16,8 +16,8 @@ pgvector.registerType(Sequelize);
 
 @Table({})
 export class ProjectFile extends Model<
-  VectorDocumentAttributes,
-  VectorDocumentCreationAttributes
+  ProjectFileAttributes,
+  ProjectFileCreationAttributes
 > {
   @Column({ type: DataTypes.STRING, primaryKey: true })
   id: string;

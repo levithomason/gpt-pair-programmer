@@ -1,11 +1,14 @@
-type Splitter = (str: string, maxLength: number) => string[];
+type Splitter = (args: {
+  str: string;
+  maxLength: number;
+  overlap?: number;
+}) => string[];
 
-// TODO: add overlap option for all splitters
 /**
  * Makes a function that splits a string into chunks which are no longer than `maxLength`.
  */
 const makeSplitter = (split: (str: string) => string[]): Splitter => {
-  return (str: string, maxLength: number, overlap = 100) => {
+  return ({ str, maxLength, overlap = 0 }) => {
     const chunks: string[] = [];
 
     const strings = split(str);

@@ -20,10 +20,10 @@ export const formatConsoleMessage = (msg: ConsoleMessage): string => {
 let browser: Browser;
 export const getBrowser = async () => {
   if (!browser) {
-    // TODO: every server retart is causing orphaned chromium processes
-    browser = await puppeteer.launch({
-      headless: "new",
-    });
+    // TODO: every server restart is causing orphaned chromium processes
+    // browser = await puppeteer.launch({
+    //   headless: "new",
+    // });
   }
   return browser;
 };

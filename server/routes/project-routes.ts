@@ -1,6 +1,12 @@
 import express from "express";
 import debug from "debug";
-import { filesToIndex, indexProject, searchStore } from "../ai/vector-store.js";
+import {
+  filesToIndex,
+  indexProjectFiles,
+  mergeProjectFileResults,
+  projectFileToSearchResultString,
+  searchProjectFiles,
+} from "../ai/vector-store.js";
 
 const log = debug("gpp:server:routes:project");
 
@@ -19,7 +25,7 @@ projectRoutes
 
   .post("/vector-store/index-project", async (_, res) => {
     try {
-      await indexProject();
+      await indexProjectFiles();
       res.status(200).send("OK");
     } catch (error) {
       log(error.message, error.stack);
@@ -28,11 +34,41 @@ projectRoutes
   })
 
   .get("/vector-store/search", async (req, res) => {
-    const { query } = req.query as { query: string };
+    const {
+      query,
+      limit = 1,
+      expand = 0,
+      merge = false,
+      print = false,
+    } = req.query as {
+      query: string;
+      limit: string;
+      expand: string;
+      merge: string;
+      print: string;
+    };
 
     try {
-      const results = await searchStore({ query });
-      res.status(200).send(results);
+      let results: any = await searchProjectFiles({
+        query,
+        limit: +limit,
+        expand: +expand,
+      });
+
+      if (merge) results = mergeProjectFileResults(results);
+
+      if (print) {
+        const resultStrings = results
+          .map(projectFileToSearchResultString)
+          .join("\n\n");
+        results = `<pre><code>${resultStrings}</code></pre>`;
+      }
+
+      if (print) {
+        res.status(200).send(results);
+      } else {
+        res.status(200).json(results);
+      }
     } catch (error) {
       log(error);
       res.status(500).send(error);

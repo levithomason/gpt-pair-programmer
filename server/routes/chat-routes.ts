@@ -10,14 +10,15 @@ import {
 } from "../utils/index.js";
 import { tools } from "../tools/index.js";
 
-import { ChatMessage, ProjectFile } from "../models/index.js";
+import { ChatMessage } from "../models/index.js";
 import { openai } from "../ai/utils.js";
 import { promptSystemDefault } from "../ai/prompts.js";
 import { getSocketIO } from "../socket.io-server.js";
-import { getComputedSettings } from "../settings.js";
-import { getDB } from "../database/index.js";
-import { splitWords } from "../ai/text-splitters.js";
-import { embeddings } from "../ai/embeddings.js";
+import { getComputedSettings, settings } from "../settings.js";
+import {
+  projectFileToSearchResultString,
+  searchProjectFiles,
+} from "../ai/vector-store.js";
 
 const log = debug("gpp:server:routes:chat");
 
@@ -66,26 +67,13 @@ chatRoutes.post("/chat", async (req, res) => {
 
   // Find files similar to the message
   // Split the message up and look for files which are similar
-  const db = await getDB();
-  const chunks = splitWords(userMessage.content, embeddings.sequenceLength);
-
-  let similarFiles: ProjectFile[] = [];
-  for (const chunk of chunks) {
-    const chunkEmbedding = await embeddings.encode(chunk);
-    similarFiles = await ProjectFile.findAll({
-      order: [db.literal(`embedding <-> '[${chunkEmbedding}]'`)],
-      limit: 5,
-    });
-  }
+  const similarFiles = await searchProjectFiles({
+    query: userMessage.content,
+  });
 
   const similarFilesPrompt =
     "The codebase says:\n\n" +
-    similarFiles
-      .map((f) => {
-        const { path, content } = f.toJSON();
-        return `${path}:\n"""\n${content}\n"""\n`;
-      })
-      .join("\n");
+    similarFiles.map(projectFileToSearchResultString).join("\n\n");
 
   log("similarFilesPrompt", similarFilesPrompt);
 
