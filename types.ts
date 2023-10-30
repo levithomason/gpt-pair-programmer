@@ -6,6 +6,13 @@ import type {
   ChatMessageCreationAttributes,
 } from "./server/models/index.js";
 
+// =============================================================================
+// Chat Messages
+// =============================================================================
+export type ChatMessagesByID = {
+  [id in ChatMessageCreationAttributes["id"]]: ChatMessageCreationAttributes;
+};
+
 // TODO: Replace with `openapi-types`
 // =============================================================================
 // OpenAPI

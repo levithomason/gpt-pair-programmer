@@ -6,17 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./chat.css";
 
-import type { ChatMessageCreationAttributes } from "../../../server/models";
-
 import { makeDebug } from "../../utils";
-import { socket } from "../../socket.io-client";
 
 import { ChatMessage } from "./chat-message";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
-import { useIsFirstRender } from "../../hooks/use-first-render";
-import type { ServerToClientEvents } from "../../../types";
 import { useSettings } from "../../hooks/use-settings";
 import toast from "react-hot-toast";
+import { useChatMessagesByID } from "../../hooks/use-chat-messages";
 
 const log = makeDebug("components:chat");
 
@@ -29,42 +25,13 @@ const suggestedMessages = [
   // markdownKitchenSink,
 ];
 
-type MessagesByID = {
-  [id in ChatMessageCreationAttributes["id"]]: ChatMessageCreationAttributes;
-};
-
 export const Chat = () => {
-  const [messagesByID, setMessagesByID] = React.useState<MessagesByID>({});
+  const { chatMessagesByID, streaming } = useChatMessagesByID();
   const [userMessage, setUserMessage] = React.useState<string>("");
-  const [streaming, setStreaming] = React.useState<boolean>(false);
   const [settings] = useSettings();
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
-
-  const isFirstRender = useIsFirstRender();
-
-  // Get initial messages
-  if (isFirstRender) {
-    fetch(`http://localhost:5004/chat/messages`)
-      .then((res) => res.json())
-      .then((res) => {
-        log("initial chat messages", res);
-        setMessagesByID(
-          res.reduce(
-            (acc: MessagesByID, message: ChatMessageCreationAttributes) => {
-              acc[message.id] = message;
-              return acc;
-            },
-            {} as MessagesByID,
-          ),
-        );
-      })
-      .catch((err) => {
-        log(err);
-        toast.error(`Get messages failed`);
-      });
-  }
 
   const scrollToBottom = () => {
     log("scrollToBottom", chatMessagesRef.current);
@@ -88,43 +55,6 @@ export const Chat = () => {
 
     lastScrollHeight.current = chatMessagesRef.current?.scrollHeight;
   });
-
-  React.useEffect(() => {
-    // Listen for new messages
-    const handleChatMessageCreate: ServerToClientEvents["chatMessageCreate"] =
-      ({ message }) => {
-        setMessagesByID((prev) => {
-          return { ...prev, [message.id]: message };
-        });
-      };
-
-    const handleChatMessageStream: ServerToClientEvents["chatMessageStream"] =
-      ({ chunk, id }) => {
-        setStreaming(true);
-        setMessagesByID((prev) => {
-          const updatedMessage = {
-            ...prev[id],
-            content: prev[id].content + chunk,
-          };
-          return { ...prev, [id]: updatedMessage };
-        });
-      };
-
-    const handleChatMessageStreamEnd: ServerToClientEvents["chatMessageStreamEnd"] =
-      () => {
-        setStreaming(false);
-      };
-
-    socket.on("chatMessageCreate", handleChatMessageCreate);
-    socket.on("chatMessageStream", handleChatMessageStream);
-    socket.on("chatMessageStreamEnd", handleChatMessageStreamEnd);
-
-    return () => {
-      socket.off("chatMessageCreate", handleChatMessageCreate);
-      socket.off("chatMessageStream", handleChatMessageStream);
-      socket.off("chatMessageStreamEnd", handleChatMessageStreamEnd);
-    };
-  }, []);
 
   const handleSend = React.useCallback(
     async (e: FormEvent) => {
@@ -153,7 +83,7 @@ export const Chat = () => {
     [userMessage, streaming],
   );
 
-  log("render", { messagesByID, userMessage, streaming });
+  log("render", { chatMessagesByID, userMessage, streaming });
 
   let runningInputTokens = 0;
   let runningOutputTokens = 0;
@@ -161,7 +91,7 @@ export const Chat = () => {
   return (
     <div id="chat">
       <div ref={chatMessagesRef} className="chat-messages">
-        {Object.values(messagesByID).map((msg, index) => {
+        {Object.values(chatMessagesByID).map((msg, index) => {
           if (msg.role === "assistant") runningOutputTokens += msg.tokens;
           else runningInputTokens += msg.tokens;
 
