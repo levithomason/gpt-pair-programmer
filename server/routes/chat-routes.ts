@@ -61,18 +61,18 @@ chatRoutes.post("/chat", async (req, res) => {
   // create user message
   await userMessage.save();
 
-  // // Find files similar to the message
-  // // Split the message up and look for files which are similar
-  // const similarFiles = await searchProjectFiles({
-  //   query: userMessage.content,
-  //   limit: 3,
-  // });
-  //
-  // const similarFilesPrompt =
-  //   "The codebase says:\n\n" +
-  //   similarFiles.map(projectFileToSearchResultString).join("\n\n");
-  //
-  // log("similarFilesPrompt", similarFilesPrompt);
+  // Find files similar to the message
+  // Split the message up and look for files which are similar
+  const similarFiles = await searchProjectFiles({
+    query: userMessage.content,
+    limit: 3,
+  });
+
+  const similarFilesPrompt =
+    "The codebase says:\n\n" +
+    similarFiles.map(projectFileToSearchResultString).join("\n\n");
+
+  log("similarFilesPrompt", similarFilesPrompt);
 
   const callModel = async () => {
     const { model } = getComputedSettings();
@@ -83,12 +83,14 @@ chatRoutes.post("/chat", async (req, res) => {
     const RESPONSE_TOKEN_BUDGET = Math.floor(model.contextSize * 0.4);
     const CONTEXT_TOKEN_BUDGET = model.contextSize - RESPONSE_TOKEN_BUDGET;
     const FUNCTIONS_TOKENS = await llm.countTokens(chatGPTFunctionsPrompt);
-    // const SIMILAR_FILES_TOKENS = await llm.countTokens(similarFilesPrompt);
+    const SIMILAR_FILES_TOKENS = await llm.countTokens(similarFilesPrompt);
     const SYSTEM_MESSAGE_TOKENS = await llm.countTokens(systemMessage);
 
     let MESSAGE_TOKENS_BUDGET =
-      CONTEXT_TOKEN_BUDGET - FUNCTIONS_TOKENS - SYSTEM_MESSAGE_TOKENS;
-    // - SIMILAR_FILES_TOKENS;
+      CONTEXT_TOKEN_BUDGET -
+      FUNCTIONS_TOKENS -
+      SYSTEM_MESSAGE_TOKENS -
+      SIMILAR_FILES_TOKENS;
 
     // get enough messages to fill the context budget
     const dbMessages = await ChatMessage.findAll({
@@ -129,8 +131,10 @@ chatRoutes.post("/chat", async (req, res) => {
     }
 
     const totalContextTokens =
-      messagesTokens + FUNCTIONS_TOKENS + SYSTEM_MESSAGE_TOKENS;
-    // + SIMILAR_FILES_TOKENS;
+      messagesTokens +
+      FUNCTIONS_TOKENS +
+      SYSTEM_MESSAGE_TOKENS +
+      SIMILAR_FILES_TOKENS;
 
     log("/chat tokens", {
       budgetTotal: llm.contextSize,
@@ -147,11 +151,11 @@ chatRoutes.post("/chat", async (req, res) => {
 
     // TODO: only push context messages if needed. Let LLM decide what context it needs.
     const lastMessage = contextMessages.pop();
-    // contextMessages.push({
-    //   role: "function",
-    //   name: "memoriesFromAssistant",
-    //   content: similarFilesPrompt,
-    // });
+    contextMessages.push({
+      role: "function",
+      name: "memoriesFromAssistant",
+      content: similarFilesPrompt,
+    });
     contextMessages.push(lastMessage);
 
     log(

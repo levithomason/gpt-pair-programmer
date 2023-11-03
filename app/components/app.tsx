@@ -45,42 +45,62 @@ export const App = () => {
         id = toast(
           (t) => {
             const filenameStyle: React.CSSProperties = {
-              marginTop: 8,
-              width: 200,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              display: "flex",
+              flexWrap: "nowrap",
               color: "rgba(255, 255, 255, 0.5)",
-              whiteSpace: "nowrap",
               fontSize: 12,
             };
             const filesProgressBarStyle: React.CSSProperties = {
               width: (file / files) * 100 + "%",
               height: 4,
+              marginTop: 4,
+              marginBottom: 16,
               backgroundColor: "rgba(0, 255, 0, 0.5)",
               borderRadius: 999,
             };
 
             const filepathParts = filename.split("/");
             const basename = filepathParts[filepathParts.length - 1];
+            const dirname = filename.replace(basename, "");
 
             return (
-              <div style={{ width: "200px" }}>
-                <div>
-                  Indexing {file}/{files}
+              <div style={{ width: 240 }}>
+                <div style={{ display: "flex" }}>
+                  <span>Indexing {Math.floor((file / files) * 100)}%</span>
+                  <span style={{ opacity: 0.5, marginLeft: "auto" }}>
+                    {file}/{files}
+                  </span>
                 </div>
                 <div style={{ background: "rgba(255, 255, 255, 0.2)" }}>
                   <div style={filesProgressBarStyle}></div>
                 </div>
-                <div style={filenameStyle}>{basename}</div>
                 <div
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(50, 3px)",
-                    gap: 1,
-                    alignItems: "center",
-                    justifyItems: "center",
+                    flex: 1,
+                    fontSize: 14,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    color: "rgba(255, 255, 255, 0.8)",
                   }}
                 >
+                  {dirname}
+                </div>
+                <div style={filenameStyle}>
+                  <span
+                    style={{
+                      flex: 1,
+                      display: "inline-block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {basename}
+                  </span>
+                  <span style={{ flex: "0 0 auto" }}>[{chunk}]</span>
+                </div>
+                <div style={{ lineHeight: 0 }}>
                   {Array.from({ length: chunks }).map((_, i) => {
                     const isDone = i <= chunk;
                     return (
@@ -90,8 +110,9 @@ export const App = () => {
                           display: "inline-block",
                           width: 3,
                           height: 3,
+                          margin: "0 1px 1px 0",
                           background: isDone
-                            ? "rgba(0, 255, 0, 0.5)"
+                            ? "rgba(0, 192, 0, 0.7)"
                             : "rgba(0, 0, 0, 0.3)",
                         }}
                       />
