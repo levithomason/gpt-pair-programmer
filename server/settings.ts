@@ -2,11 +2,16 @@ import fs from "fs";
 import path from "path";
 import debug from "debug";
 
-import type { Settings, SettingsComputed } from "../types.js";
-import { OPENAI_MODELS } from "../shared/config.js";
+import type { Settings, SettingsComputed } from "../shared/types.js";
 import { SETTINGS_PATH, WORKING_DIRECTORY } from "./paths.js";
 import { getSocketIO } from "./socket.io-server.js";
 import { BaseError } from "./utils/index.js";
+import {
+  getLLMDefinition,
+  isLLMImplemented,
+  llmDefinitions,
+  llmNames,
+} from "./ai/llms/index.js";
 
 const log = debug("gpp:server:settings");
 
@@ -37,18 +42,18 @@ export const relProjectPath = (toPath: string = "") => {
   return toPath.replace(absProjectPath() + path.sep, "");
 };
 
-export const activeModel = () => {
+export const activeLLMDefinition = () => {
   if (!settings.modelName) return null;
 
-  if (!OPENAI_MODELS[settings.modelName]) {
-    const modelNames = Object.keys(OPENAI_MODELS).join(", ");
+  if (!isLLMImplemented(settings.modelName)) {
+    const names = llmNames.join(", ");
 
     throw new BaseError(
-      `settings.modelName "${settings.modelName}" is not supported: ${modelNames}`,
+      `settings.modelName "${settings.modelName}" is not supported: ${names}`,
     );
   }
 
-  return OPENAI_MODELS[settings.modelName];
+  return getLLMDefinition(settings.modelName);
 };
 
 export const listProjects = () => {
@@ -106,8 +111,8 @@ export const getComputedSettings = (): SettingsComputed => ({
   projectPath: absProjectPath(),
   projects: listProjects(),
   projectWorkingDirectory: projectWorkingDirectory(),
-  model: activeModel(),
-  models: Object.values(OPENAI_MODELS),
+  model: activeLLMDefinition(),
+  models: llmDefinitions,
 });
 
 //

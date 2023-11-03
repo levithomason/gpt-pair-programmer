@@ -92,29 +92,6 @@
 }
 
 /*
- * Chat Divider
- */
-.chat-message:not(:last-child):not(:hover) .chat-message-details {
-  display: none;
-}
-.chat-message-details {
-  position: absolute;
-  display: flex;
-  text-align: center;
-  gap: 8px;
-  top: 100%;
-  right: 0;
-  line-height: 1;
-  font-size: 12px;
-  color: #ddd;
-  opacity: 0.3;
-}
-.chat-message-details .chat-message-details__item {
-  display: flex;
-  gap: 2px;
-}
-
-/*
  * Chat Footer
  */
 

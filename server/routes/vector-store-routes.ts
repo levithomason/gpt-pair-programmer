@@ -10,9 +10,9 @@ import {
 
 const log = debug("gpp:server:routes:project");
 
-export const projectRoutes = express.Router();
+export const vectorStoreRoutes = express.Router();
 
-projectRoutes
+vectorStoreRoutes
   .get("/vector-store/files", async (req, res) => {
     try {
       const files = await filesToIndex();

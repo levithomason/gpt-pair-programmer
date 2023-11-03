@@ -2,16 +2,13 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js"
 import express from "express";
 import debug from "debug";
 import {
+  BaseError,
   chatGPTFunctionsPrompt,
-  countTokens,
-  openAIFunctions,
   ToolError,
-  trimStringToTokens,
 } from "../utils/index.js";
 import { tools } from "../tools/index.js";
 
 import { ChatMessage } from "../models/index.js";
-import { openai } from "../ai/utils.js";
 import { promptSystemDefault } from "../ai/prompts.js";
 import { getSocketIO } from "../socket.io-server.js";
 import { getComputedSettings, settings } from "../settings.js";
@@ -19,10 +16,11 @@ import {
   projectFileToSearchResultString,
   searchProjectFiles,
 } from "../ai/vector-store.js";
+import { getLLM } from "../ai/llms/index.js";
 
 const log = debug("gpp:server:routes:chat");
 
-const ChatMessageToOpenAIMessage = (
+const dbChatMessageToAPIMessage = (
   chatMessage: ChatMessage,
 ): ChatCompletionMessageParam => {
   const { role, content, name, functionCall } = chatMessage;
@@ -45,9 +43,7 @@ chatRoutes.post("/chat/new", async (req, res) => {
 
 chatRoutes.get("/chat/messages", async (req, res) => {
   const messages = await ChatMessage.findAll({
-    where: {
-      project: settings.projectName,
-    },
+    where: { project: settings.projectName },
   });
 
   res.send(messages);
@@ -65,42 +61,38 @@ chatRoutes.post("/chat", async (req, res) => {
   // create user message
   await userMessage.save();
 
-  // Find files similar to the message
-  // Split the message up and look for files which are similar
-  const similarFiles = await searchProjectFiles({
-    query: userMessage.content,
-  });
-
-  const similarFilesPrompt =
-    "The codebase says:\n\n" +
-    similarFiles.map(projectFileToSearchResultString).join("\n\n");
-
-  log("similarFilesPrompt", similarFilesPrompt);
+  // // Find files similar to the message
+  // // Split the message up and look for files which are similar
+  // const similarFiles = await searchProjectFiles({
+  //   query: userMessage.content,
+  //   limit: 3,
+  // });
+  //
+  // const similarFilesPrompt =
+  //   "The codebase says:\n\n" +
+  //   similarFiles.map(projectFileToSearchResultString).join("\n\n");
+  //
+  // log("similarFilesPrompt", similarFilesPrompt);
 
   const callModel = async () => {
     const { model } = getComputedSettings();
+    const llm = getLLM(model.name);
 
     const systemMessage = await promptSystemDefault();
 
     const RESPONSE_TOKEN_BUDGET = Math.floor(model.contextSize * 0.4);
     const CONTEXT_TOKEN_BUDGET = model.contextSize - RESPONSE_TOKEN_BUDGET;
-    const FUNCTIONS_TOKENS = countTokens(model.name, chatGPTFunctionsPrompt);
-    const SIMILAR_FILES_TOKENS = countTokens(model.name, similarFilesPrompt);
-    const SYSTEM_MESSAGE_TOKENS = countTokens(model.name, systemMessage);
-
-    const LARGEST_SINGLE_MESSAGE_TOKENS = 0.25 * CONTEXT_TOKEN_BUDGET;
+    const FUNCTIONS_TOKENS = await llm.countTokens(chatGPTFunctionsPrompt);
+    // const SIMILAR_FILES_TOKENS = await llm.countTokens(similarFilesPrompt);
+    const SYSTEM_MESSAGE_TOKENS = await llm.countTokens(systemMessage);
 
     let MESSAGE_TOKENS_BUDGET =
-      CONTEXT_TOKEN_BUDGET -
-      FUNCTIONS_TOKENS -
-      SYSTEM_MESSAGE_TOKENS -
-      SIMILAR_FILES_TOKENS;
+      CONTEXT_TOKEN_BUDGET - FUNCTIONS_TOKENS - SYSTEM_MESSAGE_TOKENS;
+    // - SIMILAR_FILES_TOKENS;
 
     // get enough messages to fill the context budget
     const dbMessages = await ChatMessage.findAll({
-      where: {
-        project: settings.projectName,
-      },
+      where: { project: settings.projectName },
       order: [["createdAt", "ASC"]],
       limit: 10,
     });
@@ -114,16 +106,7 @@ chatRoutes.post("/chat", async (req, res) => {
     while (dbMessages.length > 0 && MESSAGE_TOKENS_BUDGET > 0) {
       const message = dbMessages.pop();
 
-      const messageTokens = countTokens(model.name, message.content);
-
-      // No single message should be allowed to dominate the entire context.
-      if (messageTokens > LARGEST_SINGLE_MESSAGE_TOKENS) {
-        trimStringToTokens(
-          model.name,
-          LARGEST_SINGLE_MESSAGE_TOKENS,
-          message.content,
-        );
-      }
+      const messageTokens = await llm.countTokens(message.content);
 
       if (messageTokens > MESSAGE_TOKENS_BUDGET) {
         const TOKEN_BUFFER = 100;
@@ -134,24 +117,23 @@ chatRoutes.post("/chat", async (req, res) => {
 
         // keep as much of the tail of the last message that will fit in context
         message.content = message.content.slice(maxContentLength);
-        messagesTokens += countTokens(model.name, message.content);
+        messagesTokens += await llm.countTokens(message.content);
         MESSAGE_TOKENS_BUDGET = 0;
         break;
       }
 
       MESSAGE_TOKENS_BUDGET -= messageTokens;
       messagesTokens += messageTokens;
-      contextMessages.unshift(ChatMessageToOpenAIMessage(message));
+      // TODO: this transform is only valid for OpenAI. Move this to the LLM.
+      contextMessages.unshift(dbChatMessageToAPIMessage(message));
     }
 
     const totalContextTokens =
-      messagesTokens +
-      FUNCTIONS_TOKENS +
-      SYSTEM_MESSAGE_TOKENS +
-      SIMILAR_FILES_TOKENS;
+      messagesTokens + FUNCTIONS_TOKENS + SYSTEM_MESSAGE_TOKENS;
+    // + SIMILAR_FILES_TOKENS;
 
     log("/chat tokens", {
-      budgetTotal: model.contextSize,
+      budgetTotal: llm.contextSize,
       budgetContext: CONTEXT_TOKEN_BUDGET,
       budgetResponse: RESPONSE_TOKEN_BUDGET,
       contextFunctions: FUNCTIONS_TOKENS,
@@ -165,11 +147,11 @@ chatRoutes.post("/chat", async (req, res) => {
 
     // TODO: only push context messages if needed. Let LLM decide what context it needs.
     const lastMessage = contextMessages.pop();
-    contextMessages.push({
-      role: "function",
-      name: "memoriesFromAssistant",
-      content: similarFilesPrompt,
-    });
+    // contextMessages.push({
+    //   role: "function",
+    //   name: "memoriesFromAssistant",
+    //   content: similarFilesPrompt,
+    // });
     contextMessages.push(lastMessage);
 
     log(
@@ -189,73 +171,33 @@ chatRoutes.post("/chat", async (req, res) => {
     const replyMessage = await ChatMessage.create({
       role: "assistant",
       content: "",
+      project: settings.projectName,
     });
 
-    const write = (message: string) => {
-      replyMessage.content += message;
-      io.emit("chatMessageStream", { id: replyMessage.id, chunk: message });
+    const write = (chunk: string) => {
+      replyMessage.update({ content: replyMessage.content + chunk });
+      io.emit("chatMessageStream", { id: replyMessage.id, chunk: chunk });
     };
 
-    try {
-      // Function call args stream in, build them up
-      let func = "";
-      let args = "";
+    await llm.chat(
+      { messages: contextMessages, maxTokens: RESPONSE_TOKEN_BUDGET },
+      async (error, data) => {
+        if (error) {
+          write(`\n\n${error.toString()}`);
+          return;
+        }
+        const { content, done, functionCall } = data;
 
-      const stream = await openai.chat.completions.create({
-        model: model.name,
-        messages: contextMessages,
-        stream: true,
-        n: 1,
-        max_tokens: RESPONSE_TOKEN_BUDGET,
-        functions: openAIFunctions,
-        function_call: "auto",
-        temperature: 0.5,
-      });
+        write(content);
 
-      // Stream
-      for await (const part of stream) {
-        const { delta, finish_reason } = part.choices[0];
-        if (delta?.function_call?.name) {
-          func = delta?.function_call?.name;
+        if (functionCall) {
+          const { name: func, arguments: args } = functionCall;
+
           replyMessage.functionCall = replyMessage.functionCall || {
             name: func,
-            arguments: "",
+            arguments: args,
           };
-        }
-
-        if (delta?.function_call?.arguments) {
-          args += delta?.function_call?.arguments;
-          replyMessage.functionCall = replyMessage.functionCall || {
-            name: "",
-            arguments: replyMessage.functionCall.arguments + args,
-          };
-        }
-
-        //
-        // Stop
-        //
-        if (finish_reason === "stop") {
-          log("finish_reason", finish_reason);
-          break;
-        }
-
-        //
-        // Content Length
-        //
-        else if (finish_reason === "length") {
-          log("finish_reason", finish_reason);
-          write("\n\n(...truncated due to max length)");
-          break;
-        }
-
-        //
-        // Call function
-        //
-        else if (finish_reason === "function_call") {
-          log("finish_reason", finish_reason);
-
-          const printArgs = args === "{}" ? "" : args;
-          write(` \`\n${func}(${printArgs})\` `);
+          await replyMessage.save();
 
           // parse args
           let argsJSon = {};
@@ -263,43 +205,38 @@ chatRoutes.post("/chat", async (req, res) => {
             argsJSon = JSON.parse(args);
           } catch (error) {
             log("JSON.parse(args) Fail", error);
-            write(`\n\nError parsing JSON: "${error}"\n\n`);
+            write(`\n\nFailed to JSON.parse function args: "${error}"`);
             // TODO: break? retry? The function will not get the correct args.
           }
 
-          await replyMessage.save();
-
-          // call function
-          await callFunction(func, argsJSon);
+          try {
+            await callFunction(func, argsJSon);
+          } catch (err) {
+            if (err instanceof ToolError) {
+              res.send(`\n\nToolError: "${err}"`);
+            } else {
+              res.send(`\n\nError: "${err}"`);
+            }
+          }
 
           // let model reply to function
           return await callModel();
         }
 
-        //
-        // Content Filter
-        //
-        else if (finish_reason === "content_filter") {
-          log("finish_reason", finish_reason);
-          write(`\n\nContent Filter: "${delta.content}"\n\n`);
-        }
+        if (done) {
+          log(
+            "/chat replyMessage done",
+            contextMessages.map((m) => {
+              return `${m.role}: ${m.content.slice(0, 20)}...`;
+            }),
+          );
+          await replyMessage.save();
+          io.emit("chatMessageStreamEnd");
 
-        //
-        // Send text
-        //
-        else if (finish_reason === null) {
-          if (typeof delta.content === "string") {
-            write(delta.content);
-          }
-        } else {
-          write(`\n\nUnknown finish_reason "${finish_reason}"\n\n`);
-          log("unknown finish_reason", finish_reason);
+          if (!functionCall) res.end();
         }
-      }
-    } catch (error) {
-      write(`\n\n500 Error: ${error.toString()}`);
-      throw error;
-    }
+      },
+    );
 
     log(
       "/chat end",
@@ -312,35 +249,27 @@ chatRoutes.post("/chat", async (req, res) => {
     res.end();
   };
 
-  const callFunction = async (func: string, args: object) => {
+  const callFunction = (func: string, args: object) => {
     const tool = tools[func];
 
     const argsString = JSON.stringify(args, null, 2);
     log(`/chat callFunction ${func}(${argsString})`);
 
     if (!tool) {
-      res.write(`\n\nTool "${func}" not found.\n\n`);
+      throw new BaseError(`Tool "${func}" not found.`);
     }
 
     // TODO: before doing this action, what memories or thoughts are triggered from considering?
     //       const remembered = mind.memory.query(<context>)
     //       have a thinking process to evaluate this decision and adjust if needed
-    try {
-      return await tool(args);
-    } catch (err) {
-      if (err instanceof ToolError) {
-        res.write('\n\nToolError: "' + err + '"' + "\n\n");
-      } else {
-        res.write('\n\nError: "' + err + '"' + "\n\n");
-      }
-    }
+    return tool(args);
   };
 
   try {
     await callModel();
   } catch (error) {
     log("callModel error", error);
-    res.status(500).write(`\n\n500 Error: ${error.toString()}`);
+    res.status(500).send(`\n\n500 Error: ${error.toString()}`);
     res.end();
   }
 });

@@ -1,13 +1,13 @@
-import type { ToolFunction } from "../../../types.js";
+import type { ToolFunction } from "../../../shared/types.js";
 import { ToolError } from "../../utils/index.js";
-import { promptSystemDefault } from "../../ai/prompts.js";
+import { promptProjectOverview } from "../../ai/prompts.js";
 
 type Return = string;
 
 const getProjectInfo: ToolFunction<void, Return> = async () => {
   let info: string;
   try {
-    info = await promptSystemDefault();
+    info = await promptProjectOverview();
   } catch (error) {
     throw new ToolError({
       tool: "getProjectInfo",

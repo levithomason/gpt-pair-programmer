@@ -4,9 +4,10 @@ import { fileURLToPath } from "url";
 
 import debug from "debug";
 
-import type { ToolFunction } from "../../types.js";
+import type { ToolFunction } from "../../shared/types.js";
 import { BaseError } from "../utils/index.js";
 import { ChatMessage } from "../models/index.js";
+import { settings } from "../settings.js";
 
 const log = debug("gpp:tools:index");
 
@@ -53,6 +54,7 @@ fs.readdirSync(__dirname).forEach((entry) => {
           role: "function",
           content: JSON.stringify(result),
           name: basename,
+          project: settings.projectName,
         });
 
         return result;
@@ -63,6 +65,7 @@ fs.readdirSync(__dirname).forEach((entry) => {
           role: "function",
           content: error.toString(),
           name: basename,
+          project: settings.projectName,
         });
 
         throw error;

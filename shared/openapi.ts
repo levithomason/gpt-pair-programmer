@@ -1,4 +1,4 @@
-import type { OpenAPIMethod, OpenAPISpec, ToolAttributes } from "../types.js";
+import type { OpenAPIMethod, OpenAPISpec, ToolAttributes } from "./types.js";
 
 export const forEachOpenAPIPath = (
   openApiJson: OpenAPISpec,

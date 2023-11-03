@@ -4,9 +4,9 @@
   "description": "Pair-program locally on your computer with local LLMs or as a ChatGPT plugin.",
   "type": "module",
   "scripts": {
-    "app": "nodemon -w package.json -w tsconfig.json -w tsconfig.app.json -w webpack.config.ts --exec \"yarn app:start\"",
+    "app": "nodemon -w package.json -w tsconfig.json -w tsconfig.app.json -w webpack.config.ts -w shared --exec \"yarn app:start\"",
     "app:start": "DEBUG=\"gpp:*\" node --no-warnings=ExperimentalWarning --loader ts-node/esm ./node_modules/.bin/webpack serve",
-    "server": "nodemon -w package.json -w tsconfig.json -w server --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
+    "server": "nodemon -w package.json -w tsconfig.json -w server -w shared --ext \"ts,yaml\" --ignore \"*.generated.*\" --exec \"yarn server:start\"",
     "server:start": "DEBUG=\"gpp:*\" node --no-warnings=ExperimentalWarning --loader ts-node/esm server/index.ts",
     "server:build": "tsc --project tsconfig.json",
     "fix-deps": "node scripts/fix-deps.js"
@@ -67,6 +67,7 @@
     "micromark": "^4.0.0",
     "micromark-extension-gfm": "^3.0.0",
     "morgan": "^1.10.0",
+    "neo4j-driver": "^5.14.0",
     "nodemon": "^3.0.1",
     "openai": "^4.11.1",
     "pg": "^8.11.3",

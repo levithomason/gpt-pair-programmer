@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../../types.js";
+import type { ToolFunction } from "../../../shared/types.js";
 import { generateTree } from "../../utils/index.js";
 import { absProjectPath } from "../../settings.js";
 

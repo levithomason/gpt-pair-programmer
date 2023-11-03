@@ -9,9 +9,6 @@ import "highlight.js/styles/atom-one-dark-reasonable.css";
 import { makeDebug } from "../../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowRightFromBracket,
-  faArrowRightToBracket,
-  faEquals,
   faGear,
   faMicrochip,
   faRobot,
@@ -66,39 +63,6 @@ export const ChatMessage = (props: ChatMessageProps) => {
     return () => clearTimeout(timeout);
   }, [message.content]);
 
-  const details =
-    runningInputTokens && runningOutputTokens && cost ? (
-      <div className="chat-message-details">
-        {runningInputTokens && (
-          <span className="chat-message-details__item">
-            {runningInputTokens}
-            <FontAwesomeIcon icon={faArrowRightToBracket} />
-          </span>
-        )}
-        {runningOutputTokens && (
-          <span className="chat-message-details__item">
-            {runningOutputTokens}
-            <FontAwesomeIcon icon={faArrowRightFromBracket} />
-          </span>
-        )}
-        {runningInputTokens & runningOutputTokens && (
-          <span className="chat-message-details__item">
-            <FontAwesomeIcon icon={faEquals} />
-            {runningInputTokens + runningOutputTokens}
-          </span>
-        )}
-        {cost && (
-          <span className="chat-message-details__item">
-            {cost.toLocaleString("en-US", {
-              style: "currency",
-              maximumFractionDigits: 3,
-              currency: "USD",
-            })}
-          </span>
-        )}
-      </div>
-    ) : null;
-
   if (message.role === "user") {
     return (
       <div className={`chat-message chat-message--user`}>
@@ -107,7 +71,6 @@ export const ChatMessage = (props: ChatMessageProps) => {
             <FontAwesomeIcon icon={faUser} className="fa-regular" />
           </span>
           <span className="chat-message__content">{message.content}</span>
-          {details}
         </div>
       </div>
     );
@@ -131,7 +94,6 @@ export const ChatMessage = (props: ChatMessageProps) => {
             className="chat-message__content"
             dangerouslySetInnerHTML={{ __html: content }}
           />
-          {details}
         </div>
       </div>
     );
@@ -168,7 +130,6 @@ export const ChatMessage = (props: ChatMessageProps) => {
             <strong>{message.name}</strong>
             {` => ${parsedContent}`}
           </span>
-          {details}
         </div>
       </div>
     );
@@ -185,7 +146,6 @@ export const ChatMessage = (props: ChatMessageProps) => {
             <strong>System &mdash; </strong>
             {message.content}
           </span>
-          {details}
         </div>
       </div>
     );

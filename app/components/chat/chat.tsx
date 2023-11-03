@@ -71,9 +71,7 @@ export const Chat = () => {
         await fetch(`http://localhost:5004/chat`, {
           method: "POST",
           body: JSON.stringify({ message: userMessage }),
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
       } catch (err) {
         log(err);
@@ -85,35 +83,11 @@ export const Chat = () => {
 
   log("render", { chatMessagesByID, userMessage, streaming });
 
-  let runningInputTokens = 0;
-  let runningOutputTokens = 0;
-
   return (
     <div id="chat">
       <div ref={chatMessagesRef} className="chat-messages">
         {Object.values(chatMessagesByID).map((msg, index) => {
-          if (msg.role === "assistant") runningOutputTokens += msg.tokens;
-          else runningInputTokens += msg.tokens;
-
-          const model = settings?.model;
-
-          return (
-            <ChatMessage
-              key={msg.id}
-              message={msg}
-              runningInputTokens={runningInputTokens}
-              runningOutputTokens={runningOutputTokens}
-              cost={
-                model
-                  ? // TODO: this is a poor-man's cost calculation
-                    //  cost is only incurred on LLM call
-                    //  it should be calc'd on call and stored in the DB if we're going to do this
-                    (runningInputTokens / 1000) * model.inputCost +
-                    (runningOutputTokens / 1000) * model.outputCost
-                  : 0
-              }
-            />
-          );
+          return <ChatMessage key={msg.id} message={msg} />;
         })}
       </div>
       <div className="suggested-messages">

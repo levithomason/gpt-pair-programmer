@@ -1,13 +1,13 @@
 import express from "express";
 import debug from "debug";
 
-import type { Settings } from "../../types.js";
+import type { Settings } from "../../shared/types.js";
 import {
   getComputedSettings,
   listProjects,
   saveSettings,
 } from "../settings.js";
-import { OPENAI_MODELS } from "../../shared/config.js";
+import { isLLMImplemented, llmNames } from "../ai/llms/index.js";
 
 const log = debug("gpp:server:routes:settings");
 
@@ -23,20 +23,22 @@ settingsRoutes
 
     const { modelName, projectName } = req.body as Settings;
 
-    if (modelName && !OPENAI_MODELS[modelName]) {
-      const models = Object.keys(OPENAI_MODELS).join(", ");
-      return res.status(400).send({
-        message: `Model "${modelName}" does not exist: ${models}`,
-      });
+    if (modelName) {
+      if (!isLLMImplemented(modelName)) {
+        const llmList = llmNames.map((p) => `  - ${p}`).join("\n");
+        return res.status(400).send({
+          message: `LLM "${modelName}" is not implemented. Try:\n\n${llmList}`,
+        });
+      }
     }
 
     if (projectName) {
       const projects = listProjects();
       if (!projects.includes(projectName)) {
+        const projectList = projects.map((p) => `  - ${p}`).join("\n");
+
         return res.status(400).send({
-          message: `Project "${projectName}" does not exist: ${projects.join(
-            ", ",
-          )}`,
+          message: `Project "${projectName}" does not exist:\n\n${projectList}`,
         });
       }
     }

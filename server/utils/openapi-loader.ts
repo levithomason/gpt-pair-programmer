@@ -3,7 +3,7 @@ import path from "path";
 import * as yaml from "js-yaml";
 import debug from "debug";
 
-import type { OpenAPISpec } from "../../types.js";
+import type { OpenAPISpec } from "../../shared/types.js";
 import { BASE_SPEC_PATH, relRootPath, TOOLS_ROOT } from "../paths.js";
 import { BaseError } from "../utils/index.js";
 

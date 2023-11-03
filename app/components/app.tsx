@@ -1,7 +1,7 @@
 import * as React from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExpand, faGear, faClose } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faExpand, faGear } from "@fortawesome/free-solid-svg-icons";
 
 import "./app.css";
 
@@ -35,45 +35,76 @@ export const App = () => {
   React.useEffect(() => {
     let id: string;
 
-    socket.on("indexingProgress", ({ file, files, filename, chunk }) => {
-      id = toast(
-        (t) => {
-          const filenameStyle: React.CSSProperties = {
-            width: 200,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: "rgba(255, 255, 255, 0.5)",
-            whiteSpace: "nowrap",
-            fontSize: 14,
-          };
-          const progressBarStyle: React.CSSProperties = {
-            width: (file / files) * 100 + "%",
-            height: 4,
-            backgroundColor: "rgba(0, 255, 0, 0.5)",
-            borderRadius: 999,
-          };
-
-          const filepathParts = filename.split("/");
-          // const root = filepathParts[0];
-          const basename = filepathParts[filepathParts.length - 1];
-
-          return (
-            <div>
-              <div>
-                Indexing {file}/{files}
-              </div>
-              <div style={{ background: "rgba(255, 255, 255, 0.2)" }}>
-                <div style={progressBarStyle}></div>
-              </div>
-              <div style={filenameStyle}>
-                [{chunk}] {basename}
-              </div>
-            </div>
-          );
-        },
-        { id },
-      );
+    socket.on("error", (error) => {
+      toast.error(error.toString());
     });
+
+    socket.on(
+      "indexingProgress",
+      ({ file, files, filename, chunk, chunks }) => {
+        id = toast(
+          (t) => {
+            const filenameStyle: React.CSSProperties = {
+              marginTop: 8,
+              width: 200,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: "rgba(255, 255, 255, 0.5)",
+              whiteSpace: "nowrap",
+              fontSize: 12,
+            };
+            const filesProgressBarStyle: React.CSSProperties = {
+              width: (file / files) * 100 + "%",
+              height: 4,
+              backgroundColor: "rgba(0, 255, 0, 0.5)",
+              borderRadius: 999,
+            };
+
+            const filepathParts = filename.split("/");
+            const basename = filepathParts[filepathParts.length - 1];
+
+            return (
+              <div style={{ width: "200px" }}>
+                <div>
+                  Indexing {file}/{files}
+                </div>
+                <div style={{ background: "rgba(255, 255, 255, 0.2)" }}>
+                  <div style={filesProgressBarStyle}></div>
+                </div>
+                <div style={filenameStyle}>{basename}</div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(50, 3px)",
+                    gap: 1,
+                    alignItems: "center",
+                    justifyItems: "center",
+                  }}
+                >
+                  {Array.from({ length: chunks }).map((_, i) => {
+                    const isDone = i <= chunk;
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          display: "inline-block",
+                          width: 3,
+                          height: 3,
+                          background: isDone
+                            ? "rgba(0, 255, 0, 0.5)"
+                            : "rgba(0, 0, 0, 0.3)",
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          },
+          { id },
+        );
+      },
+    );
 
     socket.on("indexingComplete", ({ files, chunks }) => {
       toast.success(`${files} files indexed (${chunks} chunks)`, { id });
@@ -118,7 +149,7 @@ export const App = () => {
     <div id="app">
       <Toaster
         position="top-right"
-        containerStyle={{ top: 64, bottom: 128 }}
+        containerStyle={{ top: 96, bottom: 128 }}
         toastOptions={{ className: "toast", duration: 3500 }}
         reverseOrder
       />

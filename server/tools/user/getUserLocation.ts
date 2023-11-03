@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../../types.js";
+import type { ToolFunction } from "../../../shared/types.js";
 import { getLocation } from "./utils.js";
 
 type Args = {

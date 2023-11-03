@@ -7,7 +7,7 @@ import type {
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
-} from "../types.js";
+} from "../shared/types.js";
 import { getComputedSettings } from "./settings.js";
 
 const log = debug("gpp:server:socket.io-server");

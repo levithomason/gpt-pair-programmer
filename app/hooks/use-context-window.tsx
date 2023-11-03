@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand } from "@fortawesome/free-solid-svg-icons";
 
-import type { DataForEvent, ServerToClientEvents } from "../../types";
+import type { DataForEvent, ServerToClientEvents } from "../../shared/types.js";
 import { socket } from "../socket.io-client";
 
 const log = debug("gpp:app:hooks:use-context-window");

@@ -118,6 +118,7 @@ export const indexProjectFiles = async () => {
         file: filesIndexed,
         files: files.length,
         chunk: chunkNumber,
+        chunks: chunks.length,
       });
     }
 

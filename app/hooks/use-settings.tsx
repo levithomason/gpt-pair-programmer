@@ -8,7 +8,7 @@ import type {
   ServerToClientEvents,
   Settings,
   SettingsComputed,
-} from "../../types";
+} from "../../shared/types.js";
 import { socket } from "../socket.io-client";
 
 const log = debug("gpp:app:hooks:use-settings");
@@ -37,7 +37,21 @@ const updateSettings = async (partial: Partial<Settings>) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(partial),
-  });
+  })
+    .then(async (res) => {
+      const json = await res.json();
+
+      if (!res.ok) {
+        // TODO: normalize and type API error messages
+        toast.error(json.message);
+      }
+
+      return json;
+    })
+    .catch((err) => {
+      log("updateSettings error", err);
+      toast.error("Failed to update settings. " + err.message);
+    });
 };
 
 let cachedSettings: SettingsComputed | undefined;

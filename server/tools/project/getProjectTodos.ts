@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../../types.js";
+import type { ToolFunction } from "../../../shared/types.js";
 import { absProjectPath, relProjectPath } from "../../settings.js";
 
 import * as fs from "fs";

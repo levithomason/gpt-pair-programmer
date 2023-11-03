@@ -2,7 +2,7 @@ import debug from "debug";
 import * as fs from "fs";
 import path from "path";
 
-import type { OpenAIFunction } from "../../types.js";
+import type { OpenAIFunction } from "../../shared/types.js";
 import { forEachOpenAPIPath } from "../../shared/openapi.js";
 import { openApiJson } from "./openapi-loader.js";
 import { SERVER_ROOT } from "../paths.js";
@@ -39,16 +39,20 @@ export const chatGPTFunctionsPrompt = [
         if (propertyKeys.length) {
           const argLines = propertyKeys.map((key) => {
             const { type, description } = func.parameters.properties[key];
-            const required = func.parameters.required?.includes(key) ? "" : "?";
+            const optional = func.parameters.required?.includes(key) ? "" : "?";
 
-            return `    // ${description}\n    ${key}${required}: ${type}`;
+            return `    // ${description.trim()}\n    ${key}${optional}: ${type}`;
           });
 
           typedProperties = "_: {\n" + argLines.join("\n") + "\n  }";
         }
 
         const description = func.description
-          ? `\n  // ${func.description.split("\n").join("\n  // ")}`
+          ? `\n${func.description
+              .trim()
+              .split("\n")
+              .map((l) => "  // " + l.trim())
+              .join("\n")}`
           : "";
 
         return `${description}\n  type ${func.name} = (${typedProperties}) => any;`;

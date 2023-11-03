@@ -18,7 +18,7 @@ import { chatRoutes } from "./routes/chat-routes.js";
 import { promptRoutes } from "./routes/prompt-routes.js";
 import { settingsRoutes } from "./routes/settings-routes.js";
 import { toolRoutes } from "./routes/tool-routes.js";
-import { projectRoutes } from "./routes/project-routes.js";
+import { vectorStoreRoutes } from "./routes/vector-store-routes.js";
 import { databaseRoutes } from "./routes/database-routes.js";
 
 const log = debug("gpp:server:main");
@@ -61,7 +61,7 @@ app.use(returnErrors);
 // ============================================================================
 app.use(chatGptPluginRoutes);
 app.use(chatRoutes);
-app.use(projectRoutes);
+app.use(vectorStoreRoutes);
 app.use(promptRoutes);
 app.use(settingsRoutes);
 app.use(databaseRoutes);

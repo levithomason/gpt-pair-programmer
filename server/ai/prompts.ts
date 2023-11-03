@@ -2,7 +2,7 @@ import path from "path";
 import * as fs from "fs";
 import debug from "debug";
 
-import { generateTree, run } from "../utils/index.js";
+import { chatGPTFunctionsPrompt, generateTree, run } from "../utils/index.js";
 import { absProjectPath, settings } from "../settings.js";
 
 import { getConsole, getPage } from "../tools/browser/utils.js";

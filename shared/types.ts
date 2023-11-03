@@ -4,7 +4,7 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/index.js"
 import type {
   ChatMessage,
   ChatMessageCreationAttributes,
-} from "./server/models/index.js";
+} from "../server/models";
 
 // =============================================================================
 // Chat Messages
@@ -12,6 +12,36 @@ import type {
 export type ChatMessagesByID = {
   [id in ChatMessageCreationAttributes["id"]]: ChatMessageCreationAttributes;
 };
+
+// =============================================================================
+// LLMs
+// =============================================================================
+export type LLMDefinition<TNames = string> = {
+  name: TNames;
+  description: string;
+  contextSize: number;
+  inputCost: number;
+  outputCost: number;
+  supportsFunctionCalling: boolean;
+  supportsFineTuning: boolean;
+};
+
+export type LLMMessage = {
+  role: "system" | "user" | "assistant" | "function";
+  content: string;
+};
+
+export type LLMChatCallback = (
+  error: Error | null,
+  data: {
+    content: string;
+    done: boolean;
+    functionCall?: {
+      name: string;
+      arguments: string;
+    };
+  },
+) => void;
 
 // TODO: Replace with `openapi-types`
 // =============================================================================
@@ -61,26 +91,18 @@ export type OpenAPISchemaProperties = {
 // =============================================================================
 // OpenAI
 // =============================================================================
-export type SupportedOpenAIModel =
+export type SupportedOpenAILLMName =
   | "gpt-3.5-turbo"
   | "gpt-3.5-turbo-16k"
   | "gpt-4"
   | "gpt-4-32k";
 
-export type SupportedOpenAIEmbeddingModel = "text-embedding-ada-002";
+export type SupportedOpenAIEmbeddingLLMName = "text-embedding-ada-002";
 
-export type OpenAIModel = {
-  name: SupportedOpenAIModel;
-  description: string;
-  contextSize: number;
-  inputCost: number;
-  outputCost: number;
-  supportsFunctionCalling: boolean;
-  supportsFineTuning: boolean;
-};
+export type OpenAILLMDefinition = LLMDefinition<SupportedOpenAILLMName>;
 
-export type OpenAIEmbeddingModel = {
-  name: SupportedOpenAIEmbeddingModel;
+export type OpenAIEmbeddingLLM = {
+  name: SupportedOpenAIEmbeddingLLMName;
   description: string;
   contextSize: number;
   inputCost: number;
@@ -97,15 +119,18 @@ export type OpenAIFunction = {
 // =============================================================================
 // Ollama
 // =============================================================================
-export type OllamaModel =
+export type SupportedOllamaLLMName =
   | "codellama:7b"
-  | "llama2:latest"
   | "mistral:7b-instruct"
   | "mistral:latest"
-  | string;
+  | "openhermes2-mistral:latest";
+
+export type OllamaLLMDefinition = LLMDefinition<SupportedOllamaLLMName>;
+
+// below types are specific to the Ollama API
 
 export type OllamaTag = {
-  name: OllamaModel;
+  name: SupportedOllamaLLMName;
   modified_at: string;
   size: number;
 };
@@ -116,13 +141,14 @@ export type OllamaTagsResponse = {
 
 export type OllamaEmbeddingParameters = {
   /** Name of model to generate embeddings from */
-  model: OllamaModel;
+  model: SupportedOllamaLLMName;
   /** Text to generate embeddings for */
   prompt: string;
 };
+
 export type OllamaGenerateParameters = {
   /** (required) the model name */
-  model: OllamaModel;
+  model: SupportedOllamaLLMName;
   /** The prompt to generate a response for */
   prompt: string;
   /** Advanced: Additional model parameters listed in the documentation for the Modelfile such as temperature */
@@ -228,7 +254,7 @@ export type OllamaGenerateParameters = {
 
 export type OllamaResponseStreamingInProgress = {
   /** Model name, example `llama2:7b` */
-  model: OllamaModel;
+  model: SupportedOllamaLLMName;
   /** UTC timestamp of when the request was created */
   created_at: string;
   /** The chunk of the response */
@@ -264,23 +290,32 @@ export type OllamaResponseStreaming =
   | OllamaResponseStreamingDone
   | OllamaResponseStreamingInProgress;
 
-export type OllamaCallback = (data: OllamaResponseStreaming) => void;
+// =============================================================================
+// Settings
+// =============================================================================
+export type SupportedLLMName = SupportedOpenAILLMName | SupportedOllamaLLMName;
+export type SupportedLLMDefinition = OpenAILLMDefinition | OllamaLLMDefinition;
+
+export type Settings = {
+  projectsRoot: string;
+  projectName: string;
+  modelName: SupportedLLMName;
+};
+
+export type SettingsComputed = {
+  settings: Settings;
+  projectPath: string;
+  projects: string[];
+  projectWorkingDirectory: string;
+  model: SupportedLLMDefinition;
+  models: SupportedLLMDefinition[];
+};
 
 // =============================================================================
-// Tool
+// Sequelize
 // =============================================================================
-// TODO: Tools that return extra properties in their return object don't throw a type error
-//       ToolDefinition should be stricter
-export type ToolFunction<ArgObj, Return = void> = (
-  args: ArgObj,
-) => Promise<Return>;
-
-export type ToolAttributes = {
-  operationId: OpenAPIMethodDetails["operationId"];
-  description: OpenAPIMethodDetails["description"];
-  endpoint: OpenAPIPath;
-  method: OpenAPIMethod;
-  schema: OpenAPISchema;
+export type ExtendedDataTypes = typeof OriginalDataTypes & {
+  VECTOR(dimensions: number): any;
 };
 
 // =============================================================================
@@ -297,6 +332,8 @@ export interface ServerToClientEvents {
 
   chatMessageStreamEnd: () => void;
 
+  error: (data: typeof Error) => void;
+
   /** Tell clients when settings update */
   settingsComputed: (data: SettingsComputed) => void;
 
@@ -307,6 +344,7 @@ export interface ServerToClientEvents {
     file: number;
     files: number;
     chunk: number;
+    chunks: number;
   }) => void;
   indexingComplete: (data: { files: number; chunks: number }) => void;
 
@@ -330,27 +368,18 @@ export interface SocketData {
 }
 
 // =============================================================================
-// Settings
+// Tool
 // =============================================================================
-export type Settings = {
-  projectsRoot: string;
-  projectName: string;
-  modelName: SupportedOpenAIModel;
-};
+// TODO: Tools that return extra properties in their return object don't throw a type error
+//       ToolDefinition should be stricter
+export type ToolFunction<ArgObj, Return = void> = (
+  args: ArgObj,
+) => Promise<Return>;
 
-export type SettingsComputed = {
-  settings: Settings;
-  projectPath: string;
-  projects: string[];
-  projectWorkingDirectory: string;
-  model: OpenAIModel;
-  models: OpenAIModel[];
-};
-
-// =============================================================================
-// Sequelize
-// =============================================================================
-
-export type ExtendedDataTypes = typeof OriginalDataTypes & {
-  VECTOR(dimensions: number): any;
+export type ToolAttributes = {
+  operationId: OpenAPIMethodDetails["operationId"];
+  description: OpenAPIMethodDetails["description"];
+  endpoint: OpenAPIPath;
+  method: OpenAPIMethod;
+  schema: OpenAPISchema;
 };

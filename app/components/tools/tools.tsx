@@ -2,7 +2,7 @@ import * as React from "react";
 
 import "./tools.css";
 
-import type { OpenAPISpec, ToolAttributes } from "../../../types";
+import type { OpenAPISpec, ToolAttributes } from "../../../shared/types.js";
 import { makeDebug, queryString } from "../../utils";
 import { useIsFirstRender } from "../../hooks/use-first-render";
 import { forEachOpenAPIPath } from "../../../shared/openapi";

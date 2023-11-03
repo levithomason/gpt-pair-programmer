@@ -2,7 +2,10 @@ import debug from "debug";
 import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 
-import type { ClientToServerEvents, ServerToClientEvents } from "../types";
+import type {
+  ClientToServerEvents,
+  ServerToClientEvents,
+} from "../shared/types.js";
 import toast from "react-hot-toast";
 
 const MAX_RECONNECTION_ATTEMPTS = 10;

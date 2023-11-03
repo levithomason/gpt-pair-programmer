@@ -4,6 +4,10 @@ Freeform notes about the project as they come to mind.
 
 ## First-nails
 
+### Refactor components
+
+Refactor some React components. Example, on Nov 2, 2023 I refactored Rail UI nodes to include their wrapping tree items. This would be a good first-nail to test the system.
+
 ### Document a project
 
 Crawl a project (may this one) and document it.
@@ -205,6 +209,59 @@ graph TB
 On topic/context switch, query memories and feed these to GPT.
 
 Have a flow where GPT saves summarized memories at appropriate times. Documents in a vector store or similar. This could be a tool where GPT decides when and what to remember, or hard-coded into the chat pipeline where each message has an opportunity to be saved. A lightweight/cheap/fast LLM classifier could decide if this should be remembered.
+
+### Self Constructed Context
+
+Allow the model to build its own context, as needed, by asking questions.
+
+CLASSIFY NEXT STEP
+complex: The answer to this message(s) is complex and requires a multistep plan execution.
+small-talk: The appropriate answer is simple and friendly.
+action: The right answer is to take immediate action.
+
+CLASSIFY MODEL
+code: This answer requires writing code.
+text: This answer requires writing text.
+conversation: This answer requires a conversation.
+embedding: This answer requires an embedding.
+
+CLASSIFY CONTEXT ADEQUACY
+Top-of-mind context is YAML format shorthand for a list of concepts and notes about them.
+The model can classify the context as adequate or inadequate to handle the next turn of the chat.
+
+```
+context (top of mind):
+  <concept>:
+    - <note>
+    - ...
+```
+
+Example:
+
+```
+  tools:
+  - defined in server/tools
+  - exported by server/tools/index.ts
+  - created to extend llm abilities
+  - has several planned tools: asd,asdf,asd,f
+  - available on an endpoint serverurl/tools
+  - served to chatgpt plugin at /tools
+```
+
+CLASSIFY CONTEXT POPULATION METHOD
+If additional context is needed, the model can classify the best way to populate it.
+- findFile
+- browserOpen
+
+"searchConcept"
+- searchProjectFiles
+- searchGitHub
+- searchKnowledgeGraph
+
+RESPOND STRICTLY USING THE CONTEXT:
+Based on the above context, reply to:
+
+<stack of messages>
 
 ## Picking up where you left off
 

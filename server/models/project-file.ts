@@ -4,7 +4,7 @@ import { Sequelize, DataTypes } from "sequelize";
 import { Column, Model, Table } from "sequelize-typescript";
 import pgvector from "pgvector/sequelize";
 
-import type { ExtendedDataTypes } from "../../types.js";
+import type { ExtendedDataTypes } from "../../shared/types.js";
 import { embeddings } from "../ai/embeddings.js";
 
 export type ProjectFileAttributes = InferAttributes<ProjectFile>;

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import type { SupportedOpenAIModel } from "../../../types";
+import type { SupportedLLMName } from "../../../shared/types.js";
 import { makeDebug } from "../../utils";
 import { useSettings } from "../../hooks/use-settings";
 
@@ -11,7 +11,7 @@ export const SelectModel = () => {
 
   const handleChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     log("handleChange", event.target.value);
-    const model = event.target.value as SupportedOpenAIModel;
+    const model = event.target.value as SupportedLLMName;
     setSettings({ modelName: model });
   };
 

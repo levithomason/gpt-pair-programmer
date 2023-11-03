@@ -1,4 +1,4 @@
-import type { ToolFunction } from "../../../types.js";
+import type { ToolFunction } from "../../../shared/types.js";
 import { ToolError } from "../../utils/index.js";
 import { clearConsole, readConsole } from "./utils.js";
 
