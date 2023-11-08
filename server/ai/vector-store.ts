@@ -36,7 +36,7 @@ type ProjectFileMerge = Omit<
  */
 export const filesToIndex = async (): Promise<string[]> => {
   const projectRoot = absProjectPath();
-  log(`streamFilesToIndex: in "${projectRoot}"`);
+  log(`filesToIndex: in "${projectRoot}"`);
 
   // Index all files in the project root, except .git and .gitignored
   const globalGitignoreGlobs = await getGlobalGitignoreGlobs();
@@ -84,6 +84,23 @@ export const indexProjectFiles = async () => {
   let totalChunks = 0;
   for await (const file of files) {
     filesIndexed++;
+
+    const existingFile = await ProjectFile.findByPk(
+      `${settings.projectName}:${file}:1`,
+    );
+
+    if (existingFile) {
+      io.emit("indexingProgress", {
+        filename: `skip: ${file}`,
+        file: filesIndexed,
+        files: files.length,
+        chunk: 1,
+        chunks: 1,
+      });
+
+      log(`skipping ${file} because it's already indexed`);
+      continue;
+    }
 
     const content = fs.readFileSync(absProjectPath(file), "utf8");
     const chunks = splitWords({ str: content, maxLength });
@@ -191,7 +208,7 @@ export const mergeProjectFileResults = async (
     resultsByPath[projectFile.path].push(projectFile);
   });
 
-  return Object.entries(resultsByPath).reduce((acc, [path, results]) => {
+  return Object.entries(resultsByPath).reduce((acc, [_, results]) => {
     let minIndexStart = Infinity;
     let maxIndexEnd = -Infinity;
     let minChunk = Infinity;
