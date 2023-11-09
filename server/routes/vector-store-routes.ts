@@ -6,7 +6,7 @@ import {
   mergeProjectFileResults,
   projectFileToSearchResultString,
   searchProjectFiles,
-} from "../ai/vector-store.js";
+} from "../ai/vector-store/project-files.js";
 
 const log = debug("gpp:server:routes:project");
 

@@ -3,14 +3,14 @@ import path from "path";
 import debug from "debug";
 import { globby } from "globby";
 
-import { absProjectPath, settings } from "../settings.js";
-import { getGlobalGitignoreGlobs } from "../tools/project/utils.js";
-import { embeddings } from "./embeddings.js";
-import { splitWords } from "./text-splitters.js";
-import type { ProjectFileAttributes } from "../models/project-file.js";
-import { ProjectFile } from "../models/project-file.js";
-import { getSocketIO } from "../socket.io-server.js";
-import { getDB } from "../database/index.js";
+import { absProjectPath, settings } from "../../settings.js";
+import { getGlobalGitignoreGlobs } from "../../tools/project/utils.js";
+import { embeddings } from "../embeddings.js";
+import { splitWords } from "../text-splitters.js";
+import type { ProjectFileAttributes } from "../../models/project-file.js";
+import { ProjectFile } from "../../models/project-file.js";
+import { getSocketIO } from "../../socket.io-server.js";
+import { getDB } from "../../database/index.js";
 import yaml from "js-yaml";
 
 const log = debug("gpp:server:ai:vector-store");
