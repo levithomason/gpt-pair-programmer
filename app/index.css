@@ -88,6 +88,7 @@ pre {
 /* Base styles for all form elements */
 input,
 select,
+textarea,
 button {
   display: flex;
   height: var(--form-element-height);
@@ -152,9 +153,10 @@ select:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
 /* form control focus */
+button:focus,
 input:focus,
 select:focus,
-button:focus {
+textarea:focus {
   outline: none;
   box-shadow:
     inset 0 0 0 1px #ccc,
@@ -234,7 +236,7 @@ hr {
 }
 
 /* placeholder */
-::-webkit-input-placeholder {
+::placeholder {
   color: rgba(192, 192, 192, 0.7);
   /*mix-blend-mode: difference;*/
   /* text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9); */
