@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 import * as React from "react";
+import TextareaAutosize from "react-textarea-autosize";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { faCircleStop } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,10 +29,10 @@ const suggestedMessages = [
 export const Chat = () => {
   const { chatMessagesByID, streaming } = useChatMessagesByID();
   const [userMessage, setUserMessage] = React.useState<string>("");
-  const [settings] = useSettings();
+  useSettings(); // we want to re-render when settings change
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = () => {
     log("scrollToBottom", chatMessagesRef.current);
@@ -57,7 +58,7 @@ export const Chat = () => {
   });
 
   const handleSend = React.useCallback(
-    async (e: FormEvent) => {
+    (e: FormEvent | React.KeyboardEvent<HTMLTextAreaElement>) => {
       e.preventDefault();
 
       if (streaming || !userMessage.trim()) {
@@ -67,16 +68,14 @@ export const Chat = () => {
 
       setUserMessage("");
 
-      try {
-        await fetch(`http://localhost:5004/chat`, {
-          method: "POST",
-          body: JSON.stringify({ message: userMessage }),
-          headers: { "Content-Type": "application/json" },
-        });
-      } catch (err) {
+      fetch(`http://localhost:5004/chat`, {
+        method: "POST",
+        body: JSON.stringify({ message: userMessage }),
+        headers: { "Content-Type": "application/json" },
+      }).catch((err) => {
         log(err);
         toast.error(`Posting /chat failed`);
-      }
+      });
     },
     [userMessage, streaming],
   );
@@ -86,7 +85,7 @@ export const Chat = () => {
   return (
     <div id="chat">
       <div ref={chatMessagesRef} className="chat-messages">
-        {Object.values(chatMessagesByID).map((msg, index) => {
+        {Object.values(chatMessagesByID).map((msg) => {
           return <ChatMessage key={msg.id} message={msg} />;
         })}
       </div>
@@ -97,7 +96,7 @@ export const Chat = () => {
             <button
               key={msg}
               className="suggested-message"
-              onClick={(e) => {
+              onClick={() => {
                 setUserMessage(msg);
                 setTimeout(() => {
                   const button = document.querySelector(
@@ -114,17 +113,24 @@ export const Chat = () => {
           );
         })}
       </div>
-      <div id="chat-messages-fade"></div>
-      <div className="chat-form-glass"></div>
       <form onSubmit={handleSend} className="chat-form">
-        <input
+        <TextareaAutosize
+          className="chat-form__input"
           ref={inputRef}
-          placeholder={streaming ? "" : "Send a message"}
-          type="text"
+          placeholder="Send a message"
           value={userMessage}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && e.metaKey) {
+              handleSend(e);
+            }
+          }}
           onChange={(e) => setUserMessage(e.target.value)}
         />
-        <button type="submit" disabled={streaming}>
+        <button
+          className="chat-form__submit"
+          type="submit"
+          disabled={streaming}
+        >
           {streaming ? (
             <FontAwesomeIcon icon={faCircleStop} />
           ) : (

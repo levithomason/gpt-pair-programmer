@@ -105,54 +105,42 @@
   left: 0;
   right: 0;
   margin: 0 auto var(--chat-input-margin) auto;
-  border-radius: 4px;
+  color: #aaa;
+  background: #333333cc;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    /* border */
+    0 0 0 4px hsl(240, 2%, 17%),
+    0 0 32px 8px #313133,
+    0 0 16px 2px #313133;
+  /*mix-blend-mode: exclusion;*/
+  border-radius: 2px;
   z-index: 2;
   /*border: 2px solid yellow;*/
 }
-.chat-form-glass {
-  position: absolute;
-  width: calc(100% - var(--chat-input-margin) * 2);
-  max-width: 800px;
-  height: var(--chat-input-height);
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: 0 auto var(--chat-input-margin) auto;
-  background-image: linear-gradient(
-    90deg,
-    #2a3333,
-    #2c3135,
-    #343037,
-    #382c36,
-    #332934
-  );
-  backdrop-filter: blur(8px);
-  border-radius: 4px;
-  box-shadow:
-    0 0 0 4px hsl(240, 2%, 17%),
-    0 0 32px 4px #31313388,
-    0 0 16px 2px #313133;
-
-  mix-blend-mode: color;
-  filter: contrast(1.05) saturate(0.5) brightness(1.2);
-  z-index: 1;
-}
-
 .chat-form:focus-within {
+  color: #ddd;
   box-shadow:
     0 0 0 4px hsl(280, 4%, 13%),
     -16px 16px 48px hsla(314, 27%, 39%, 0.25);
 }
-.chat-form input {
+.chat-form__input {
+  transition: box-shadow 0.2s ease-in-out;
   flex: 1;
-  padding: 24px;
-  height: 48px;
-  color: rgba(255, 255, 255, 0.7);
+  padding: 16px;
+  height: 24px;
+  color: inherit;
   background-color: transparent;
   border: none;
+  resize: none;
+  overflow: hidden;
   /*border: 2px solid red;*/
 }
-.chat-form button {
+.chat-form__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+.chat-form__submit {
   transition: transform 0.2s ease-in-out;
   position: absolute;
   display: flex;
@@ -162,6 +150,8 @@
   width: 48px;
   height: 48px;
   right: 0;
+  bottom: 0;
+  color: inherit;
   border: none;
   background-color: transparent;
   z-index: 1;
@@ -192,29 +182,4 @@
   color: rgba(255, 255, 255, 0.6);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/*
- * Fade
- */
-#chat-messages-fade {
-  position: absolute;
-  bottom: var(--chat-input-margin);
-  left: 0;
-  right: 0;
-  width: calc(100% - var(--chat-input-margin) * 2);
-  max-width: 800px;
-  height: var(--chat-input-height);
-  margin: 0 auto;
-  background-image: linear-gradient(
-    0deg,
-    #313133ee,
-    #313133aa 100% /*#313233dd,*/ /*#313233aa 100%*/
-  );
-  background-size: 100%;
-  background-position: bottom center;
-  background-repeat: no-repeat;
-  pointer-events: none;
-  z-index: 1;
-  /*border: 1px solid hsla(40, 40%, 50%, 1);*/
 }
