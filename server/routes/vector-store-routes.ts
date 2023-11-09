@@ -19,17 +19,23 @@ vectorStoreRoutes
       res.status(200).json({ count: files.length, files });
     } catch (error) {
       log(error);
-      res.status(500).send(error.toString());
+      res
+        .setHeader("Content-Type", "text/plain")
+        .status(500)
+        .send(error.toString());
     }
   })
 
   .post("/vector-store/index-project", async (_, res) => {
     try {
       await indexProjectFiles();
-      res.status(200).send("OK");
+      res.setHeader("Content-Type", "text/plain").status(200).send("OK");
     } catch (error) {
       log(error.message, error.stack);
-      res.status(500).send(error.toString());
+      res
+        .setHeader("Content-Type", "text/plain")
+        .status(500)
+        .send(error.toString());
     }
   })
 
@@ -58,19 +64,16 @@ vectorStoreRoutes
       if (merge) results = mergeProjectFileResults(results);
 
       if (print) {
-        const resultStrings = results
-          .map(projectFileToSearchResultString)
-          .join("\n\n");
-        results = `<pre><code>${resultStrings}</code></pre>`;
+        results = results.map(projectFileToSearchResultString).join("\n");
       }
 
       if (print) {
-        res.status(200).send(results);
+        res.setHeader("Content-Type", "text/plain").status(200).send(results);
       } else {
         res.status(200).json(results);
       }
     } catch (error) {
       log(error);
-      res.status(500).send(error);
+      res.setHeader("Content-Type", "text/plain").status(500).send(error);
     }
   });
