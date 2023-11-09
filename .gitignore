@@ -2,6 +2,7 @@ cache/*
 dist/
 node_modules/
 server/settings.json
+server/ai/vector-store/data
 
 .env
 *.log
