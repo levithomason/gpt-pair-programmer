@@ -27,10 +27,17 @@ export const App = () => {
     prompt: string;
     tokens: number;
   }>();
-  const [showRight, setShowRight] = React.useState<boolean>(false);
-  const [showLeft, setShowLeft] = React.useState<boolean>(false);
+  const [showRight, setShowRight] = React.useState<boolean>(
+    localStorage.getItem("app.showRight") === "true",
+  );
+  const [showLeft, setShowLeft] = React.useState<boolean>(
+    localStorage.getItem("app.showLeft") === "true",
+  );
   const [computedSettings] = useSettings();
   const [contextWindow] = useContextWindow();
+
+  localStorage.setItem("app.showRight", showRight.toString());
+  localStorage.setItem("app.showLeft", showLeft.toString());
 
   React.useEffect(() => {
     let id: string;
@@ -43,7 +50,7 @@ export const App = () => {
       "indexingProgress",
       ({ file, files, filename, chunk, chunks }) => {
         id = toast(
-          (t) => {
+          () => {
             const filenameStyle: React.CSSProperties = {
               display: "flex",
               flexWrap: "nowrap",
