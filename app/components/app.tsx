@@ -22,6 +22,32 @@ import { ChatMessage } from "./chat/chat-message";
 
 const log = makeDebug("components:app");
 
+function formatTime(milliseconds: number) {
+  if (!milliseconds) return "...";
+
+  // Calculate hours, minutes and seconds
+  const seconds: number = Math.floor(milliseconds / 1000);
+  let minutes: number | string = Math.floor(seconds / 60);
+  let hours: number | string = Math.floor(minutes / 60);
+
+  // Modulo operation to get remaining minutes and seconds
+  minutes = minutes % 60;
+
+  // Adding leading zero if the number is less than 10
+  hours = hours < 10 ? hours : hours;
+  minutes = minutes < 10 ? minutes : minutes;
+
+  if (hours) {
+    return `${hours}h ${minutes}min`;
+  }
+
+  if (minutes) {
+    return `${minutes}min`;
+  }
+
+  return `< 1min`;
+}
+
 export const App = () => {
   const [systemPrompt, setSystemPrompt] = React.useState<{
     prompt: string;
@@ -41,6 +67,10 @@ export const App = () => {
 
   React.useEffect(() => {
     let id: string;
+    const times: number[] = [];
+    let timeStart = 0;
+    let prevFilename: string;
+    let timeRemaining = 0;
 
     socket.on("error", (error) => {
       toast.error(error.toString());
@@ -51,62 +81,143 @@ export const App = () => {
       ({ file, files, filename, chunk, chunks }) => {
         id = toast(
           () => {
-            const filenameStyle: React.CSSProperties = {
-              display: "flex",
-              flexWrap: "nowrap",
-              color: "rgba(255, 255, 255, 0.5)",
-              fontSize: 12,
-            };
-            const filesProgressBarStyle: React.CSSProperties = {
-              width: (file / files) * 100 + "%",
-              height: 4,
-              marginTop: 4,
-              marginBottom: 16,
-              backgroundColor: "rgba(0, 255, 0, 0.5)",
-              borderRadius: 999,
-            };
+            // set timeStart
+            if (!timeStart) timeStart = Date.now();
 
-            const filepathParts = filename.split("/");
-            const basename = filepathParts[filepathParts.length - 1];
-            const dirname = filename.replace(basename, "");
+            // handle file change
+            if (prevFilename !== filename) {
+              const NOW = Date.now();
+              times.push(NOW - timeStart);
+              if (times.length > 100) times.shift();
+
+              const timeAvg = times.reduce((a, b) => a + b, 0) / times.length;
+              const filesRemaining = files - file;
+              timeRemaining = filesRemaining * timeAvg;
+
+              prevFilename = filename;
+              timeStart = NOW;
+            }
+
+            const parts = filename.split("/");
+            const name = parts.pop();
+            const lastPartOfPath = "/" + parts.pop();
+            const firstPartsOfPath = parts.join("/");
+
+            // Extract the file extension and file name without extension
+            const dotIndex = name.indexOf(".");
+            const fileNameWithoutExt =
+              dotIndex > 0 ? name.substring(0, dotIndex) : name;
+            const extension = dotIndex > 0 ? name.substring(dotIndex) : "";
 
             return (
               <div style={{ width: 240 }}>
                 <div style={{ display: "flex" }}>
                   <span>Indexing {Math.floor((file / files) * 100)}%</span>
+
+                  {/* TIME REMAINING */}
                   <span style={{ opacity: 0.5, marginLeft: "auto" }}>
-                    {file}/{files}
+                    {formatTime(timeRemaining)}
                   </span>
                 </div>
-                <div style={{ background: "rgba(255, 255, 255, 0.2)" }}>
-                  <div style={filesProgressBarStyle}></div>
-                </div>
+
+                {/* PROGRESS BAR */}
                 <div
                   style={{
-                    flex: 1,
-                    fontSize: 14,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    color: "rgba(255, 255, 255, 0.8)",
+                    background: "rgba(0, 0, 0, 0.2)",
+                    borderRadius: 999,
                   }}
                 >
-                  {dirname}
+                  <div
+                    style={{
+                      width: (file / files) * 100 + "%",
+                      height: 4,
+                      marginTop: 4,
+                      marginBottom: 4,
+                      backgroundColor: "rgba(0, 255, 0, 0.5)",
+                      borderRadius: 999,
+                    }}
+                  ></div>
                 </div>
-                <div style={filenameStyle}>
+
+                {/* FILES */}
+                <div
+                  style={{
+                    color: "rgba(255, 255, 255, 0.5)",
+                    fontSize: 12,
+                    textAlign: "right",
+                  }}
+                >
+                  {file} <span style={{ opacity: 0.5 }}>of</span> {files}
+                </div>
+
+                {/* DIRNAME */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "nowrap",
+                    marginTop: 8,
+                  }}
+                >
                   <span
                     style={{
-                      flex: 1,
+                      flex: "0 1 auto",
                       display: "inline-block",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {basename}
+                    {firstPartsOfPath}
                   </span>
-                  <span style={{ flex: "0 0 auto" }}>[{chunk}]</span>
+                  <span
+                    style={{
+                      flex: "0 0 auto",
+                      display: "inline-block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {lastPartOfPath}
+                  </span>
                 </div>
+
+                {/* FILENAME */}
+                <div
+                  style={{
+                    display: "flex",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    color: "rgba(255, 255, 255, 0.5)",
+                    fontSize: 12,
+                  }}
+                >
+                  <span
+                    style={{
+                      flex: "0 1 auto",
+                      display: "inline-block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fileNameWithoutExt}
+                  </span>
+                  <span
+                    style={{
+                      flex: "0 0 auto",
+                      display: "inline-block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {extension}
+                  </span>
+                </div>
+
+                {/* CHUNKS */}
                 <div style={{ lineHeight: 0 }}>
                   {Array.from({ length: chunks }).map((_, i) => {
                     const isDone = i <= chunk;
@@ -114,13 +225,14 @@ export const App = () => {
                       <div
                         key={i}
                         style={{
-                          display: "inline-block",
-                          width: 3,
-                          height: 3,
-                          margin: "0 1px 1px 0",
+                          display: "block",
+                          float: "left",
+                          width: 28,
+                          height: 2,
+                          margin: "0 2px 2px 0",
                           background: isDone
                             ? "rgba(0, 192, 0, 0.7)"
-                            : "rgba(0, 0, 0, 0.3)",
+                            : "rgba(0, 0, 0, 0.2)",
                         }}
                       />
                     );
