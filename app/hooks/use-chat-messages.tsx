@@ -48,10 +48,6 @@ export const useChatMessagesByID = (): {
   }
 
   React.useEffect(() => {
-    const handleProjectChanged = () => {
-      fetchMessages();
-    };
-
     // Listen for new messages
     const handleChatMessageCreate: ServerToClientEvents["chatMessageCreate"] =
       ({ message }) => {
@@ -77,13 +73,15 @@ export const useChatMessagesByID = (): {
         setStreaming(false);
       };
 
-    socket.on("projectChanged", handleProjectChanged);
+    socket.on("connect", fetchMessages);
+    socket.on("projectChanged", fetchMessages);
     socket.on("chatMessageCreate", handleChatMessageCreate);
     socket.on("chatMessageStream", handleChatMessageStream);
     socket.on("chatMessageStreamEnd", handleChatMessageStreamEnd);
 
     return () => {
-      socket.off("projectChanged", handleProjectChanged);
+      socket.off("connect", fetchMessages);
+      socket.off("projectChanged", fetchMessages);
       socket.off("chatMessageCreate", handleChatMessageCreate);
       socket.off("chatMessageStream", handleChatMessageStream);
       socket.off("chatMessageStreamEnd", handleChatMessageStreamEnd);

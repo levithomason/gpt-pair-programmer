@@ -11,7 +11,6 @@ import { makeDebug } from "../../utils";
 
 import { ChatMessage } from "./chat-message";
 // import { markdownKitchenSink } from "./markdown-kitchen-sink";
-import { useSettings } from "../../hooks/use-settings";
 import toast from "react-hot-toast";
 import { useChatMessagesByID } from "../../hooks/use-chat-messages";
 
@@ -29,7 +28,6 @@ const suggestedMessages = [
 export const Chat = () => {
   const { chatMessagesByID, streaming } = useChatMessagesByID();
   const [userMessage, setUserMessage] = React.useState<string>("");
-  useSettings(); // we want to re-render when settings change
 
   const chatMessagesRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
