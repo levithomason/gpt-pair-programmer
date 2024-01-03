@@ -97,6 +97,7 @@ for (const model of models) {
     log(`cache ${encodingName} for ${model.name}`);
   }
 
+  // TODO: handle offline mode... drop OpenAI? Cache these locally?
   const res = await fetch(`https://tiktoken.pages.dev/js/${encodingName}.json`);
 
   if (!res.ok) {
