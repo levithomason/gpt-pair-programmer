@@ -241,7 +241,7 @@ export const App = () => {
               </div>
             );
           },
-          { id },
+          { id, duration: Infinity },
         );
       },
     );
