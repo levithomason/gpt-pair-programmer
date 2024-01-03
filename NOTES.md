@@ -4,6 +4,16 @@ Freeform notes about the project as they come to mind.
 
 ## First-nails
 
+### GitHub Bot
+
+Stages of possible bot:
+
+1. Triage Bot - Makes appropriate first comment, labels and assigns to appropriate people.
+2. Comment Bot - Meaningfully comments on PRs and issues.
+3. Solution Suggestion Bot - Suggests solutions to issues and PRs by comments.
+4. PR Bot - Can create PRs to fix issues.
+5. Collaborator Bot - Fully automated PR creation and merging.
+
 ### Refactor components
 
 Refactor some React components. Example, on Nov 2, 2023 I refactored Rail UI nodes to include their wrapping tree items. This would be a good first-nail to test the system.
