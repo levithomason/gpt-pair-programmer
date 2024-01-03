@@ -13,9 +13,7 @@ export const openhermes2MistralLLM = new OllamaLLM(
       });
       prompt += `<|im_start|>assistant\n`;
 
-      this.log();
-      this.log(prompt);
-      this.log();
+      this.log("prompt:", prompt);
 
       return prompt;
     },
