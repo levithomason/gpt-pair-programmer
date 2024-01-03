@@ -118,7 +118,12 @@ export const Chat = () => {
           placeholder="Send a message"
           value={userMessage}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && e.metaKey) {
+            const hasNewLines = /\n/.test(userMessage);
+            const isSubmitKeyCombo = hasNewLines
+              ? e.key === "Enter" && e.metaKey && !e.shiftKey
+              : e.key === "Enter" && !e.shiftKey;
+
+            if (isSubmitKeyCombo) {
               handleSend(e);
             }
           }}
