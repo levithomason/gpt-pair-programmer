@@ -90,8 +90,8 @@ export const promptGit = async () => {
     const { stdout: details } = await run(
       `git log --abbrev-commit --date=format:"%Y-%m-%d" --format="%h %cd %s" -n 1 ${shaLong.trim()}`,
     );
-    const [sha, date, ...msgParts] = details.trim().split("\n");
-    const msg = msgParts.join("\n");
+    const [sha, date, ...msgParts] = details.trim().split(" ");
+    const msg = msgParts.join(" ");
     firstCommit = `${sha} (${date}) "${msg}"`;
   } catch (error) {
     log(`Failed to get first commit: ${error}`);
@@ -106,7 +106,11 @@ export const promptGit = async () => {
     gitLog = stdout
       .trim()
       .split("\n")
-      .map((l) => `  - ${l}`)
+      .map((l) => {
+        const [sha, date, ...msgParts] = l.trim().split(" ");
+        const msg = msgParts.join(" ");
+        return `  - ${sha} (${date}) "${msg}"`;
+      })
       .join("\n");
   } catch (error) {
     log(`Failed to get git log: ${error}`);
