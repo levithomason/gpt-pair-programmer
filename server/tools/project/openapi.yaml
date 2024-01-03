@@ -7,6 +7,7 @@ paths:
     post:
       operationId: fileRead
       summary: Read a project file
+      description: Returns the contents of a file in the project.
       requestBody:
         required: true
         content:
@@ -46,6 +47,7 @@ paths:
     delete:
       operationId: fileDelete
       summary: Delete a project file
+      description: Delete a file from the project.
       requestBody:
         required: true
         content:
@@ -99,7 +101,7 @@ paths:
     post:
       operationId: fileFind
       summary: Find a file
-      description: Query matches any part of the file name (fuzzy subsequence, case insensitive). Returns all matching results.
+      description: Query matches any part of the file name (fuzzy subsequence, case-insensitive). Returns all matching results.
       requestBody:
         required: true
         content:

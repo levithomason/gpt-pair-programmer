@@ -28,13 +28,16 @@ paths:
     get:
       operationId: browserGetDom
       summary: Read the browser's DOM
+      description: Returns the browser's DOM as a string.
   /browser/console:
     get:
       operationId: browserGetConsole
       summary: Read console logs
+      description: Returns the browser's console logs as a string.
     delete:
       operationId: browserClearConsole
       summary: Clear console logs
+      description: Clears the browser's console logs.
   /browser/read:
     get:
       operationId: browserReadPage
