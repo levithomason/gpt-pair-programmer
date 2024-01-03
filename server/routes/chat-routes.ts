@@ -15,7 +15,7 @@ import { getComputedSettings, settings } from "../settings.js";
 import {
   projectFileToSearchResultString,
   searchProjectFiles,
-} from "../ai/vector-store.js";
+} from "../ai/vector-store/project-files.js";
 import { getLLM } from "../ai/llms/index.js";
 
 const log = debug("gpp:server:routes:chat");
@@ -95,10 +95,10 @@ chatRoutes.post("/chat", async (req, res) => {
     // get enough messages to fill the context budget
     const dbMessages = await ChatMessage.findAll({
       where: { project: settings.projectName },
-      order: [["createdAt", "ASC"]],
-      limit: 10,
+      order: [["createdAt", "DESC"]],
+      limit: 100,
     });
-    log(`/chat ${dbMessages.length} dbMessages`);
+    log(`/chat ${dbMessages.length} dbMessages`, dbMessages);
 
     // Build the context of messages starting from the most recent message
     // and going backwards. Once we reach the end of the context token budget,
@@ -106,7 +106,7 @@ chatRoutes.post("/chat", async (req, res) => {
     const contextMessages: ChatCompletionMessageParam[] = [];
     let messagesTokens = 0;
     while (dbMessages.length > 0 && MESSAGE_TOKENS_BUDGET > 0) {
-      const message = dbMessages.pop();
+      const message = dbMessages.shift();
 
       const messageTokens = await llm.countTokens(message.content);
 
