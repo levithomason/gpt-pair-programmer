@@ -16,7 +16,11 @@ forEachOpenAPIPath(openApiJson, ({ operationId, description, schema }) => {
 
   log("define", operationId);
 
-  openAIFunctions.push({ name: operationId, description, parameters });
+  openAIFunctions.push({
+    name: operationId,
+    description: description.trim(),
+    parameters,
+  });
 });
 
 //
