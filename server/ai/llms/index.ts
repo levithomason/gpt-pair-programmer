@@ -9,6 +9,7 @@ import { gpt35TurboLLM } from "./gpt-35-turbo-llm.js";
 import { gpt35Turbo16kLLM } from "./gpt-35-turbo-16k-llm.js";
 import { gpt4LLM } from "./gpt-4-llm.js";
 import { gpt432kLLM } from "./gpt-4-32k-llm.js";
+import { mistralLLM } from "./mistral-llm.js";
 import { mistralInstructLLM } from "./mistral-instruct-llm.js";
 import { openhermes2MistralLLM } from "./openhermes2-mistral-llm.js";
 
@@ -18,6 +19,7 @@ export const llms = [
   gpt4LLM,
   gpt432kLLM,
   mistralInstructLLM,
+  mistralLLM,
   openhermes2MistralLLM,
 ];
 
