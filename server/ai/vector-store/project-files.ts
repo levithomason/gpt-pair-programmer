@@ -11,7 +11,6 @@ import type { ProjectFileAttributes } from "../../models/project-file.js";
 import { ProjectFile } from "../../models/project-file.js";
 import { getSocketIO } from "../../socket.io-server.js";
 import { getDB } from "../../database/index.js";
-import yaml from "js-yaml";
 
 const log = debug("gpp:server:ai:vector-store");
 
@@ -19,11 +18,19 @@ const dotProduct = (a: number[], b: number[]): number => {
   return a.reduce((acc, _, i) => acc + a[i] * b[i], 0);
 };
 
-type ProjectFileWithScore = Omit<ProjectFileAttributes, "embedding"> & {
+export type ProjectFileWithScore = Omit<ProjectFileAttributes, "embedding"> & {
   score: number;
 };
 
-type ProjectFileMerge = Omit<
+export type ProjectFileExpanded = Omit<
+  ProjectFileAttributes,
+  "id" | "embedding" | "chunk"
+> & {
+  chunkStart: number;
+  chunkEnd: number;
+};
+
+export type ProjectFileMerge = Omit<
   ProjectFileAttributes,
   "id" | "embedding" | "chunk"
 > & {
@@ -165,114 +172,149 @@ export const indexProjectFiles = async () => {
 
 /**
  * Converts a ProjectFile to a low-token-count string based on yaml.
- * @param projectFile
  */
 export const projectFileToSearchResultString = (
-  projectFile: ProjectFile | ProjectFileWithScore | ProjectFileMerge,
+  projectFile:
+    | ProjectFile
+    | ProjectFileWithScore
+    | ProjectFileMerge
+    | ProjectFileExpanded,
 ): string => {
-  const keys = ["project", "path", "indexStart", "indexEnd", "content"];
-
-  const projectFileSearchResult = keys.reduce((acc, key) => {
-    acc[key] = projectFile[key];
-    return acc;
-  }, {});
-
-  return yaml.dump(projectFileSearchResult);
+  const { path, content } = projectFile;
+  return `// File: ${path}\n${content}`;
 };
 
-export const mergeProjectFileResults = async (
+/**
+ * Expand a ProjectFile to include surrounding content.
+ */
+export const expandProjectFileResult = async (
+  projectFile: ProjectFile | ProjectFileWithScore | ProjectFileMerge,
+  expandToLength = 1024,
+): Promise<ProjectFileExpanded> => {
+  const chunkArr = [].concat(projectFile.chunk);
+  const file: ProjectFileExpanded = {
+    ...projectFile,
+    chunkStart: chunkArr.shift(),
+    chunkEnd: chunkArr.pop(),
+  };
+
+  const lengthNeeded = () => expandToLength - file.content.length;
+  const hasChunksBefore = () => file.chunkStart > 1;
+  const hasChunksAfter = () => file.chunkEnd < projectFile.chunks;
+  const canExpand = () => hasChunksBefore() || hasChunksAfter();
+
+  if (lengthNeeded() <= 0) return file;
+  if (!canExpand()) return file;
+
+  while (lengthNeeded() > 0 && canExpand()) {
+    log(`expandProjectFileResult lengthNeeded: ${lengthNeeded()}`);
+
+    if (hasChunksBefore()) {
+      file.chunkStart--;
+      const head = await ProjectFile.findOne({
+        where: { path: projectFile.path, chunk: file.chunkStart },
+        attributes: ["content"],
+      });
+      const slice = head.content.slice(-lengthNeeded());
+      file.content = slice + file.content;
+      file.indexStart -= slice.length;
+    }
+
+    if (hasChunksAfter() && lengthNeeded()) {
+      file.chunkEnd++;
+      const tail = await ProjectFile.findOne({
+        where: { path: projectFile.path, chunk: file.chunkEnd },
+        attributes: ["content"],
+      });
+      const slice = tail.content.slice(0, lengthNeeded());
+      file.content += slice;
+      file.indexEnd += slice.length;
+    }
+  }
+
+  return file;
+};
+
+/**
+ * Merge results from multiple chunks of the same file.
+ */
+export const mergeProjectFileResults = (
   projectFiles: ProjectFileWithScore[],
-): Promise<ProjectFileMerge[]> => {
+): ProjectFileMerge[] => {
   const makeMergeable = (result: ProjectFileWithScore): ProjectFileMerge => ({
     project: result.project,
     name: result.name,
     path: result.path,
     content: result.content,
-    chunk: [result.chunk],
+    chunk: [].concat(result.chunk),
     chunks: result.chunks,
     indexStart: result.indexStart,
     indexEnd: result.indexEnd,
-    score: [result.score],
+    score: [].concat(result.score),
   });
 
   if (projectFiles.length === 0) return [];
 
   if (projectFiles.length === 1) return [makeMergeable(projectFiles[0])];
 
-  const resultsByPath: {
+  const assign = (a: ProjectFileMerge, b: ProjectFileWithScore) => {
+    a.name = b.name;
+    a.path = b.path;
+    a.content += b.content;
+    a.chunk.push(b.chunk);
+    a.chunks = b.chunks;
+    a.indexStart = Math.min(a.indexStart, b.indexStart);
+    a.indexEnd = Math.max(a.indexEnd, b.indexEnd);
+    if (typeof b.score !== "undefined") a.score.push(b.score);
+  };
+
+  // group by path
+  const resultsByPath = projectFiles.reduce<{
     [path: string]: ProjectFileWithScore[];
-  } = {};
-
-  projectFiles.forEach((projectFile) => {
-    resultsByPath[projectFile.path] = resultsByPath[projectFile.path] || [];
-    resultsByPath[projectFile.path].push(projectFile);
-  });
-
-  return Object.entries(resultsByPath).reduce((acc, [_, results]) => {
-    let minIndexStart = Infinity;
-    let maxIndexEnd = -Infinity;
-    let minChunk = Infinity;
-    let maxChunk = -Infinity;
-
-    results.forEach((result) => {
-      minIndexStart = Math.min(minIndexStart, result.indexStart);
-      maxIndexEnd = Math.max(maxIndexEnd, result.indexEnd);
-      minChunk = Math.min(minChunk, result.chunk);
-      maxChunk = Math.max(maxChunk, result.chunk);
-    });
-
-    // TODO: merge if chunks are adjacent or fetch missing chunks if within distance?
-    //       could consider an "expandChunks" function to fetch missing chunks
-
-    const sorted = results.sort((a, b) => {
-      return a.chunk > b.chunk ? 1 : -1;
-    });
-
-    const merge = (a: ProjectFileMerge, b: ProjectFileWithScore) => {
-      a.name = b.name;
-      a.path = b.path;
-      a.content += b.content;
-      a.chunk.push(b.chunk);
-      a.chunks = b.chunks;
-      a.indexStart = Math.min(a.indexStart, b.indexStart);
-      a.indexEnd = Math.max(a.indexEnd, b.indexEnd);
-      if (typeof b.score !== "undefined") a.score.push(b.score);
-    };
-
-    const merged = sorted.reduce((mergeAcc, result, i) => {
-      if (i === 0) {
-        mergeAcc.push(makeMergeable(result));
-        return mergeAcc;
-      }
-
-      const prev = mergeAcc[i - 1];
-      const doesPathMatch = prev.path === result.path;
-      const isNextChunk =
-        prev.chunk[prev.chunk.length - 1] + 1 === result.chunk;
-
-      if (doesPathMatch && isNextChunk) {
-        merge(prev, result);
-      } else {
-        mergeAcc.push(result);
-      }
-
-      return mergeAcc;
-    }, []);
-
-    acc.push(...merged);
+  }>((acc, next) => {
+    const path = next.path;
+    acc[path] = acc[path] || [];
+    acc[path].push(next);
 
     return acc;
-  }, []);
+  }, {});
+
+  // sort each group by chunk
+  for (const results of Object.values(resultsByPath)) {
+    results.sort((a, b) => a.chunk - b.chunk);
+  }
+
+  // merge each group if chunks are consecutive
+  const mergedResults: ProjectFileMerge[] = [];
+
+  for (const results of Object.values(resultsByPath)) {
+    const mergedResult = makeMergeable(results[0]);
+    mergedResults.push(mergedResult);
+
+    for (const result of results.slice(1)) {
+      if (
+        result.chunk ===
+        mergedResult.chunk[mergedResult.chunk.length - 1] + 1
+      ) {
+        assign(mergedResult, result);
+      } else {
+        mergedResults.push(makeMergeable(result));
+      }
+    }
+  }
+
+  return mergedResults;
 };
 
+/**
+ * Search the project files for the given query.
+ */
 export const searchProjectFiles = async ({
   query,
   limit = 5,
-  expand = 0,
 }: {
   query: string;
   limit?: number;
-  expand?: number;
 }): Promise<ProjectFileWithScore[]> => {
   const db = await getDB();
   const startTime = Date.now();
@@ -283,47 +325,31 @@ export const searchProjectFiles = async ({
     maxLength: embeddings.sequenceLength,
   });
 
-  const chunksToFetch: { [path: string]: Set<number> } = {};
-
   for (const queryChunk of queryChunks) {
     const chunkEmbedding = await embeddings.encode(queryChunk);
     const projectFiles = await ProjectFile.findAll({
       where: { project: settings.projectName },
-      order: [db.literal(`embedding <-> '[${chunkEmbedding}]'`)],
+      // https://github.com/pgvector/pgvector?tab=readme-ov-file#vector-operators
+      // OPERATOR                           BEST FOR
+      // +    element-wise addition         Combining features or bias addition in neural networks.
+      // -    element-wise subtraction      Finding feature differences or in differential equations.
+      // *    element-wise multiplication   Feature scaling, applying weights in neural networks.
+      // <->  Euclidean distance            Measuring actual distance, used in k-means and nearest neighbor searches.
+      // <#>  negative inner product        Specialized optimization or similarity measurements.
+      // <=>  cosine distance               Matching queries with documents, text similarity in NLP,
+      //                                      scale-invariant (considers orientation, not magnitude).
+      order: [db.literal(`embedding <=> '[${chunkEmbedding}]'`)],
       limit,
     });
 
-    projectFiles.forEach((projectFile) => {
+    for (const projectFile of projectFiles) {
       const score = dotProduct(chunkEmbedding, projectFile.embedding);
       const json = projectFile.toJSON();
       delete json.embedding;
-      results.push({ ...json, score });
 
-      for (let i = 1; i <= expand; i++) {
-        chunksToFetch[json.path] = chunksToFetch[json.path] || new Set();
-        chunksToFetch[json.path].add(json.chunk + i);
-        chunksToFetch[json.path].add(json.chunk - i);
-      }
-    });
+      const projectFileWithScore = { ...json, score };
 
-    for (const [path, chunks] of Object.entries(chunksToFetch)) {
-      for (const chunk of chunks) {
-        // don't fetch chunks that are already in the results
-        if (results.some((r) => r.path === path && r.chunk === chunk)) {
-          continue;
-        }
-
-        const projectFile = await ProjectFile.findOne({
-          where: { project: settings.projectName, path, chunk },
-        });
-
-        if (!projectFile) continue;
-
-        const score = dotProduct(chunkEmbedding, projectFile.embedding);
-        const json = projectFile.toJSON();
-        delete json.embedding;
-        results.push({ ...json, score });
-      }
+      results.push(projectFileWithScore);
     }
   }
 

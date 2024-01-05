@@ -1,6 +1,7 @@
 import express from "express";
 import debug from "debug";
 import {
+  expandProjectFileResult,
   filesToIndex,
   indexProjectFiles,
   mergeProjectFileResults,
@@ -40,31 +41,25 @@ vectorStoreRoutes
   })
 
   .get("/vector-store/search", async (req, res) => {
-    const {
-      query,
-      limit = 1,
-      expand = 0,
-      merge = false,
-      print = false,
-    } = req.query as {
-      query: string;
-      limit: string;
-      expand: string;
-      merge: string;
-      print: string;
-    };
+    const { query, limit = 1, expand = 0, print = false } = req.query;
 
     try {
       let results: any = await searchProjectFiles({
-        query,
+        query: query.toString(),
         limit: +limit,
-        expand: +expand,
       });
 
-      if (merge) results = mergeProjectFileResults(results);
+      // merge
+      results = mergeProjectFileResults(results);
+
+      if (expand) {
+        results = await Promise.all(
+          results.map((result) => expandProjectFileResult(result, +expand)),
+        );
+      }
 
       if (print) {
-        results = results.map(projectFileToSearchResultString).join("\n");
+        results = results.map(projectFileToSearchResultString).join("\n\n");
       }
 
       if (print) {
